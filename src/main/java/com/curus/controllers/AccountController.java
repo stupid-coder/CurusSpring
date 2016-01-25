@@ -1,5 +1,6 @@
 package com.curus.controllers;
 
+import com.curus.dao.AccountDao;
 import com.curus.httpio.request.account.*;
 import com.curus.httpio.request.account.passwd.AccountPasswdForgetRequest;
 import com.curus.httpio.request.account.passwd.AccountPasswdModifyRequest;
@@ -7,12 +8,14 @@ import com.curus.httpio.response.ResponseBase;
 import com.curus.services.account.*;
 import com.curus.services.account.passwd.AccountPasswdForgetService;
 import com.curus.services.account.passwd.AccountPasswdModifyService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.xml.ws.Response;
 
 /**

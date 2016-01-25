@@ -37,4 +37,12 @@ public class CodeValidate {
         else { CacheUtils.deleteCode4Cache(CateConst.MODIFY_PHONE,token,phone);}
         return  errorData;
     }
+
+    public static ErrorData validateAddPatientCode(String token, String phone, String code) {
+        ErrorData errorData;
+        if ( ( errorData = validation(code,CacheUtils.getCode4Cache(CateConst.ADD_PATIENT,token,phone))) != null) {}
+        else { CacheUtils.deleteCode4Cache(CateConst.ADD_PATIENT,token,phone);}
+        return errorData;
+    }
+
 }

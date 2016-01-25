@@ -2,17 +2,16 @@ package com.curus.dao;
 
 import com.curus.model.Account;
 import com.curus.utils.TimeUtils;
-import org.apache.commons.lang.StringUtils;
+import com.curus.utils.TypeUtils;
 import org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 
 /**
  * Created by stupid-coder on 23/1/16.
  */
+
 public class AccountDao extends BaseDao<Account> {
 
     public boolean existsByPhone(String phone) {
@@ -25,11 +24,11 @@ public class AccountDao extends BaseDao<Account> {
     }
 
     public Account selectByPhone(String phone) {
-        return getJdbcTemplate().queryForObject("SELECT * FROM account WHERE phone=?", ParameterizedBeanPropertyRowMapper.newInstance(Account.class),phone);
+        return select( TypeUtils.getWhereHashMap("phone", phone) );
     }
 
     public Account selectById(Long id) {
-        return getJdbcTemplate().queryForObject("SELECT * FROM account WHERE id=?", ParameterizedBeanPropertyRowMapper.newInstance(Account.class),id);
+        return select(TypeUtils.getWhereHashMap("id", id));
     }
 
     public int updatePasswd(Account account) {
@@ -40,21 +39,4 @@ public class AccountDao extends BaseDao<Account> {
         return getJdbcTemplate().update("UPDATE account SET phone=? WHERE id=?", Integer.class, account.getPhone(), account.getId());
     }
 
-//    public int update(Account account) {
-//        List<String> sb = new ArrayList<String>();
-//        List<Object> ob = new ArrayList<Object>();
-//
-//        if ( account.getName() != null) sb.add(String.format(" name = '%s' ", account.getName()));
-//        if ( account.getGender() != null) sb.add(String.format(" gender = %d ", account.getGender()));
-//        if ( account.getBirth() != null) sb.add(String.format(" birth = '%s' ", account.getBirth()));
-//        if ( account.getId_number() != null) sb.add(String.format(" id_number = '%s' ", account.getId_number()));
-//        if ( account.getAddress() != null) sb.add(String.format(" address = '%s' ", account.getAddress()));
-//        if ( account.getOther_contact() != null) sb.add(String.format(" other_contact = '%s' ", account.getOther_contact()));
-//        if ( account.getIs_exp_user() != null) sb.add(String.format(" is_exp_user = %d ", account.getIs_exp_user()));
-//
-//        String sql = String.format("UPDATE account SET %s WHERE id='%s'", StringUtils.join(sb, ","),account.getId());
-//
-//        return getJdbcTemplate().update(sql,Integer.class);
-//
-//    }
 }

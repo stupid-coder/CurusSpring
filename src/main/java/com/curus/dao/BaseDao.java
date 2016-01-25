@@ -8,8 +8,7 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -34,8 +33,10 @@ public class BaseDao<T> extends JdbcDaoSupport {
 
     public int update(T entity) {
         JdbcArgsOut jdbcArgsOut = new JdbcArgsOut();
+        Map<String,Object> where = new HashMap<String, Object>();
         try {
-            processSql(SQL_UPDATE, entity, "id", jdbcArgsOut);
+            where.put("id", entityClass.getDeclaredField("id").get(entity));
+            processSql(SQL_UPDATE, entity, where,jdbcArgsOut);
         } catch (Exception e) {
             return 0;
         }
@@ -52,19 +53,35 @@ public class BaseDao<T> extends JdbcDaoSupport {
         return getJdbcTemplate().update(jdbcArgsOut.sql,jdbcArgsOut.args);
     }
 
-    public T select(Long id) {
-        String sql = String.format("SELECT * FROM %s WHERE %s=?",entityClass.getSimpleName(),id);
-        RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
-        List<T> rs = getJdbcTemplate().query(sql,rowMapper,id);
-        if (rs.isEmpty())return null;
+    public int save(T entity) {
+        try {
+            if (entityClass.getDeclaredField("id").get(entity) == null) return insert(entity);
+            else return update(entity);
+
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public T select(Map<String,Object> where) {
+        List<T> rs = selectAll(where);
+        if (rs == null) return null;
         else return rs.get(0);
     }
 
-    protected void processSql(int SQLTYPE, T entity, String where,JdbcArgsOut jdbcArgsOut) throws Exception {
+    public List<T> selectAll(Map<String,Object> where) {
+        List<Object> args = new ArrayList<Object>();
+        String whereSql = buildWhereSql(where,args);
+        RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
+        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE", entityClass.getSimpleName(), whereSql), rowMapper, args.toArray());
+        if (rs.isEmpty()) return null;
+        else return rs;
+    }
+
+    protected void processSql(int SQLTYPE, T entity, Map<String,Object> where,JdbcArgsOut jdbcArgsOut) throws Exception {
         List<String> sql = new ArrayList<String>();
         List<Object> args = new ArrayList<Object>();
         Field[] fields = entityClass.getDeclaredFields();
-        Object whereObj = null;
         if (fields==null) return;
 
         for (int i = 0; i < fields.length; ++i) {
@@ -75,7 +92,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
             String name = fields[i].getName();
             Object value = fields[i].get(entity);
 
-            if (where != null && name.compareTo(where) == 0) { whereObj = value; continue;}
+            if (where != null && where.containsKey(name) ) { continue; }
             else if (name.compareTo("id") == 0 || value == null) continue;
 
             switch (SQLTYPE) {
@@ -89,9 +106,8 @@ public class BaseDao<T> extends JdbcDaoSupport {
                     break;
             }
         }
-        if (whereObj!=null) args.add(whereObj);
 
-        jdbcArgsOut.sql = buildSql(SQLTYPE,entityClass.getSimpleName(),sql) + buildWhereSql(where);
+        jdbcArgsOut.sql = buildSql(SQLTYPE,entityClass.getSimpleName(),sql) + buildWhereSql(where,args);
         jdbcArgsOut.args = args.toArray();
     }
 
@@ -101,9 +117,14 @@ public class BaseDao<T> extends JdbcDaoSupport {
         else return String.format("DELETE FROM %s",table);
     }
 
-    protected String buildWhereSql(String where) {
-        if (where!=null && !where.isEmpty()) {
-            return String.format("WHERE %s=?",where);
-        } else return "";
+    protected String buildWhereSql(Map<String,Object> where, List<Object> args) {
+        List<String> w = new ArrayList<String>();
+        w.add(" 1=? ");
+        args.add(new Integer(1));
+        for ( Map.Entry<String,Object> entry : where.entrySet() ) {
+            w.add(String.format(" %s = ? ",entry.getKey()));
+            args.add(entry.getValue());
+        }
+        return StringUtils.join(w,"AND");
     }
 }

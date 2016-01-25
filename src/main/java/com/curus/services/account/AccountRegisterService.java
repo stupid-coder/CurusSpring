@@ -28,7 +28,7 @@ public class AccountRegisterService {
 
     public AccountRegisterService(AccountRegisterRequest request) {
         this.request = request;
-        driver = (AccountDao)SpringContextUtils.getBean("accountDao");
+        this.driver = (AccountDao)SpringContextUtils.getBean("accountDao");
         errorData = null;
     }
 

@@ -28,7 +28,7 @@ public class CacheUtils {
 
     public static String getCodeCacheKey(String cate, String token, String phone) {
         int cateIdx = CateValidate.getIdx(cate);
-        if (cateIdx == CateConst.IMODIFY_PHONE)
+        if (cateIdx == CateConst.IMODIFY_PHONE || cateIdx == CateConst.IADD_PATIENT)
             return codeCacheKey(cate, token, phone);
         else if (cateIdx == CateConst.IREGISTER || cateIdx == CateConst.IFORGET_PASSWD )
             return codeCacheKey(cate, phone);

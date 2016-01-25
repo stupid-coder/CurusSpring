@@ -24,6 +24,14 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
+    <bean id="patientDao" class="com.curus.dao.PatientDao">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="accountPatientDao" class="com.curus.dao.AccountPatientDao">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
     <bean id="SpringContextUtils" class="com.curus.utils.SpringContextUtils" scope="singleton" />
 
 </beans>
