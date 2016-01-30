@@ -1,0 +1,16 @@
+SET FOREIGN_KEY_CHECKS=0;
+-- ----------------------------
+-- Table structure for patient_issue
+-- ----------------------------
+DROP TABLE IF EXISTS `patient_issue`;
+CREATE TABLE `patient_issue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) DEFAULT NULL,
+  `issure_id` int(11) DEFAULT NULL,
+  `latest_visit_date` date DEFAULT NULL,
+  `visit_count` int(11) NOT NULL,
+  `latest_interval_decide_date` date DEFAULT NULL,
+  `visit_interval` smallint(6) NOT NULL,
+  `status` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=365 DEFAULT CHARSET=utf8;

@@ -1,5 +1,6 @@
-package com.curus.dao;
+package com.curus.dao.patient;
 
+import com.curus.dao.BaseDao;
 import com.curus.model.Patient;
 
 /**

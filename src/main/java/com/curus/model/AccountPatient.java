@@ -7,6 +7,7 @@ import java.io.Serializable;
  *
  * */
 public class AccountPatient implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id ;
     private Long account_id;
     private Long patient_id;
@@ -27,6 +28,18 @@ public class AccountPatient implements Serializable {
         this.role_id = null;
         this.appellation_id = null;
         this.status = null;
+    }
+
+    public AccountPatient(Long account_id, Long patient_id, Integer is_self, Integer is_super_validate, Integer is_patient_validate, Long role_id, Long appellation_id) {
+        this.id = null;
+        this.status = null;
+        this.account_id = account_id;
+        this.patient_id = patient_id;
+        this.is_self = is_self;
+        this.is_super_validate = is_super_validate;
+        this.is_patient_validate = is_patient_validate;
+        this.role_id = role_id;
+        this.appellation_id = appellation_id;
     }
 
     public Long getId() {

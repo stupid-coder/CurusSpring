@@ -45,25 +45,8 @@ public class Patient implements Serializable {
     private Integer can_phone_push;
     private Integer can_app_push;
     private Integer can_weixin_push;
+    private Integer can_qq_push;
     private Integer can_email_push;
-
-    public Patient() {
-    }
-
-    public Patient(String name, Integer gender, Date birth, String id_number, String phone, String address, Timestamp create_time, String weixin, String qq, String email, String other_contact) {
-        this.id = null;
-        this.name = name;
-        this.gender = gender;
-        this.birth = birth;
-        this.id_number = id_number;
-        this.phone = phone;
-        this.address = address;
-        this.create_time = create_time;
-        this.weixin = weixin;
-        this.qq = qq;
-        this.email = email;
-        this.other_contact = other_contact;
-    }
 
     @Override
     public String toString() {
@@ -83,8 +66,28 @@ public class Patient implements Serializable {
                 ", can_phone_push=" + can_phone_push +
                 ", can_app_push=" + can_app_push +
                 ", can_weixin_push=" + can_weixin_push +
+                ", can_qq_push=" + can_qq_push +
                 ", can_email_push=" + can_email_push +
                 '}';
+    }
+
+    public Patient() {
+    }
+
+
+    public Patient(String name, Integer gender, Date birth, String id_number, String phone, String address, Timestamp create_time, String weixin, String qq, String email, String other_contact) {
+        this.id = null;
+        this.name = name;
+        this.gender = gender;
+        this.birth = birth;
+        this.id_number = id_number;
+        this.phone = phone;
+        this.address = address;
+        this.create_time = create_time;
+        this.weixin = weixin;
+        this.qq = qq;
+        this.email = email;
+        this.other_contact = other_contact;
     }
 
     public Integer getCan_phone_push() {
@@ -202,6 +205,15 @@ public class Patient implements Serializable {
     public void setCan_app_push(Integer can_app_push) {
         this.can_app_push = can_app_push;
     }
+
+    public Integer getCan_qq_push() {
+        return can_qq_push;
+    }
+
+    public void setCan_qq_push(Integer can_qq_push) {
+        this.can_qq_push = can_qq_push;
+    }
+
 
     public Integer getCan_weixin_push() {
         return can_weixin_push;

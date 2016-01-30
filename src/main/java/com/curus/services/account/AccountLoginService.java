@@ -1,6 +1,7 @@
 package com.curus.services.account;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.AccountLoginRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -24,13 +25,13 @@ public class AccountLoginService {
     static private Log logger = LogFactory.getLog(AccountLoginService.class);
     private AccountLoginRequest request;
     private AccountLoginResponseData responseData;
-    private AccountDao driver;
+    private CurusDriver driver;
     private ErrorData errorData;
-    public AccountLoginService(AccountLoginRequest request) {
+    public AccountLoginService(AccountLoginRequest request, CurusDriver driver) {
         this.request = request;
-        responseData = null;
-        errorData = null;
-        driver = (AccountDao)SpringContextUtils.getBean("accountDao");
+        this.responseData = null;
+        this.errorData = null;
+        this.driver = driver;
     }
 
     private ErrorData validate() {
@@ -44,7 +45,7 @@ public class AccountLoginService {
 
     private ErrorData login() {
         Account account;
-        if ( ( account = driver.selectByPhone(request.getPhone())) == null) {
+        if ( ( account = driver.accountDao.selectByPhone(request.getPhone())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_USERNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( account.getPasswd().compareTo(request.getPasswd()) != 0) {

@@ -1,6 +1,7 @@
 package com.curus.services.account;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.AccountModifyPhoneRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -22,12 +23,12 @@ import org.apache.commons.logging.LogFactory;
 public class AccountModifyPhoneService {
     static private Log logger = LogFactory.getLog(AccountModifyPhoneService.class);
     private AccountModifyPhoneRequest request;
-    private AccountDao driver;
+    private CurusDriver driver;
     private ErrorData errorData;
-    public AccountModifyPhoneService(AccountModifyPhoneRequest request) {
+    public AccountModifyPhoneService(AccountModifyPhoneRequest request, CurusDriver driver) {
         this.request = request;
-        errorData = null;
-        driver = (AccountDao) SpringContextUtils.getBean("accountDao");
+        this.errorData = null;
+        this.driver = driver;
     }
 
     private ErrorData validate() {
@@ -48,11 +49,11 @@ public class AccountModifyPhoneService {
         if ( ( account = (Account)CacheUtils.deleteObjectAndGet4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_USERNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (account = driver.selectById(account.getId())) == null ) {
+        } else if ( (account = driver.accountDao.selectById(account.getId())) == null ) {
             errorData = new ErrorData(ErrorConst.IDX_INCPASSWD_ERROR);
         } else {
             account.setPhone(request.getPhone());
-            driver.updatePhone(account);
+            driver.accountDao.updatePhone(account);
         }
         return errorData;
     }

@@ -1,6 +1,7 @@
 package com.curus.services.account.passwd;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.passwd.AccountPasswdModifyRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -21,12 +22,12 @@ import org.apache.commons.logging.LogFactory;
 public class AccountPasswdModifyService {
     static private Log logger = LogFactory.getLog(AccountPasswdModifyService.class);
     private AccountPasswdModifyRequest request;
-    private AccountDao driver;
+    private CurusDriver driver;
     private ErrorData errorData;
-    public AccountPasswdModifyService(AccountPasswdModifyRequest request) {
+    public AccountPasswdModifyService(AccountPasswdModifyRequest request, CurusDriver driver) {
         this.request = request;
-        errorData = null;
-        driver = (AccountDao) SpringContextUtils.getBean("accountDao");
+        this.errorData = null;
+        this.driver = driver;
     }
 
     private ErrorData validate() {
@@ -51,7 +52,7 @@ public class AccountPasswdModifyService {
             logger.warn(LogUtils.Msg(errorData,request,account));
         } else {
             account.setPasswd(request.getNew_passwd());
-            assert(driver.updatePasswd(account)==1);
+            assert(driver.accountDao.updatePasswd(account)==1);
             CacheUtils.putObject2Cache(request.getToken(),account);
         }
         return errorData;

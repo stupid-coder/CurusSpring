@@ -1,5 +1,6 @@
 package com.curus.services.account;
 
+import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.account.AccountLogoutRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -20,7 +21,7 @@ public class AccountLogoutService {
     static private Log logger = LogFactory.getLog(AccountLogoutService.class);
     private AccountLogoutRequest request;
     private ErrorData errorData;
-    public AccountLogoutService(AccountLogoutRequest request) {
+    public AccountLogoutService(AccountLogoutRequest request,CurusDriver driver) {
         this.request = request;
         errorData = null;
     }

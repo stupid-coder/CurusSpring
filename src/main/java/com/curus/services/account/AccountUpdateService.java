@@ -1,6 +1,7 @@
 package com.curus.services.account;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.AccountUpdateRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -21,12 +22,12 @@ public class AccountUpdateService {
 
     static private Log logger = LogFactory.getLog(AccountUpdateService.class);
     private AccountUpdateRequest request;
-    private AccountDao driver;
+    private CurusDriver driver;
     private ErrorData errorData;
-    public AccountUpdateService(AccountUpdateRequest request) {
+    public AccountUpdateService(AccountUpdateRequest request,CurusDriver driver) {
         this.request = request;
-        errorData = null;
-        driver = (AccountDao) SpringContextUtils.getBean("accountDao");
+        this.errorData = null;
+        this.driver = driver;
     }
 
     private ErrorData validate() {
@@ -57,7 +58,7 @@ public class AccountUpdateService {
             if ( request.getAddress() != null ) account.setAddress(request.getAddress());
             if ( request.getContact() != null ) account.setOther_contact(request.getContact());
             account.setIs_exp_user(0);
-            driver.update(account);
+            driver.accountDao.update(account);
             CacheUtils.putObject2Cache(request.getToken(),account);
         }
         return errorData;

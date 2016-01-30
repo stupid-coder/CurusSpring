@@ -1,12 +1,9 @@
-package com.curus.dao;
+package com.curus.dao.account;
 
+import com.curus.dao.BaseDao;
 import com.curus.model.Account;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
-import org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper;
-
-import java.util.HashMap;
-
 
 /**
  * Created by stupid-coder on 23/1/16.

@@ -1,6 +1,7 @@
 package com.curus.services.account.passwd;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.passwd.AccountPasswdForgetRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -21,12 +22,12 @@ import org.apache.commons.logging.LogFactory;
 public class AccountPasswdForgetService {
     static private Log logger = LogFactory.getLog(AccountPasswdForgetService.class);
     private AccountPasswdForgetRequest request;
-    private AccountDao driver;
+    private CurusDriver driver;
     private ErrorData errorData;
-    public AccountPasswdForgetService(AccountPasswdForgetRequest request) {
+    public AccountPasswdForgetService(AccountPasswdForgetRequest request, CurusDriver driver) {
         this.request = request;
-        errorData = null;
-        driver = (AccountDao) SpringContextUtils.getBean("accountDao");
+        this.errorData = null;
+        this.driver = driver;
     }
 
     private ErrorData validate() {
@@ -42,12 +43,12 @@ public class AccountPasswdForgetService {
 
     private ErrorData forgetPassword() {
         Account account;
-        if ( ( account = driver.selectByPhone(request.getPhone())) == null) {
+        if ( ( account = driver.accountDao.selectByPhone(request.getPhone())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_USERNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
             account.setPasswd(request.getPasswd());
-            assert(driver.updatePasswd(account)==1);
+            assert(driver.accountDao.updatePasswd(account)==1);
         }
         return errorData;
     }

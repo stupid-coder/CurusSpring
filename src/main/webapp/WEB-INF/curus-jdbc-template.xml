@@ -16,20 +16,8 @@
         <property name="password" value="curus"/>
     </bean>
 
-    <!--<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">-->
-    <!--<property name="dataSource" ref="dataSource"/>-->
-    <!--</bean>-->
-
-    <bean id="accountDao" class="com.curus.dao.AccountDao">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
-
-    <bean id="patientDao" class="com.curus.dao.PatientDao">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
-
-    <bean id="accountPatientDao" class="com.curus.dao.AccountPatientDao">
-        <property name="dataSource" ref="dataSource"/>
+    <bean id="curusDriver" class="com.curus.dao.CurusDriver" scope="prototype">
+        <constructor-arg ref="dataSource"/>
     </bean>
 
     <bean id="SpringContextUtils" class="com.curus.utils.SpringContextUtils" scope="singleton" />

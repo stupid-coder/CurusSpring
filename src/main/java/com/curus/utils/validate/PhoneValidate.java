@@ -1,6 +1,6 @@
 package com.curus.utils.validate;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.response.ErrorData;
 import com.curus.utils.constant.ErrorConst;
 import org.apache.commons.lang.StringUtils;

@@ -1,6 +1,7 @@
 package com.curus.services.account;
 
-import com.curus.dao.AccountDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.AccountIDetailRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -10,7 +11,6 @@ import com.curus.utils.LogUtils;
 import com.curus.utils.SpringContextUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
-import com.curus.utils.validate.PhoneValidate;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,13 +23,13 @@ public class AccountIDetailService {
     static private Log logger = LogFactory.getLog(AccountIDetailService.class);
     private AccountIDetailRequest request;
     private AccountIDetailResponseData responseData;
-    private AccountDao driver;
+    private CurusDriver driver;
     private ErrorData errorData;
-    public AccountIDetailService(AccountIDetailRequest request) {
+    public AccountIDetailService(AccountIDetailRequest request, CurusDriver driver) {
         this.request = request;
         responseData = null;
         errorData = null;
-        driver = (AccountDao) SpringContextUtils.getBean("accountDao");
+        this.driver = driver;
     }
 
     private ErrorData validate() {
@@ -43,7 +43,7 @@ public class AccountIDetailService {
 
     private ErrorData login() {
         Account account;
-        if ( ( account = driver.selectById(Long.parseLong(request.getUid()))) == null) {
+        if ( ( account = driver.accountDao.selectById(Long.parseLong(request.getUid()))) == null) {
             errorData = new ErrorData(ErrorConst.IDX_USERNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {

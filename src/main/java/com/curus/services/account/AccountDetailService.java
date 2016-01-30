@@ -1,5 +1,6 @@
 package com.curus.services.account;
 
+import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.account.AccountDetailRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -22,7 +23,7 @@ public class AccountDetailService {
     private AccountDetailRequest request;
     private AccountDetailResponseData responseData;
     private ErrorData errorData;
-    public AccountDetailService(AccountDetailRequest request) {
+    public AccountDetailService(AccountDetailRequest request,CurusDriver driver) {
         this.request = request;
         responseData = null;
         errorData = null;

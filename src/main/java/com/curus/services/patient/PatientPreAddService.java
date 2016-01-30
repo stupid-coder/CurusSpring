@@ -1,7 +1,8 @@
 package com.curus.services.patient;
 
-import com.curus.dao.AccountPatientDao;
-import com.curus.dao.PatientDao;
+import com.curus.dao.CurusDriver;
+import com.curus.dao.account.AccountPatientDao;
+import com.curus.dao.patient.PatientDao;
 import com.curus.httpio.request.patient.PatientPreAddRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
@@ -15,6 +16,7 @@ import com.curus.utils.LogUtils;
 import com.curus.utils.SpringContextUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CateConst;
+import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.validate.PhoneValidate;
@@ -31,16 +33,15 @@ public class PatientPreAddService {
 
     private PatientPreAddRequest request;
     private PatientPreAddResponseData responseData;
-    private PatientDao driver;
-    private AccountPatientDao apdriver;
+    private CurusDriver driver;
+
     private ErrorData errorData;
 
 
-    public PatientPreAddService(PatientPreAddRequest request) {
+    public PatientPreAddService(PatientPreAddRequest request,CurusDriver driver) {
         this.request = request;
         this.responseData = new PatientPreAddResponseData();
-        this.driver = (PatientDao) SpringContextUtils.getBean("patientDao");
-        this.apdriver = (AccountPatientDao) SpringContextUtils.getBean("accountPatientDao");
+        this.driver = driver;
         this.errorData = null;
     }
 
@@ -66,19 +67,19 @@ public class PatientPreAddService {
             errorData = new ErrorData(ErrorConst.IDX_ISEXPUSER);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            patient = driver.select(TypeUtils.getWhereHashMap("phone", request.getPhone()));
-            if (patient == null) {
-                responseData.setCode(SendCodeService.getCodeAndSave2Cache(driver, CateConst.ADD_PATIENT, request.getToken(), request.getPhone(), request.getId_number()));
+            patient = driver.patientDao.select(TypeUtils.getWhereHashMap("id_number", request.getId_number()));
+            if (patient == null) { // Patient Not Exists
+                responseData.setCode(SendCodeService.getCodeAndSave2Cache(CateConst.ADD_PATIENT, request.getToken(), request.getPhone(), request.getId_number()));
                 responseData.setIs_exist(0L);
-            } else {
+            } else { // Patient Already Exists
                 responseData.setIs_exist(1L);
-                if ((accountPatient = apdriver.select(TypeUtils.getWhereHashMap("account_id",account.getId(),"patient_id",patient.getId()))) != null) {
+                if (driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account.getId(),"patient_id",patient.getId())) != null) { // already Manger
                     responseData.setUnder_manager(1L);
-                } else {
-                    responseData.setCode(SendCodeService.getCodeAndSave2Cache(driver,CateConst.ADD_PATIENT,request.getToken(),patient.getPhone(),request.getId_number()));
+                } else { // Patient Not Under Manage
+                    responseData.setCode(SendCodeService.getCodeAndSave2Cache(CateConst.ADD_PATIENT,request.getToken(),patient.getPhone(),request.getId_number()));
                     responseData.setUnder_manager(0L);
                     responseData.setPatient(patient);
-                    responseData.setManagers(apdriver.selectAll(TypeUtils.getWhereHashMap("patient_id",patient.getId(),"is_patient_validate",new Integer(1))));
+                    responseData.setManagers(driver.accountPatientDao.selectAll(TypeUtils.getWhereHashMap("patient_id",patient.getId(),"is_patient_validate", CommonConst.TRUE)));
                 }
             }
         }

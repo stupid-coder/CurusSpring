@@ -13,7 +13,7 @@
 
     <mvc:annotation-driven />
 
-    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+    <!--<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />-->
 
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -21,5 +21,5 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
-    <import resource="curus-jdbc-template.xml"/>
+
 </beans>
