@@ -24,7 +24,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
     public BaseDao() {
         ParameterizedType type = (ParameterizedType) getClass().getGenericSuperclass();
         entityClass = (Class<T>)type.getActualTypeArguments()[0];
-        tableName = entityClass.getSimpleName();
+        tableName = entityClass.getSimpleName().toLowerCase();
     }
 
     class JdbcArgsOut {
@@ -95,7 +95,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
         List<Object> args = new ArrayList<Object>();
         String whereSql = buildWhereSql(where,args);
         RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
-        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s", entityClass.getSimpleName(), whereSql), rowMapper, args.toArray());
+        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s", tableName, whereSql), rowMapper, args.toArray());
         if (rs.isEmpty()) return null;
         else return rs;
     }
