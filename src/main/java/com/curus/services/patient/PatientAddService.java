@@ -83,7 +83,7 @@ public class PatientAddService {
                 if ( ap.getIs_patient_validate() == 1L && ap.getIs_super_validate() == 1L ) {
                     logger.info(LogUtils.Msg("Already Manager",request,patient));
                 } else {
-                    ap.setAppellation_id(AppellationUtils.getAppellationId(request.getAppellation())); // TODO 关系 不需要用数据库
+                    ap.setAppellation_id(AppellationUtils.getAppellationId(request.getAppellation()));
                     ap.setRole_id(RoleConst.ROLE_IDS.get("common"));
                     ap.setIs_self(account.getId() == patient.getId() ? 1 : 0);
                     ap.setIs_patient_validate(1);
