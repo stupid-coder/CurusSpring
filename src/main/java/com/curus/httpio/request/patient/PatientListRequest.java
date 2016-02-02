@@ -7,10 +7,6 @@ public class PatientListRequest {
 
     private String token;
 
-    public PatientListRequest(String token) {
-        this.token = token;
-    }
-
     public String getToken() {
         return token;
     }

@@ -8,6 +8,7 @@ import java.util.Map;
  * Created by stupid-coder on 26/1/16.
  */
 public class AppellationUtils {
+
     static public Long getAppellationId(String appellation) {
         if ( appellation == null ) return AppellationConst.APPELLATION_INVALIDE;
         for ( Map.Entry<String,Long> entry : AppellationConst.APPELLATION_IDS.entrySet() ) {

@@ -13,7 +13,4 @@ import java.util.List;
  * Created by stupid-coder on 25/1/16.
  */
 public class AccountPatientDao extends BaseDao<AccountPatient> {
-
-
-
 }

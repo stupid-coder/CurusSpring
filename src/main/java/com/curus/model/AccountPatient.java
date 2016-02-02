@@ -18,6 +18,9 @@ public class AccountPatient implements Serializable {
     private Long appellation_id;
     private Long status;
 
+    public AccountPatient() {
+    }
+
     public AccountPatient(Long account_id, Long patient_id) {
         this.account_id = account_id;
         this.patient_id = patient_id;

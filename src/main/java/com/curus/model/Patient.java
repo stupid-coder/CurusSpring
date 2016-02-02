@@ -71,9 +71,7 @@ public class Patient implements Serializable {
                 '}';
     }
 
-    public Patient() {
-    }
-
+    public Patient() {}
 
     public Patient(String name, Integer gender, Date birth, String id_number, String phone, String address, Timestamp create_time, String weixin, String qq, String email, String other_contact) {
         this.id = null;

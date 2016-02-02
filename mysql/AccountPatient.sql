@@ -1,8 +1,9 @@
+SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for account_patient
 -- ----------------------------
-DROP TABLE IF EXISTS `account_patient`;
-CREATE TABLE `account_patient` (
+DROP TABLE IF EXISTS `AccountPatient`;
+CREATE TABLE `AccountPatient` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) DEFAULT NULL,
   `patient_id` int(11) DEFAULT NULL,

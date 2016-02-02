@@ -1,10 +1,9 @@
 SET FOREIGN_KEY_CHECKS=0;
-
 -- ----------------------------
 -- Table structure for account
 -- ----------------------------
-DROP TABLE IF EXISTS `account`;
-CREATE TABLE `account` (
+DROP TABLE IF EXISTS `Account`;
+CREATE TABLE `Account` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `phone` varchar(20) UNIQUE NOT NULL,
   `is_exp_user` tinyint(1) NOT NULL DEFAULT 1,

@@ -1,11 +1,9 @@
 SET FOREIGN_KEY_CHECKS=0;
-
 -- ----------------------------
 -- Table structure for patient
 -- ----------------------------
-
-DROP TABLE IF EXISTS `patient`;
-CREATE TABLE `patient` (
+DROP TABLE IF EXISTS `Patient`;
+CREATE TABLE `Patient` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL DEFAULT "",
   `gender` tinyint(1) NOT NULL DEFAULT 1,

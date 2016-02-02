@@ -4,6 +4,7 @@ import com.curus.dao.BaseDao;
 import com.curus.model.Account;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
+import com.curus.utils.constant.CommonConst;
 
 /**
  * Created by stupid-coder on 23/1/16.
@@ -17,7 +18,9 @@ public class AccountDao extends BaseDao<Account> {
     }
 
     public int insert(String phone, String passwd) {
-        return getJdbcTemplate().update("INSERT account(phone,passwd,create_time) VALUES(?,?,?)", phone, passwd, TimeUtils.getTimestamp());
+        Account account = new Account(phone, null, passwd,  null, null,
+                null, null, null, null, TimeUtils.getTimestamp());
+        return insert(account);
     }
 
     public Account selectByPhone(String phone) {

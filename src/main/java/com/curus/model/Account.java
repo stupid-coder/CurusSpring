@@ -15,10 +15,6 @@ public class Account implements Serializable {
 
     private String phone = null;
 
-    private Integer is_exp_user = 1;
-
-    private Timestamp create_time = null;
-
     private String name = "";
 
     private String passwd = null;
@@ -32,6 +28,27 @@ public class Account implements Serializable {
     private String address = null;
 
     private String other_contact = null;
+
+    private Integer is_exp_user = 1;
+
+    private Timestamp create_time = null;
+
+    public Account(String phone, String name, String passwd, Integer gender,
+                   Date birth, String id_number, String address, String other_contact, Integer is_exp_user, Timestamp create_time) {
+        this.phone = phone;
+        this.name = name;
+        this.passwd = passwd;
+        this.gender = gender;
+        this.birth = birth;
+        this.id_number = id_number;
+        this.address = address;
+        this.other_contact = other_contact;
+        this.is_exp_user = is_exp_user;
+        this.create_time = create_time;
+    }
+
+    public Account() {
+    }
 
     public Long getId() {
         return id;

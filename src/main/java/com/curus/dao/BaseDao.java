@@ -24,7 +24,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
     public BaseDao() {
         ParameterizedType type = (ParameterizedType) getClass().getGenericSuperclass();
         entityClass = (Class<T>)type.getActualTypeArguments()[0];
-        tableName = entityClass.getSimpleName().toLowerCase();
+        tableName = entityClass.getSimpleName();
     }
 
     class JdbcArgsOut {
@@ -42,12 +42,15 @@ public class BaseDao<T> extends JdbcDaoSupport {
         JdbcArgsOut jdbcArgsOut = new JdbcArgsOut();
         Map<String,Object> where = new HashMap<String, Object>();
         try {
-            where.put("id", entityClass.getDeclaredField("id").get(entity));
+            Field field = entityClass.getDeclaredField("id");
+            field.setAccessible(true);
+            where.put("id", field.get(entity));
             processSql(SQL_UPDATE, entity, where,jdbcArgsOut);
         } catch (Exception e) {
+            e.printStackTrace();
             return 0;
         }
-        return getJdbcTemplate().update(jdbcArgsOut.sql, jdbcArgsOut.args);
+        return getJdbcTemplate().update(jdbcArgsOut.sql, jdbcArgsOut.args.toArray());
     }
 
     public int insert(T entity) {
@@ -55,9 +58,10 @@ public class BaseDao<T> extends JdbcDaoSupport {
         try {
             processSql(SQL_INSERT, entity, null, jdbcArgsOut);
         } catch (Exception e) {
+            e.printStackTrace();
             return 0;
         }
-        return getJdbcTemplate().update(jdbcArgsOut.sql,jdbcArgsOut.args);
+        return getJdbcTemplate().update(jdbcArgsOut.sql,jdbcArgsOut.args.toArray());
     }
 
     public int insert(List<T> entitys) {
@@ -66,11 +70,12 @@ public class BaseDao<T> extends JdbcDaoSupport {
         if ( entitys == null || entitys.size() == 0) return 0;
         else try {
             for ( T entity : entitys ) {
-                processSql(SQL_INSERT,entitys.get(0),null,jdbcArgsOut);
+                processSql(SQL_INSERT,entity,null,jdbcArgsOut);
                 batch_args.add(jdbcArgsOut.args.toArray());
             }
             return processRs(getJdbcTemplate().batchUpdate(jdbcArgsOut.sql,batch_args));
         } catch (Exception e) {
+            e.printStackTrace();
             return 0;
         }
     }
@@ -81,6 +86,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
             else return update(entity);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return 0;
         }
     }
@@ -105,9 +111,10 @@ public class BaseDao<T> extends JdbcDaoSupport {
         try {
             processSql(SQL_DELETE, null, where, jdbcArgsOut);
         } catch (Exception e) {
+            e.printStackTrace();
             return 0;
         }
-        return getJdbcTemplate().update(jdbcArgsOut.sql,jdbcArgsOut.args);
+        return getJdbcTemplate().update(jdbcArgsOut.sql,jdbcArgsOut.args.toArray());
     }
 
     protected void processSql(int SQLTYPE, T entity, Map<String,Object> where,JdbcArgsOut jdbcArgsOut) throws Exception {
@@ -131,10 +138,6 @@ public class BaseDao<T> extends JdbcDaoSupport {
             else if (name.compareTo("id") == 0 || value == null) continue;
 
             args.add(value);
-        }
-
-        for ( Map.Entry<String,Object> entry : where.entrySet() ) {
-            args.add(entry.getValue());
         }
         return args;
     }
@@ -165,7 +168,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
             }
         }
 
-        if ( SQLTYPE == SQL_INSERT ) return String.format("INSERT INTO %s (%s) VALUES (%s) ", tableName, StringUtils.join(sqlFields, ","), StringUtils.stripEnd(StringUtils.repeat("?,", sqlFields.size()), ","));
+        if ( SQLTYPE == SQL_INSERT ) return String.format("INSERT INTO %s(%s) VALUES(%s)", tableName, StringUtils.join(sqlFields, ","), StringUtils.stripEnd(StringUtils.repeat("?,", sqlFields.size()), ","));
         else if ( SQLTYPE == SQL_UPDATE ) return String.format("UPDATE %s SET %s", tableName, StringUtils.join(sqlFields,","));
         else return String.format("DELETE FROM %s",tableName);
     }
@@ -179,6 +182,6 @@ public class BaseDao<T> extends JdbcDaoSupport {
             w.add(String.format(" %s = ? ",entry.getKey()));
             args.add(entry.getValue());
         }
-        return String.format("WHERE %s", StringUtils.join(w, "AND"));
+        return String.format(" WHERE %s", StringUtils.join(w, "AND"));
     }
 }

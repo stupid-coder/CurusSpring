@@ -15,4 +15,8 @@ public class RoleUtils {
         }
         return null;
     }
+
+    static public Long getRoleId(String name) {
+        return RoleConst.ROLE_IDS.getOrDefault(name,null);
+    }
 }

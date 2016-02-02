@@ -8,6 +8,9 @@ import java.util.Map;
  */
 public class RoleConst {
 
+    static public String ROLE_COMMON = "common";
+    static public String ROLE_SUPER = "super";
+
     static public Map<String,Long> ROLE_IDS = new HashMap<String,Long>() {{
         put("super",1L);
         put("common",2L);

@@ -14,6 +14,8 @@ import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
+import com.curus.utils.service.account.AccountPatientServiceUtils;
+import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,11 +56,10 @@ public class PatientListService {
         } else {
             responseData = new PatientListResponseData();
             List<PatientListResponseData.PatientListInfo> patientList = new ArrayList<PatientListResponseData.PatientListInfo>();
-            List<AccountPatient> accountPatientList = driver.accountPatientDao.selectAll(TypeUtils.getWhereHashMap("account_id",account.getId(),
-                    "is_super_validate", CommonConst.TRUE,"is_patient_validate",CommonConst.TRUE));
+            List<AccountPatient> accountPatientList = AccountPatientServiceUtils.selectValidate(driver,account.getId());
             for ( AccountPatient accountPatient  : accountPatientList) {
-                Patient patient = driver.patientDao.select(TypeUtils.getWhereHashMap("patient_id", accountPatient.getPatient_id()));
-                patientList.add(responseData.new PatientListInfo(patient,accountPatient));
+                patientList.add(responseData.new PatientListInfo(
+                        PatientServiceUtils.select(driver,accountPatient.getPatient_id()),accountPatient));
             }
             responseData.setPatients(patientList);
         }

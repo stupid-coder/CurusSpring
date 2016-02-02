@@ -1,16 +1,14 @@
 package com.curus.services.account;
 
 import com.curus.dao.CurusDriver;
-import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.AccountUpdateRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.model.Account;
-import com.curus.utils.CacheUtils;
-import com.curus.utils.LogUtils;
-import com.curus.utils.SpringContextUtils;
-import com.curus.utils.constant.ErrorConst;
-import com.curus.utils.constant.StatusConst;
+import com.curus.model.Patient;
+import com.curus.utils.*;
+import com.curus.utils.constant.*;
+import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,12 +39,15 @@ public class AccountUpdateService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.idValidation(request.getId_number(),"id_number")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getAddress(),"address")) != null) {
+            logger.warn(LogUtils.Msg(errorData,request));
         }
         return errorData;
     }
 
     private ErrorData update() {
         Account account;
+        Patient patient;
         if ( ( account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
@@ -60,6 +61,13 @@ public class AccountUpdateService {
             account.setIs_exp_user(0);
             driver.accountDao.update(account);
             CacheUtils.putObject2Cache(request.getToken(),account);
+
+            PatientServiceUtils.AddPatient(driver,account,
+                    new Patient(account.getName(),account.getGender(),account.getBirth(),
+                            account.getId_number(),account.getPhone(),account.getAddress(),
+                            TimeUtils.getTimestamp(),null,null,null,account.getOther_contact()),
+                    AppellationConst.APPELLATION_SELF);
+
         }
         return errorData;
     }
