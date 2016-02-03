@@ -54,8 +54,6 @@ public class PatientAddService {
             logger.warn(LogUtils.Msg(errorData, request));
         } else if ((errorData = ValueValidate.valueExistValidate(request.getBirth(),"brith")) != null) {
             logger.warn(LogUtils.Msg(errorData, request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getAddress(),"address")) != null) {
-            logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getWeight(),"weight")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getHeight(),"height")) != null) {
