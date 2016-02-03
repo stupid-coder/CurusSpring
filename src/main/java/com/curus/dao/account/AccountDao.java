@@ -13,7 +13,7 @@ import com.curus.utils.constant.CommonConst;
 public class AccountDao extends BaseDao<Account> {
 
     public boolean existsByPhone(String phone) {
-        Number count = getJdbcTemplate().queryForObject("SELECT COUNT(*) FROM account WHERE phone=?",Integer.class,phone);
+        Number count = getJdbcTemplate().queryForObject(String.format("SELECT COUNT(*) FROM %s WHERE phone=?",tableName),Integer.class,phone);
         return ( count != null && count.intValue() > 0 ? true : false );
     }
 
@@ -32,11 +32,11 @@ public class AccountDao extends BaseDao<Account> {
     }
 
     public int updatePasswd(Account account) {
-        return getJdbcTemplate().update("UPDATE account SET passwd=? WHERE id=?", Integer.class, account.getPasswd(), account.getId());
+        return getJdbcTemplate().update(String.format("UPDATE %s SET passwd=? WHERE id=?",tableName), Integer.class, account.getPasswd(), account.getId());
     }
 
     public int updatePhone(Account account) {
-        return getJdbcTemplate().update("UPDATE account SET phone=? WHERE id=?", Integer.class, account.getPhone(), account.getId());
+        return getJdbcTemplate().update(String.format("UPDATE %s SET phone=? WHERE id=?",tableName), Integer.class, account.getPhone(), account.getId());
     }
 
 }

@@ -20,7 +20,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
     public static final int SQL_DELETE = 2;
 
     private Class<T> entityClass;
-    private String tableName;
+    protected String tableName;
     public BaseDao() {
         ParameterizedType type = (ParameterizedType) getClass().getGenericSuperclass();
         entityClass = (Class<T>)type.getActualTypeArguments()[0];
