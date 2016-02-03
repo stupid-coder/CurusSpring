@@ -58,8 +58,9 @@ public class PatientListService {
             List<PatientListResponseData.PatientListInfo> patientList = new ArrayList<PatientListResponseData.PatientListInfo>();
             List<AccountPatient> accountPatientList = AccountPatientServiceUtils.selectValidate(driver,account.getId());
             for ( AccountPatient accountPatient  : accountPatientList) {
-                patientList.add(responseData.new PatientListInfo(
-                        PatientServiceUtils.select(driver,accountPatient.getPatient_id()),accountPatient));
+                if ( accountPatient.getPatient_id() != null )
+                    patientList.add(responseData.new PatientListInfo(PatientServiceUtils.select(driver,accountPatient.getPatient_id()),accountPatient));
+
             }
             responseData.setPatients(patientList);
         }

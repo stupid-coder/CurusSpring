@@ -2,7 +2,7 @@
 
 import common
 import pdb
-phone="18810346541"
+phone="18810346542"
 passwd="888888"
 
 def Register():

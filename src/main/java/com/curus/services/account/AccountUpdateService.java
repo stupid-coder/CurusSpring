@@ -52,6 +52,8 @@ public class AccountUpdateService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
+            patient = PatientServiceUtils.select(driver,account.getId_number());
+
             if ( request.getName() != null ) account.setName(request.getName());
             if ( request.getGender() != null ) account.setGender(ValueValidate.genderize(Integer.parseInt(request.getGender())));
             if ( request.getBirth() != null ) account.setBirth( ValueValidate.dateFromTimestamp(request.getBirth()) );
@@ -62,11 +64,16 @@ public class AccountUpdateService {
             driver.accountDao.update(account);
             CacheUtils.putObject2Cache(request.getToken(),account);
 
-            PatientServiceUtils.AddPatient(driver,account,
-                    new Patient(account.getName(),account.getGender(),account.getBirth(),
-                            account.getId_number(),account.getPhone(),account.getAddress(),
-                            TimeUtils.getTimestamp(),null,null,null,account.getOther_contact()),
-                    AppellationConst.APPELLATION_SELF);
+            if (patient == null) {
+                patient = new Patient(account.getName(), account.getGender(), account.getBirth(),
+                        account.getId_number(), account.getPhone(), account.getAddress(),
+                        TimeUtils.getTimestamp(), null, null, null, account.getOther_contact());
+            } else {
+                patient.setName(account.getName()); patient.setGender(account.getGender()); patient.setBirth(account.getBirth());
+                patient.setId_number(account.getId_number()); patient.setAddress(account.getAddress()); patient.setOther_contact(account.getOther_contact());
+                driver.patientDao.save(patient);
+            }
+            PatientServiceUtils.AddPatient(driver,account, patient, AppellationConst.APPELLATION_SELF);
 
         }
         return errorData;
@@ -74,7 +81,7 @@ public class AccountUpdateService {
 
     public ResponseBase process() {
         if (validate() == null && update() == null) {
-            logger.info(LogUtils.Msg("Success to Login",request,null));
+            logger.info(LogUtils.Msg("Success to Update",request,null));
             return new ResponseBase(StatusConst.OK,null);
         } else return new ResponseBase(StatusConst.ERROR,errorData);
 

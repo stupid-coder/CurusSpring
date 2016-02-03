@@ -155,10 +155,12 @@ public class PatientPreAddResponseData {
     }
 
     public void setManagers(List<AccountPatient> ap) {
-        this.managers = new ArrayList<ManagerSubData>();
-        for ( int i = 0; i < ap.size(); ++ i) {
-            managers.add(new ManagerSubData(ap.get(i)));
-        }
+        if (ap != null) {
+            this.managers = new ArrayList<ManagerSubData>();
+            for (int i = 0; i < ap.size(); ++i) {
+                managers.add(new ManagerSubData(ap.get(i)));
+            }
+        } else this.managers = null;
     }
 
     @Override

@@ -12,4 +12,4 @@ def Update(token,name,gender,birth,id_number,address):
         return None
 
 if __name__ == "__main__":
-    Update(Login.Login(),"qixiang",2,1454430141,"411502198804190537","test")
+    Update(Login.Login("18810346542","888888"),"qixiang",2,1454430141,"411502198804190538","test")

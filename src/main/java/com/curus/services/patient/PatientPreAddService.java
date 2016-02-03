@@ -19,6 +19,8 @@ import com.curus.utils.constant.CateConst;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
+import com.curus.utils.service.account.AccountPatientServiceUtils;
+import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.validate.PhoneValidate;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
@@ -59,21 +61,20 @@ public class PatientPreAddService {
     private ErrorData preAdd() {
         Account account;
         Patient patient;
-        AccountPatient accountPatient;
         if ( (account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData, request));
-        } else if ( account.getIs_exp_user() == 0 ) {
+        } else if ( account.getIs_exp_user() == CommonConst.TRUE ) {
             errorData = new ErrorData(ErrorConst.IDX_ISEXPUSER);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            patient = driver.patientDao.select(TypeUtils.getWhereHashMap("id_number", request.getId_number()));
+            patient = PatientServiceUtils.select(driver,request.getId_number());
             if (patient == null) { // Patient Not Exists
                 responseData.setCode(SendCodeService.getCodeAndSave2Cache(CateConst.ADD_PATIENT, request.getToken(), request.getPhone(), request.getId_number()));
                 responseData.setIs_exist(0L);
             } else { // Patient Already Exists
                 responseData.setIs_exist(1L);
-                if (driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account.getId(),"patient_id",patient.getId())) != null) { // already Manger
+                if (AccountPatientServiceUtils.select( driver,account.getId(),patient.getId() ) != null) { // already Manger
                     responseData.setUnder_manager(1L);
                 } else { // Patient Not Under Manage
                     responseData.setCode(SendCodeService.getCodeAndSave2Cache(CateConst.ADD_PATIENT,request.getToken(),patient.getPhone(),request.getId_number()));
@@ -83,7 +84,7 @@ public class PatientPreAddService {
                 }
             }
         }
-        return null;
+        return errorData;
     }
 
     public ResponseBase process() {

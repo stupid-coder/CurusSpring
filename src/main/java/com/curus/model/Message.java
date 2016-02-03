@@ -38,7 +38,7 @@ public class Message implements Serializable {
         this.title = title;
         this.content = content;
         this.extra = extra;
-        this.read = CommonConst.FALSE;
+        this.read = null;
     }
 
     public Long getId() {

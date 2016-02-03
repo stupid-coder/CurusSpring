@@ -6,6 +6,7 @@ import java.io.Serializable;
  * Created by stupid-coder on 25/1/16.
  */
 public class PatientAddRequest {
+
     private String token;
     private String code;
     private String phone;

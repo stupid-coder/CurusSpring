@@ -6,6 +6,9 @@ package com.curus.httpio.response.patient;
 public class PatientAddResponseData {
     private Long patient_id;
 
+    public PatientAddResponseData() {
+    }
+
     public PatientAddResponseData(Long patient_id) {
         this.patient_id = patient_id;
     }

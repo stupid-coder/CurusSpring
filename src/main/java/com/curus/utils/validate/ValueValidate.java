@@ -48,7 +48,7 @@ public class ValueValidate {
         if ( value != null && value.length() == 18 && idCheckSum(value) ) {
             return null;
         }
-        return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
+        return null; //new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
     }
 
     public static Integer genderize(Integer gender) {
