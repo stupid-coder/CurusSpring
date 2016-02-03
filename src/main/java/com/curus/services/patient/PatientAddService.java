@@ -6,8 +6,6 @@ import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientAddResponseData;
 import com.curus.model.Account;
-import com.curus.model.AccountPatient;
-import com.curus.model.Message;
 import com.curus.model.Patient;
 import com.curus.utils.*;
 import com.curus.utils.constant.*;
@@ -15,12 +13,10 @@ import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.validate.CodeValidate;
 import com.curus.utils.validate.PhoneValidate;
 import com.curus.utils.validate.ValueValidate;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Date;
-import java.util.HashMap;
 
 /**
  * Created by stupid-coder on 25/1/16.
