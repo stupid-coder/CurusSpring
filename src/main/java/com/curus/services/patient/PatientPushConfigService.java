@@ -41,7 +41,7 @@ public class PatientPushConfigService {
 
     private ErrorData pushConfig() {
         Patient patient;
-        if ( (patient = driver.patientDao.select(TypeUtils.getWhereHashMap("patient_id",request.getPatient_id()))) == null) {
+        if ( (patient = driver.patientDao.select(TypeUtils.getWhereHashMap("id",request.getPatient_id()))) == null) {
             errorData = new ErrorData(ErrorConst.IDX_PATIENTNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else try {
@@ -52,7 +52,7 @@ public class PatientPushConfigService {
             patient.setCan_weixin_push(Integer.parseInt(request.getCan_weixin_push()));
             driver.patientDao.save(patient);
         } catch (Exception e) {
-            errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR);
+            errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"All");
         }
         return errorData;
     }

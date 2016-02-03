@@ -10,6 +10,7 @@ import com.curus.model.Patient;
 import com.curus.utils.*;
 import com.curus.utils.constant.*;
 import com.curus.utils.service.patient.PatientServiceUtils;
+import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.validate.CodeValidate;
 import com.curus.utils.validate.PhoneValidate;
 import com.curus.utils.validate.ValueValidate;
@@ -85,6 +86,7 @@ public class PatientAddService {
                 }
                 patient = PatientServiceUtils.AddPatient(driver,account,patient,request.getAppellation());
                 responseData.setPatient_id(patient.getId());
+                QuotaServiceUtils.addWeightHeight(driver,account,patient,request.getWeight(),request.getHeight());
             }
         }
         return errorData;

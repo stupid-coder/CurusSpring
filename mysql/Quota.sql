@@ -2,8 +2,8 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for quota
 -- ----------------------------
-DROP TABLE IF EXISTS `quota`;
-CREATE TABLE `quota` (
+DROP TABLE IF EXISTS `Quota`;
+CREATE TABLE `Quota` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) DEFAULT NULL,
   `patient_id` int(11) DEFAULT NULL,

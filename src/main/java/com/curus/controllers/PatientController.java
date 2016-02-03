@@ -49,7 +49,7 @@ public class PatientController {
         return service.process();
     }
 
-    @RequestMapping(value="/pushConfig",method= RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value="/push_config",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
     ResponseBase pushConfig(@RequestBody PatientPushConfigRequest request) {
         PatientPushConfigService service = new PatientPushConfigService(request,driver);

@@ -9,6 +9,7 @@ import com.curus.model.Patient;
 import com.curus.utils.*;
 import com.curus.utils.constant.*;
 import com.curus.utils.service.patient.PatientServiceUtils;
+import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,11 +36,15 @@ public class AccountUpdateService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueIntegerValidate(request.getGender(),"gender")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueIntegerValidate(request.getBirth(),"birth")) != null) {
+        } else if ( (errorData = ValueValidate.valueDateValidate(request.getBirth(),"birth")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.idValidation(request.getId_number(),"id_number")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getAddress(),"address")) != null) {
+            logger.warn(LogUtils.Msg(errorData,request));
+        } else if ( (errorData = ValueValidate.valueDoubleValidate(request.getWeight(),"weight")) != null) {
+            logger.warn(LogUtils.Msg(errorData,request));
+        } else if ( (errorData = ValueValidate.valueDoubleValidate(request.getHeight(),"height")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         }
         return errorData;
@@ -74,6 +79,8 @@ public class AccountUpdateService {
                 driver.patientDao.save(patient);
             }
             PatientServiceUtils.AddPatient(driver,account, patient, AppellationConst.APPELLATION_SELF);
+
+            QuotaServiceUtils.addWeightHeight(driver,account,patient,request.getWeight(),request.getHeight());
 
         }
         return errorData;

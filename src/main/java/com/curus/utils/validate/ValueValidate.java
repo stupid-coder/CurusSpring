@@ -2,6 +2,8 @@ package com.curus.utils.validate;
 
 import com.curus.httpio.response.ErrorData;
 import com.curus.utils.constant.ErrorConst;
+
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 
 /**
@@ -29,6 +31,24 @@ public class ValueValidate {
         } catch ( NumberFormatException e ) {
             return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
         }
+    }
+
+    public static ErrorData valueDoubleValidate(String value, String key) {
+        try {
+            Double.parseDouble(value);
+            return null;
+        } catch ( NumberFormatException e) {
+            return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
+        }
+    }
+
+    public static ErrorData valueDateValidate(String value, String key) {
+        try {
+            Date date = new Date(Long.parseLong(value)*1000);
+        } catch (Exception e){
+            return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
+        }
+        return null;
     }
 
     static final byte[] CHECK = {'1','0','X','9','8','7','6','5','4','3','2'};

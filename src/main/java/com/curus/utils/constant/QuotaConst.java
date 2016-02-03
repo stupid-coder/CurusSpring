@@ -8,15 +8,16 @@ import java.util.Map;
  */
 public class QuotaConst {
 
-    static public String QUOTA_SMOKE = "smoke";
-    static public String QUOTA_HEIGHT = "height";
-    static public String QUOTA_WEIGHT = "weight";
-    static public String QUOTA_ACT = "act";
-    static public String QUOTA_BP = "bp";
-    static public String QUOTA_BS = "bs";
-    static public String QUOTA_BF = "bf";
-    static public String QUOTA_DIET = "diet";
+    static public String QUOTA_SMOKE = "smoke"; static public Long QUOTA_SMOKE_ID = 1L;
+    static public String QUOTA_HEIGHT = "height"; static public Long QUOTA_HEIGHT_ID = 2L;
+    static public String QUOTA_WEIGHT = "weight"; static public Long QUOTA_WEIGHT_ID = 3L;
+    static public String QUOTA_ACT = "act"; static public Long QUOTA_ACT_ID = 4L;
+    static public String QUOTA_BP = "bp"; static public Long QUOTA_BP_ID = 5L;
+    static public String QUOTA_BS = "bs"; static public Long QUOTA_BS_ID = 6L;
+    static public String QUOTA_BF = "bf"; static public Long QUOTA_BF_ID = 7L;
+    static public String QUOTA_DIET = "diet"; static public Long QUOTA_DIET_ID =  8L;
     static public Long QUOTA_UNKNOW_ID = 0L;
+
     static public Map<String,Long> QUOTA_IDS = new HashMap<String, Long>() {{
         put(QUOTA_SMOKE,1L); put(QUOTA_HEIGHT,2L); put(QUOTA_WEIGHT,3L);
         put(QUOTA_ACT,4L); put(QUOTA_BP,5L); put(QUOTA_BS,6L);

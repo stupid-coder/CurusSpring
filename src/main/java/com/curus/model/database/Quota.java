@@ -1,4 +1,6 @@
-package com.curus.model;
+package com.curus.model.database;
+
+import com.curus.utils.TimeUtils;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -15,16 +17,27 @@ public class Quota implements Serializable {
     private Timestamp submit_time;
     private Timestamp measure_time;
     private Long quota_cat_id;
-    private String recode;
+    private String record;
     private String sub_cat;
 
-    public Quota(Long account_id, Long patient_id, Timestamp submit_time, Timestamp measure_time, Long quota_cat_id, String recode) {
+    public Quota(Long account_id, Long patient_id, Timestamp submit_time, Timestamp measure_time, Long quota_cat_id, String record) {
         this.account_id = account_id;
         this.patient_id = patient_id;
         this.submit_time = submit_time;
         this.measure_time = measure_time;
         this.quota_cat_id = quota_cat_id;
-        this.recode = recode;
+        this.record = record;
+    }
+
+    public Quota(Long account_id, Long patient_id, Timestamp measure_time, Long quota_cat_id, String record) {
+        this.account_id = account_id;
+        this.patient_id = patient_id;
+        this.measure_time = measure_time;
+        this.quota_cat_id = quota_cat_id;
+        this.record = record;
+        this.submit_time = TimeUtils.getTimestamp();
+        this.id = null;
+        this.sub_cat = null;
     }
 
     public Long getId() {
@@ -75,12 +88,12 @@ public class Quota implements Serializable {
         this.quota_cat_id = quota_cat_id;
     }
 
-    public String getRecode() {
-        return recode;
+    public String getRecord() {
+        return record;
     }
 
-    public void setRecode(String recode) {
-        this.recode = recode;
+    public void setRecord(String record) {
+        this.record = record;
     }
 
     public String getSub_cat() {
@@ -100,7 +113,7 @@ public class Quota implements Serializable {
                 ", submit_time=" + submit_time +
                 ", measure_time=" + measure_time +
                 ", quota_cat_id=" + quota_cat_id +
-                ", recode='" + recode + '\'' +
+                ", record='" + record + '\'' +
                 ", sub_cat='" + sub_cat + '\'' +
                 '}';
     }
