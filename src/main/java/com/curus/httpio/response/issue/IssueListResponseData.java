@@ -1,7 +1,5 @@
 package com.curus.httpio.response.issue;
 
-import com.curus.model.PatientIssue;
-
 import java.util.List;
 
 /**

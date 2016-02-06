@@ -1,6 +1,6 @@
 package com.curus.httpio.response.account;
 
-import com.curus.model.Account;
+import com.curus.model.database.Account;
 
 import java.io.Serializable;
 

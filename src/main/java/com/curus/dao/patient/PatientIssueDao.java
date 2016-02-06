@@ -1,7 +1,7 @@
 package com.curus.dao.patient;
 
 import com.curus.dao.BaseDao;
-import com.curus.model.PatientIssue;
+import com.curus.model.database.PatientIssue;
 import com.curus.utils.constant.IssueConst;
 
 import java.util.ArrayList;

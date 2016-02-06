@@ -1,11 +1,8 @@
 package com.curus.dao.patient;
 
 import com.curus.dao.BaseDao;
-import com.curus.model.Patient;
-import com.curus.utils.TimeUtils;
+import com.curus.model.database.Patient;
 import com.curus.utils.TypeUtils;
-
-import java.sql.Date;
 
 /**
  * Created by stupid-coder on 25/1/16.

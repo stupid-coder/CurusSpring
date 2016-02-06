@@ -1,11 +1,10 @@
 package com.curus.utils.service.patient;
 
 import com.curus.dao.CurusDriver;
-import com.curus.dao.account.AccountPatientDao;
-import com.curus.model.Account;
-import com.curus.model.AccountPatient;
-import com.curus.model.Message;
-import com.curus.model.Patient;
+import com.curus.model.database.Account;
+import com.curus.model.database.AccountPatient;
+import com.curus.model.database.Message;
+import com.curus.model.database.Patient;
 import com.curus.utils.AppellationUtils;
 import com.curus.utils.RoleUtils;
 import com.curus.utils.TimeUtils;
@@ -14,10 +13,8 @@ import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.MessageConst;
 import com.curus.utils.constant.RoleConst;
 import com.curus.utils.service.account.AccountPatientServiceUtils;
-import com.curus.utils.service.issue.IssueServiceUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.maven.surefire.shade.org.codehaus.plexus.util.StringUtils;
 
 import java.util.List;
 

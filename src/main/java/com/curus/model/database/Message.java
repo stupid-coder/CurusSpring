@@ -1,4 +1,4 @@
-package com.curus.model;
+package com.curus.model.database;
 
 import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.CommonConst;

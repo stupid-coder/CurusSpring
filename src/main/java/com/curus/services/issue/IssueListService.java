@@ -5,7 +5,7 @@ import com.curus.httpio.request.issue.IssueListRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.issue.IssueListResponseData;
-import com.curus.model.PatientIssue;
+import com.curus.model.database.PatientIssue;
 import com.curus.utils.LogUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.ErrorConst;

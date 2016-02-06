@@ -1,7 +1,7 @@
 package com.curus.utils.service.account;
 
 import com.curus.dao.CurusDriver;
-import com.curus.model.AccountPatient;
+import com.curus.model.database.AccountPatient;
 import com.curus.utils.RoleUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CommonConst;

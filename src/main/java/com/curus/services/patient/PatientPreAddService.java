@@ -1,19 +1,15 @@
 package com.curus.services.patient;
 
 import com.curus.dao.CurusDriver;
-import com.curus.dao.account.AccountPatientDao;
-import com.curus.dao.patient.PatientDao;
 import com.curus.httpio.request.patient.PatientPreAddRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientPreAddResponseData;
-import com.curus.model.Account;
-import com.curus.model.AccountPatient;
-import com.curus.model.Patient;
+import com.curus.model.database.Account;
+import com.curus.model.database.Patient;
 import com.curus.services.common.SendCodeService;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
-import com.curus.utils.SpringContextUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CateConst;
 import com.curus.utils.constant.CommonConst;

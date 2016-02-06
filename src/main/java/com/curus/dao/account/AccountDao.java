@@ -1,10 +1,9 @@
 package com.curus.dao.account;
 
 import com.curus.dao.BaseDao;
-import com.curus.model.Account;
+import com.curus.model.database.Account;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
-import com.curus.utils.constant.CommonConst;
 
 /**
  * Created by stupid-coder on 23/1/16.

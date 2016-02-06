@@ -5,7 +5,7 @@ import com.curus.httpio.request.account.AccountDetailRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.account.AccountDetailResponseData;
-import com.curus.model.Account;
+import com.curus.model.database.Account;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
 import com.curus.utils.constant.ErrorConst;

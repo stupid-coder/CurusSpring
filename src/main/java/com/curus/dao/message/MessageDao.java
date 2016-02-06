@@ -1,7 +1,7 @@
 package com.curus.dao.message;
 
 import com.curus.dao.BaseDao;
-import com.curus.model.Message;
+import com.curus.model.database.Message;
 
 /**
  * Created by stupid-coder on 26/1/16.

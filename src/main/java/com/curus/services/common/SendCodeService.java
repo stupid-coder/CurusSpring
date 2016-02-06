@@ -1,17 +1,11 @@
 package com.curus.services.common;
 
-import com.curus.dao.CurusDriver;
-import com.curus.dao.patient.PatientDao;
 import com.curus.httpio.request.common.SendCodeRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.common.SendCodeResponseData;
-import com.curus.model.Patient;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
-import com.curus.utils.SpringContextUtils;
-import com.curus.utils.TypeUtils;
-import com.curus.utils.constant.CateConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.validate.CateValidate;
 import com.curus.utils.validate.PhoneValidate;

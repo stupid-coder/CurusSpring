@@ -20,6 +20,9 @@ public class Quota implements Serializable {
     private String record;
     private String sub_cat;
 
+    public Quota() {
+    }
+
     public Quota(Long account_id, Long patient_id, Timestamp submit_time, Timestamp measure_time, Long quota_cat_id, String record) {
         this.account_id = account_id;
         this.patient_id = patient_id;

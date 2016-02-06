@@ -4,7 +4,7 @@ import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.patient.PatientPushConfigRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
-import com.curus.model.Patient;
+import com.curus.model.database.Patient;
 import com.curus.utils.LogUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.ErrorConst;

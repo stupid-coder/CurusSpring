@@ -4,9 +4,10 @@ import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.quota.QuotaAddRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
-import com.curus.model.Account;
+import com.curus.model.database.Account;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
+import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.service.quota.QuotaServiceUtils;
@@ -55,7 +56,7 @@ public class QuotaAddService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( QuotaServiceUtils.addQuota(driver, account, Long.parseLong(request.getPatient_id()),
-                request.getCate(), Timestamp.valueOf(request.getDate()),request.getValue()) == 0) {
+                request.getCate(), TimeUtils.parseTimestamp(request.getDate()),request.getValue()) == 0) {
             errorData = new ErrorData(ErrorConst.IDX_SERVER_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         }

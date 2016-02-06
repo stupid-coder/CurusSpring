@@ -1,10 +1,6 @@
 package com.curus.utils;
 
-import com.curus.dao.patient.PatientIssueDao;
-import com.curus.model.PatientIssue;
 import com.curus.utils.constant.IssueConst;
-
-import java.util.Map;
 
 /**
  * Created by stupid-coder on 27/1/16.

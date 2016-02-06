@@ -1,4 +1,4 @@
-package com.curus.model;
+package com.curus.model.database;
 
 import java.io.Serializable;
 import java.sql.Date;

@@ -1,14 +1,12 @@
 package com.curus.services.account.passwd;
 
 import com.curus.dao.CurusDriver;
-import com.curus.dao.account.AccountDao;
 import com.curus.httpio.request.account.passwd.AccountPasswdModifyRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
-import com.curus.model.Account;
+import com.curus.model.database.Account;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
-import com.curus.utils.SpringContextUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.validate.PasswdValidate;

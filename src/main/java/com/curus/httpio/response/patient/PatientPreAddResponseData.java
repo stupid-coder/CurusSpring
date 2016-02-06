@@ -1,7 +1,7 @@
 package com.curus.httpio.response.patient;
 
-import com.curus.model.AccountPatient;
-import com.curus.model.Patient;
+import com.curus.model.database.AccountPatient;
+import com.curus.model.database.Patient;
 
 import java.util.ArrayList;
 import java.util.List;

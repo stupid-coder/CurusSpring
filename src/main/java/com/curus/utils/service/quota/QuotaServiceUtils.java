@@ -2,11 +2,10 @@ package com.curus.utils.service.quota;
 
 import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
-import com.curus.model.Account;
-import com.curus.model.Patient;
+import com.curus.httpio.response.TsValueData;
+import com.curus.model.database.Account;
+import com.curus.model.database.Patient;
 import com.curus.model.database.Quota;
-import com.curus.model.record.QuotaHeightRecord;
-import com.curus.model.record.QuotaWeightRecord;
 import com.curus.utils.LogUtils;
 import com.curus.utils.QuotaUtils;
 import com.curus.utils.TimeUtils;
@@ -14,7 +13,6 @@ import com.curus.utils.constant.QuotaConst;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +69,8 @@ public class QuotaServiceUtils {
                                      Long patient_id,
                                      Timestamp date,
                                      String weight) {
-        String record = JSONObject.toJSONString(new QuotaWeightRecord(Double.parseDouble(weight)));
+        JSONObject jb = new JSONObject(); jb.put("weight", Double.parseDouble(weight));
+        String record = jb.toJSONString();
         Quota quota = new Quota(account_id,patient_id,date,QuotaConst.QUOTA_WEIGHT_ID,record);
         logger.info(LogUtils.Msg("Add Weight Quota",quota));
         return driver.quotaDao.insert(quota);
@@ -82,10 +81,30 @@ public class QuotaServiceUtils {
                                      Long patient_id,
                                      Timestamp date,
                                      String height) {
-        String record = JSONObject.toJSONString(new QuotaHeightRecord(Double.parseDouble(height)));
+        JSONObject jb = new JSONObject(); jb.put("height",Double.parseDouble(height));
+        String record = jb.toJSONString();
         Quota quota = new Quota(account_id, patient_id, date, QuotaConst.QUOTA_HEIGHT_ID,record);
         logger.info(LogUtils.Msg("Add Height Quota",quota));
         return driver.quotaDao.insert(quota);
+    }
+
+    static public int listQuota(CurusDriver driver,
+                                Long account_id, Long patient_id,
+                                String cate,
+                                List<TsValueData> response) {
+
+        Long cate_id = QuotaUtils.getQuotaIds(cate);
+        List<Quota> quotaList = driver.quotaDao.selectByMeasureTime90Days(account_id,patient_id,cate_id);
+
+        for ( Quota q : quotaList ) {
+            JSONObject record = JSONObject.parseObject(q.getRecord());
+            if ( cate_id == QuotaConst.QUOTA_WEIGHT_ID ) {
+                response.add(new TsValueData(q.getMeasure_time().getTime()/1000,String.valueOf(record.getDoubleValue("weight"))));
+            } else if ( cate_id == QuotaConst.QUOTA_HEIGHT_ID ){
+                response.add(new TsValueData(q.getMeasure_time().getTime()/1000,String.valueOf(record.getDoubleValue("height"))));
+            }
+        }
+        return response.size();
     }
 
 }
