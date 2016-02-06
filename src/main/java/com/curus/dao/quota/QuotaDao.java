@@ -21,8 +21,7 @@ public class QuotaDao extends BaseDao<Quota> {
         RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
         List<Quota> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_time >= ?", tableName),
                 rowMapper, new Object[] {account_id, patient_id, cate_id, TimeUtils.getTimestamp(days90ago)});
-        if (rs.isEmpty()) return null;
-        else return rs;
+        return rs;
     }
 
 }
