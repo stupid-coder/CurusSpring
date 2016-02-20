@@ -32,8 +32,9 @@ public class QuotaServiceUtils {
         List<Quota> quotaList = new ArrayList<Quota>();
         for ( Map.Entry<String,String> entry : quotas.entrySet() ) {
             if ((id = QuotaUtils.getQuotaIds(entry.getKey())) != QuotaConst.QUOTA_UNKNOW_ID) {
+                JSONObject jb = new JSONObject(); jb.put(entry.getKey(),entry.getValue());
                 Quota quota = new Quota(account_id,patient_id, TimeUtils.getTimestamp(), TimeUtils.getTimestamp(),
-                        id, JSONObject.toJSONString(entry));
+                        id, jb.toJSONString());
                 quotaList.add(quota);
             }
         }
