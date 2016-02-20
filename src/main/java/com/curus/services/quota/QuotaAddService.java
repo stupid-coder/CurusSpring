@@ -42,8 +42,6 @@ public class QuotaAddService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData =ValueValidate.valueLongValidate(request.getPatient_id(), "patient_id")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDate(), "date")) != null) {
-            logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getValue(), "value")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         }
@@ -56,7 +54,7 @@ public class QuotaAddService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( QuotaServiceUtils.addQuota(driver, account, Long.parseLong(request.getPatient_id()),
-                request.getCate(), TimeUtils.parseTimestamp(request.getDate()),request.getValue()) == 0) {
+                request.getCate(), TimeUtils.getTimestamp(),request.getValue()) == 0) {
             errorData = new ErrorData(ErrorConst.IDX_SERVER_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         }

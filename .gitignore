@@ -3,3 +3,4 @@ target/
 curus.iml
 server.conf
 *.pyc
+*.html

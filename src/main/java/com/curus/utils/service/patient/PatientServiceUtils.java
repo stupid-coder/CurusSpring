@@ -11,11 +11,14 @@ import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.MessageConst;
+import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.constant.RoleConst;
 import com.curus.utils.service.account.AccountPatientServiceUtils;
+import com.curus.utils.service.quota.QuotaServiceUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.validation.constraints.Null;
 import java.util.List;
 
 /**
@@ -86,9 +89,12 @@ public class PatientServiceUtils {
                     is_self,
                     CommonConst.TRUE,
                     RoleUtils.getRoleId(role),
-                    AppellationUtils.getAppellationId(appellation)))>0)
+                    AppellationUtils.getAppellationId(appellation)))>0) {
                 accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id", account.getId(),
                         "patient_id", patient.getId()));
+                QuotaServiceUtils.initQuota(driver,account.getId(),patient.getId(), QuotaConst.QUOTA_INIT);
+            }
+            else accountPatient = null;
         }
 
         if (role.compareTo(RoleConst.ROLE_COMMON) == 0){

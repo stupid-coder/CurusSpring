@@ -1,0 +1,9 @@
+#+TITLE: Curus 健康管理系统WIKI
+#+AUTHOR: stupid_coder@163.com
+#+DATE: Sat Feb 20 15:37:13 2016
+
+* Curus 健康管理系统
+** Curus 接口
+  + [[https://github.com/stupid-coder/CurusSpring/wiki/quota-interface][生理指标接口]] :: 提交和查询生理指标相关的接口说明
+
+  

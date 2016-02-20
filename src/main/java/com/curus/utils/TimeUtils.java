@@ -13,4 +13,7 @@ public class TimeUtils {
     public static Timestamp parseTimestamp(String ts) {
         return new Timestamp(Long.parseLong(ts)*1000);
     }
+    public static String timestamp2String(Long ts) {
+        return new Long(ts / 1000).toString();
+    }
 }

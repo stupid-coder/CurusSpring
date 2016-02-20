@@ -99,9 +99,9 @@ public class QuotaServiceUtils {
         for ( Quota q : quotaList ) {
             JSONObject record = JSONObject.parseObject(q.getRecord());
             if ( cate_id == QuotaConst.QUOTA_WEIGHT_ID ) {
-                response.add(new TsValueData(q.getMeasure_time().getTime()/1000,String.valueOf(record.getDoubleValue("weight"))));
+                response.add(new TsValueData(TimeUtils.timestamp2String(q.getMeasure_time().getTime()),String.valueOf(record.getDoubleValue("weight"))));
             } else if ( cate_id == QuotaConst.QUOTA_HEIGHT_ID ){
-                response.add(new TsValueData(q.getMeasure_time().getTime()/1000,String.valueOf(record.getDoubleValue("height"))));
+                response.add(new TsValueData(TimeUtils.timestamp2String(q.getMeasure_time().getTime()),String.valueOf(record.getDoubleValue("height"))));
             }
         }
         return response.size();
