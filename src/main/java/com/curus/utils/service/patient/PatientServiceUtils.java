@@ -35,7 +35,7 @@ public class PatientServiceUtils {
 
     static public Patient select(CurusDriver driver,
                                  String id_number) {
-        return driver.patientDao.select(id_number);
+        return driver.patientDao.select(TypeUtils.getWhereHashMap("id_number", id_number));
     }
 
     static public void SendMessageToSuper(CurusDriver driver,
@@ -62,7 +62,7 @@ public class PatientServiceUtils {
                     patient.getBirth(),patient.getId_number(),
                     patient.getPhone(),patient.getAddress(),
                     TimeUtils.getTimestamp(),null,null,null,patient.getOther_contact()));
-            ret = driver.patientDao.select(patient.getId_number());
+            ret = select(driver,patient.getId_number());
             role = RoleConst.ROLE_SUPER;
 
         } else { ret = patient; role =RoleConst.ROLE_COMMON; }

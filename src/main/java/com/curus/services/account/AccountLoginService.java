@@ -8,6 +8,7 @@ import com.curus.httpio.response.account.AccountLoginResponseData;
 import com.curus.model.database.Account;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
+import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.validate.PasswdValidate;
@@ -43,7 +44,7 @@ public class AccountLoginService {
 
     private ErrorData login() {
         Account account;
-        if ( ( account = driver.accountDao.selectByPhone(request.getPhone())) == null) {
+        if ( ( account = driver.accountDao.select(TypeUtils.getWhereHashMap("phone",request.getPhone()))) == null) {
             errorData = new ErrorData(ErrorConst.IDX_USERNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( account.getPasswd().compareTo(request.getPasswd()) != 0) {

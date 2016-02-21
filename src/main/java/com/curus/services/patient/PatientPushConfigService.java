@@ -50,7 +50,7 @@ public class PatientPushConfigService {
             patient.setCan_phone_push(Integer.parseInt(request.getCan_phone_push()));
             patient.setCan_qq_push(Integer.parseInt(request.getCan_qq_push()));
             patient.setCan_weixin_push(Integer.parseInt(request.getCan_weixin_push()));
-            driver.patientDao.save(patient);
+            driver.patientDao.save(patient,"id");
         } catch (Exception e) {
             errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"All");
         }

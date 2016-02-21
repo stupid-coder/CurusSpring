@@ -38,13 +38,13 @@ public class BaseDao<T> extends JdbcDaoSupport {
         return total_rs;
     }
 
-    public int update(T entity) {
+    public int update(T entity, String id) {
         JdbcArgsOut jdbcArgsOut = new JdbcArgsOut();
         Map<String,Object> where = new HashMap<String, Object>();
         try {
-            Field field = entityClass.getDeclaredField("id");
+            Field field = entityClass.getDeclaredField(id);
             field.setAccessible(true);
-            where.put("id", field.get(entity));
+            where.put(id, field.get(entity));
             processSql(SQL_UPDATE, entity, where,jdbcArgsOut);
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,10 +80,10 @@ public class BaseDao<T> extends JdbcDaoSupport {
         }
     }
 
-    public int save(T entity) {
+    public int save(T entity, String id) {
         try {
-            if (entityClass.getDeclaredField("id").get(entity) == null) return insert(entity);
-            else return update(entity);
+            if (entityClass.getDeclaredField(id).get(entity) == null) return insert(entity);
+            else return update(entity,id);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -8,9 +8,4 @@ import com.curus.utils.TypeUtils;
  * Created by stupid-coder on 25/1/16.
  */
 public class PatientDao extends BaseDao<Patient> {
-
-    public Patient select(String id_nubmer) {
-        return select(TypeUtils.getWhereHashMap("id_number",id_nubmer));
-    }
-
 }

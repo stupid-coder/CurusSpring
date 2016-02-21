@@ -56,9 +56,10 @@ public class AccountUpdateService {
         if ( ( account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
+        } else if ( driver.accountDao.select(TypeUtils.getWhereHashMap("id_number",request.getId_number())) != null ) {
+            errorData = new ErrorData(ErrorConst.IDX_INVALIDID_ERROR);
+            logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            patient = PatientServiceUtils.select(driver,account.getId_number());
-
             if ( request.getName() != null ) account.setName(request.getName());
             if ( request.getGender() != null ) account.setGender(ValueValidate.genderize(Integer.parseInt(request.getGender())));
             if ( request.getBirth() != null ) account.setBirth( ValueValidate.dateFromTimestamp(request.getBirth()) );
@@ -66,8 +67,9 @@ public class AccountUpdateService {
             if ( request.getAddress() != null ) account.setAddress(request.getAddress());
             if ( request.getContact() != null ) account.setOther_contact(request.getContact());
             account.setIs_exp_user(0);
-            driver.accountDao.update(account);
+            driver.accountDao.update(account,"id");
             CacheUtils.putObject2Cache(request.getToken(),account);
+            patient = PatientServiceUtils.select(driver,account.getId_number());
 
             if (patient == null) {
                 patient = new Patient(account.getName(), account.getGender(), account.getBirth(),
@@ -76,7 +78,7 @@ public class AccountUpdateService {
             } else {
                 patient.setName(account.getName()); patient.setGender(account.getGender()); patient.setBirth(account.getBirth());
                 patient.setId_number(account.getId_number()); patient.setAddress(account.getAddress()); patient.setOther_contact(account.getOther_contact());
-                driver.patientDao.save(patient);
+                driver.patientDao.save(patient,"id");
             }
             patient = PatientServiceUtils.AddPatient(driver,account, patient, AppellationConst.APPELLATION_SELF);
 
