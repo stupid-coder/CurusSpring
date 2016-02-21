@@ -58,7 +58,7 @@ public class PatientServiceUtils {
                                      AccountPatient accountPatient,
                                      String appellation) {
         String role;
-        if ( patient.getId() == null && (patient = select(driver,patient.getId_number())) == null) {
+        if ( patient.getId() == null || (patient = select(driver,patient.getId_number())) == null) {
             driver.patientDao.insert(new Patient(patient.getName(),patient.getGender(),
                     patient.getBirth(),patient.getId_number(),
                     patient.getPhone(),patient.getAddress(),
@@ -85,8 +85,8 @@ public class PatientServiceUtils {
         if ( accountPatient == null) {
             if (driver.accountPatientDao.insert(new AccountPatient(account.getId(),
                     patient.getId(),
-                    role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE,
                     is_self,
+                    role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE,
                     CommonConst.TRUE,
                     RoleUtils.getRoleId(role),
                     AppellationUtils.getAppellationId(appellation)))>0) {
