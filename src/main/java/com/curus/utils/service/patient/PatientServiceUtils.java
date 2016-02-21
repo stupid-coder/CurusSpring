@@ -85,7 +85,7 @@ public class PatientServiceUtils {
             Integer is_self = account.getId_number().compareTo(patient.getId_number()) == 0 ? CommonConst.TRUE : CommonConst.FALSE;
             if (driver.accountPatientDao.insert(new AccountPatient(account.getId(),
                     patient.getId(),
-                    is_self,
+                    role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE,
                     is_self,
                     CommonConst.TRUE,
                     RoleUtils.getRoleId(role),
