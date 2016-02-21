@@ -19,7 +19,7 @@ public class ValueValidate {
         try {
             Integer.parseInt(value);
             return null;
-        } catch ( NumberFormatException e ) {
+        } catch ( Exception e ) {
             return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
         }
     }
@@ -28,7 +28,7 @@ public class ValueValidate {
         try {
             Long.parseLong(value);
             return null;
-        } catch ( NumberFormatException e ) {
+        } catch ( Exception e ) {
             return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
         }
     }
@@ -37,7 +37,7 @@ public class ValueValidate {
         try {
             Double.parseDouble(value);
             return null;
-        } catch ( NumberFormatException e) {
+        } catch ( Exception e) {
             return new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,key);
         }
     }

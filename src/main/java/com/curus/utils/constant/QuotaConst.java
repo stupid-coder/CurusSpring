@@ -16,6 +16,7 @@ public class QuotaConst {
     static public String QUOTA_BS = "bs"; static public Long QUOTA_BS_ID = 6L; // 血糖
     static public String QUOTA_BF = "bf"; static public Long QUOTA_BF_ID = 7L; // 血脂
     static public String QUOTA_DIET = "diet"; static public Long QUOTA_DIET_ID =  8L;
+    static public String QUOTA_FOOD = "food"; static public Long QUOTA_FOOD_ID = 9L;
     static public Long QUOTA_UNKNOW_ID = 0L;
 
     static public Map<String,Long> QUOTA_IDS = new HashMap<String, Long>() {{
@@ -28,7 +29,8 @@ public class QuotaConst {
         put("ph",1L); put("lf",2L);
     }};
 
-    static public Map<String,String> QUOTA_INIT = new HashMap<String, String>() {{
-        put("smoke",""); put("diet",""); put("act","");
+    static public Map<String,Object> QUOTA_INIT = new HashMap<String, Object>() {{
+        put("diet",new HashMap<String,Long>(){{put("lunch",8L);put("dinner",9L);put("snacks",3L);put("fatink",0L);}});
+        put("act",new HashMap<String,Object>() {{put("sport",0L);}});
     }};
 }

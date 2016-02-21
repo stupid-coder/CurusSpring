@@ -31,5 +31,4 @@ public class TypeUtils {
             put(key1,obj1); put(key2,obj2);
             put(key3,obj3); put(key4,obj4);}};
     }
-
 }

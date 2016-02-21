@@ -22,4 +22,8 @@ public class LogUtils {
     public static String Msg(String msg, Object object1, Object object2) {
         return String.format("%s - %s\t%s",msg,object1,object2);
     }
+
+    public static String Msg(String msg, Object object1, Object object2, Object object3) {
+        return String.format("%s - %s\t%s\t%s",msg,object1,object2,object3);
+    }
 }

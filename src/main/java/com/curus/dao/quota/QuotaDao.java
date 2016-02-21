@@ -6,6 +6,7 @@ import com.curus.utils.TimeUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,4 +25,8 @@ public class QuotaDao extends BaseDao<Quota> {
         return rs;
     }
 
+    public int insert(Long account_id, Long patient_id, Long quota_id, Timestamp date, String value) {
+        Quota quota = new Quota(account_id,patient_id,date,quota_id, value);
+        return insert(quota);
+    }
 }

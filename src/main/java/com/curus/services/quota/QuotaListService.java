@@ -35,8 +35,8 @@ public class QuotaListService {
     public QuotaListService(QuotaListRequest request, CurusDriver driver) {
         this.request = request;
         this.driver = driver;
-        responseData = new ArrayList<TsValueData>();
-        errorData = null;
+        this.responseData = new ArrayList<TsValueData>();
+        this.errorData = null;
     }
 
     private ErrorData validate() {

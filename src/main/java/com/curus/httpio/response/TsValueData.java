@@ -7,9 +7,9 @@ package com.curus.httpio.response;
 public class TsValueData implements Comparable<TsValueData> {
 
     private String  measure_time;
-    private String value;
+    private Object value;
 
-    public TsValueData(String measure_time, String value) {
+    public TsValueData(String measure_time, Object value) {
         this.measure_time = measure_time;
         this.value = value;
     }
@@ -22,11 +22,11 @@ public class TsValueData implements Comparable<TsValueData> {
         this.measure_time = measure_time;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 

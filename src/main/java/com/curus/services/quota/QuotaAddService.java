@@ -53,8 +53,8 @@ public class QuotaAddService {
         if ( (account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( QuotaServiceUtils.addQuota(driver, account, Long.parseLong(request.getPatient_id()),
-                request.getCate(), TimeUtils.getTimestamp(),request.getValue()) == 0) {
+        } else if ( QuotaServiceUtils.addQuotas(driver, account.getId(), Long.parseLong(request.getPatient_id()),
+                request.getCate(), request.getDate(),request.getValue()) == 0) {
             errorData = new ErrorData(ErrorConst.IDX_SERVER_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         }
