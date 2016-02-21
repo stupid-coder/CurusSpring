@@ -75,7 +75,7 @@ public class PatientAddService {
         } else {
             patient = PatientServiceUtils.select(driver,request.getId_number());
             if ( (errorData = CodeValidate.validateAddPatientCode(request.getToken(),
-                    request.getPhone(),
+                    patient == null ? request.getPhone() : patient.getPhone(),
                     request.getCode())) != null ) {
                 logger.warn(LogUtils.Msg(errorData, request, patient));
             } else {
@@ -84,9 +84,13 @@ public class PatientAddService {
                             new Date(Long.parseLong(request.getBirth())),
                             request.getId_number(),request.getPhone(),request.getAddress(), TimeUtils.getTimestamp(),null,null,null,null);
                 }
-                patient = PatientServiceUtils.AddPatient(driver,account,patient,request.getAppellation());
-                responseData.setPatient_id(patient.getId());
-                QuotaServiceUtils.addWeightHeight(driver,account.getId(),patient.getId(),request.getWeight(),request.getHeight());
+                if (request.getAppellation().compareTo("self") == 0 && request.getId_number().compareTo(account.getId_number()) != 0 ) {
+                    errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"appellation");
+                } else {
+                    patient = PatientServiceUtils.AddPatient(driver, account, patient, request.getAppellation());
+                    responseData.setPatient_id(patient.getId());
+                    QuotaServiceUtils.addWeightHeight(driver, account.getId(), patient.getId(), request.getWeight(), request.getHeight());
+                }
             }
         }
         return errorData;

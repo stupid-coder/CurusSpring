@@ -31,11 +31,11 @@ public class AccountDao extends BaseDao<Account> {
     }
 
     public int updatePasswd(Account account) {
-        return getJdbcTemplate().update(String.format("UPDATE %s SET passwd=? WHERE id=?",tableName), Integer.class, account.getPasswd(), account.getId());
+        return getJdbcTemplate().update(String.format("UPDATE %s SET passwd=? WHERE id=?",tableName), account.getPasswd(), account.getId());
     }
 
     public int updatePhone(Account account) {
-        return getJdbcTemplate().update(String.format("UPDATE %s SET phone=? WHERE id=?",tableName), Integer.class, account.getPhone(), account.getId());
+        return getJdbcTemplate().update(String.format("UPDATE %s SET phone=? WHERE id=?",tableName), account.getPhone(), account.getId());
     }
 
 }

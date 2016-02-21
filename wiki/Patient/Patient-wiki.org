@@ -1,0 +1,120 @@
+#+TITLE: 管理对象接口
+#+AUTHOR: stupid_coder@163.com
+#+DATE: Sat Feb 20 15:32:37 2016
+
+* 描述
+  管理对象相关接口，用来对管理对象进行添加和修改。
+
+* 接口常量说明
+  #+CAPTION: 管理对象常量说明及默认值
+  | 常量             | 说明 |
+  |------------------+------|
+  | appellation.self | 自己 |
+  | appellation.fu   | 父亲 |
+
+* 接口说明
+  管理对象接口提供：获取管理对象，预添加管理对象，添加管理对象，更改管
+  理对象消息通知设置，释放管理对象，管理对象SUPPER同意接口等功能。
+** 获取管理对象
+   获取接口URI：http://ip:port/hostname/patient/list
+*** 请求结构体
+   #+CAPTION: 获取管理对象结构体
+   | 字段名     | 类型   | 说明                     |
+   |------------+--------+--------------------------|
+   | token      | String | 用户标示                 |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名                        | 类型   | 说明                         |
+    |-------------------------------+--------+------------------------------|
+    | status                        | Int    | 返回状态                     |
+    | data.patient                  | List   | 管理对象列表                 |
+    | data.patient.appellation_name | String | 用户和管理对象关系           |
+    | data.patient.is_self          | Long   | 用户和管理对象是否是同一个人 |
+    | data.patient.patient_id       | Long   | 管理对象ID                   |
+    | data.patient.patient_name     | String | 管理对象名称                 |
+    | data.patient.role_name        | String | 用户对管理对象的角色         |
+
+** 预添加管理对象
+   添加结构URI: http://ip:port/hostname/patient/preadd
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名    | 类型   | 说明                      |
+    |-----------+--------+---------------------------|
+    | token     | String | 用户标示                  |
+    | id_number | String | 预添加管理对象的ID_NUMBER |
+    | phone     | String | 预添加管理对象的手机号或者当前用户手机号|
+
+*** 响应结样例
+    + 管理对象不存在 :: 
+                    #+CAPTION: 响应结构体
+                    | 字段名        | 类型   | 说明                 |     值 |
+                    |---------------+--------+----------------------+--------|
+                    | status        | Int    | 响应状态             |      1 |
+                    | data          | Object | 响应结构体           |        |
+                    | data.code     | String | 添加管理对象的验证码 | XXXXXX |
+                    | data.is_exist | Long   | 管理对象不存在       |      0 |
+    + 管理对象存在且已经被用户管理 :: 
+                  #+CAPTION: 响应结构体
+                  | 字段名             | 类型   | 说明                       | 值 |
+                  |--------------------+--------+----------------------------+----|
+                  | status             | Int    | 响应状态                   |  1 |
+                  | data               | Object | 响应结构体                 |    |
+                  | data.under_manage  | Long   | 当前管理对象在该用户管理下 |  1 |
+                  | data.is_exists     | Long   | 当前管理对象已经存在       |  1 |
+    + 管理对象存在，不在用户管理 ::
+         #+CAPTION: 响应结构体
+         | 字段名           | 类型   | 说明                     |     值 |
+         |------------------+--------+--------------------------+--------|
+         | status           | Int    | 响应状态                 |      1 |
+         | data             | Object | 响应结构体               |        |
+         | data.under_mange | Long   | 当前管理对象在用户管理下 |      1 |
+         | data.patient     | Object | 管理对象信息             |        |
+         | data.is_exist    | Long   | 管理对象已经存在         |      1 |
+         | code             | String | 下一步添加该对象的验证码 | XXXXXX |
+         | data.managers    | List   | 管理对象的管理者列表     |        |
+                   
+
+     
+
+
+
+
+
+** 添加管理对象
+   添加管理对象URI: http://ip:port/hostname/patient/add
+*** 请求结构体
+    #+CAPTION: 添加管理对象结构体
+    | 字段名      | 类型   | 说明                 |
+    |-------------+--------+----------------------|
+    | token       | String | 用户标示             |
+    | code        | String | 添加管理对象验证码   |
+    | phone       | String | 管理对象手机号       |
+    | id_number   | String | 管理对象的身分ID     |
+    | appellation | String | 用户与管理对象的关系 |
+    | name        | String | 管理对象的名称       |
+    | gender      | String | 管理对象的性别       |
+    | birth       | String | 管理对象生日的时间戳 |
+    | weight      | String | 管理对象的体重       |
+    | height      | String | 管理对象的身高       |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名          | 类型   | 值 | 说明       |
+    |-----------------+--------+----+------------|
+    | status          | Int    |  1 | 响应状态   |
+    | data            | Object |    | 响应结构体 |
+    | data.patient_id | Long   | 11 | 管理对象的ID |
+
+** 释放管理对象
+   释放管理对象URI: http://ip:port/hostname/patient/relieve
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名     | 类型   | 说明             |
+    |------------+--------+------------------|
+    | token      | String | 用户标示         |
+    | patient_id | String | 释放的管理对象ID |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名 | 类型 | 值 | 说明 |
+    |--------+------+----+------|
+    | status | Int  |  1 | 响应状态 |
+

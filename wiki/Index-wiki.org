@@ -5,5 +5,7 @@
 * Curus 健康管理系统
 ** Curus 接口
   + [[https://github.com/stupid-coder/CurusSpring/wiki/quota-interface][生理指标接口]] :: 提交和查询生理指标相关的接口说明
-
+  + [[https://github.com/stupid-coder/CurusSpring/wiki/patient-interface][管理对象接口]] :: 管理对象相关接口说明
+** Links
+  + [[https://github.com/palfan/ncd_api][原有服务API]]
   

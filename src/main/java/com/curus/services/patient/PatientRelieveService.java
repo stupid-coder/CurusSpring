@@ -44,7 +44,6 @@ public class PatientRelieveService {
 
     private ErrorData relievePatient() {
         Account account;
-        AccountPatient accountPatient;
         if ( (account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null ) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));

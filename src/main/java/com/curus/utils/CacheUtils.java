@@ -37,8 +37,10 @@ public class CacheUtils {
 
     public static void putCode2Cache(String cate, String token, String phone, String code) {
         String ckey = getCodeCacheKey(cate, token, phone);
-        if (ckey != null)
+        if (ckey != null) {
+            System.out.println(String.format("Put Code 2 Cache: %s-%s",ckey,code));
             Cache.Add(ckey, code);
+        }
     }
 
     public static String getCode4Cache(String cate, String token, String phone) {
@@ -52,8 +54,6 @@ public class CacheUtils {
         if ( ckey != null)
             Cache.Delete(ckey);
     }
-
-
 
     public static String getToken() {
         return UUID.randomUUID().toString().replaceAll("-","");

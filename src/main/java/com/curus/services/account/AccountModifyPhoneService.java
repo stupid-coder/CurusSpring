@@ -42,7 +42,7 @@ public class AccountModifyPhoneService {
         return errorData;
     }
 
-    private ErrorData login() {
+    private ErrorData modifyPhone() {
         Account account;
         if ( ( account = (Account)CacheUtils.deleteObjectAndGet4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_USERNOTEXIST_ERROR);
@@ -57,7 +57,7 @@ public class AccountModifyPhoneService {
     }
 
     public ResponseBase process() {
-        if (validate() == null && login() == null) {
+        if (validate() == null && modifyPhone() == null) {
             logger.info(LogUtils.Msg("Success to Login",request,null));
             return new ResponseBase(StatusConst.OK,null);
         } else return new ResponseBase(StatusConst.ERROR,errorData);

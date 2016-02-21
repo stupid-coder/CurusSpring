@@ -82,7 +82,7 @@ public class PatientServiceUtils {
         AccountPatient accountPatient;
         if ( (accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id", account.getId(),
                 "patient_id", patient.getId()))) == null) {
-            Integer is_self = appellation.compareTo("self") == 0 ? CommonConst.TRUE : CommonConst.FALSE;
+            Integer is_self = account.getId_number().compareTo(patient.getId_number()) == 0 ? CommonConst.TRUE : CommonConst.FALSE;
             if (driver.accountPatientDao.insert(new AccountPatient(account.getId(),
                     patient.getId(),
                     is_self,

@@ -50,7 +50,7 @@ public class AccountPasswdModifyService {
             logger.warn(LogUtils.Msg(errorData,request,account));
         } else {
             account.setPasswd(request.getNew_passwd());
-            assert(driver.accountDao.updatePasswd(account)==1);
+            driver.accountDao.updatePasswd(account);
             CacheUtils.putObject2Cache(request.getToken(),account);
         }
         return errorData;
