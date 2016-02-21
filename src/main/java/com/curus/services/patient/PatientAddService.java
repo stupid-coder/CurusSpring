@@ -6,6 +6,7 @@ import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientAddResponseData;
 import com.curus.model.database.Account;
+import com.curus.model.database.AccountPatient;
 import com.curus.model.database.Patient;
 import com.curus.utils.*;
 import com.curus.utils.constant.*;
@@ -47,7 +48,7 @@ public class PatientAddService {
             logger.warn(LogUtils.Msg(errorData, request));
         } else if ((errorData = ValueValidate.idValidation(request.getId_number(), "id_number")) != null) {
             logger.warn(LogUtils.Msg(errorData, request));
-        } else if ((errorData = ValueValidate.valueExistValidate(request.getAppellation(), "appelltaion")) != null) {
+        } else if ((errorData = ValueValidate.valueExistValidate(request.getAppellation(), "appellation")) != null) {
             logger.warn(LogUtils.Msg(errorData, request));
         } else if ((errorData = ValueValidate.valueExistValidate(request.getName(), "name")) != null) {
             logger.warn(LogUtils.Msg(errorData, request));
@@ -66,6 +67,7 @@ public class PatientAddService {
     private ErrorData addPatient() {
         Account account;
         Patient patient;
+        AccountPatient accountPatient = null;
         if ( (account = (Account)CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
@@ -83,14 +85,20 @@ public class PatientAddService {
                     patient = new Patient(request.getName(),Integer.parseInt(request.getGender()),
                             new Date(Long.parseLong(request.getBirth())),
                             request.getId_number(),request.getPhone(),request.getAddress(), TimeUtils.getTimestamp(),null,null,null,null);
-                }
-                if (request.getAppellation().compareTo("self") == 0 && request.getId_number().compareTo(account.getId_number()) != 0 ) {
-                    errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"appellation");
                 } else {
-                    patient = PatientServiceUtils.AddPatient(driver, account, patient, request.getAppellation());
-                    responseData.setPatient_id(patient.getId());
-                    QuotaServiceUtils.addWeightHeight(driver, account.getId(), patient.getId(), request.getWeight(), request.getHeight());
+                    accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id", account.getId(),
+                            "patient_id", patient.getId()));
+                    if (accountPatient.getIs_super_validate().compareTo(CommonConst.TRUE) == 0 ) {
+                        patient.setName(request.getName());
+                        patient.setGender(Integer.parseInt(request.getGender()));
+                        patient.setBirth(new Date(Long.parseLong(request.getBirth())));
+                        patient.setId_number(request.getId_number());
+                        patient.setPhone(request.getPhone());
+                    }
                 }
+                patient = PatientServiceUtils.AddPatient(driver, account, patient, accountPatient, request.getAppellation());
+                responseData.setPatient_id(patient.getId());
+                QuotaServiceUtils.addWeightHeight(driver, account.getId(), patient.getId(), request.getWeight(), request.getHeight());
             }
         }
         return errorData;

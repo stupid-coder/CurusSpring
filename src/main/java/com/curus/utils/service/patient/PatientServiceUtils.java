@@ -55,34 +55,34 @@ public class PatientServiceUtils {
     static public Patient AddPatient(CurusDriver driver,
                                      Account account,
                                      Patient patient,
+                                     AccountPatient accountPatient,
                                      String appellation) {
-        Patient ret; String role;
-        if ( patient.getId() == null && (ret = select(driver,patient.getId_number())) == null) {
+        String role;
+        if ( patient.getId() == null && (patient = select(driver,patient.getId_number())) == null) {
             driver.patientDao.insert(new Patient(patient.getName(),patient.getGender(),
                     patient.getBirth(),patient.getId_number(),
                     patient.getPhone(),patient.getAddress(),
                     TimeUtils.getTimestamp(),null,null,null,patient.getOther_contact()));
-            ret = select(driver,patient.getId_number());
+            patient = select(driver,patient.getId_number());
             role = RoleConst.ROLE_SUPER;
 
-        } else { ret = patient; role =RoleConst.ROLE_COMMON; }
+        } else { role =RoleConst.ROLE_COMMON; }
 
-        if ( ret != null ) {
-            AddAccountPatient(driver,account,ret,role,appellation);
+        if ( patient != null ) {
+            AddAccountPatient(driver,account,patient,accountPatient,role,appellation);
         }
 
-        return ret;
+        return patient;
     }
 
     static public AccountPatient AddAccountPatient(CurusDriver driver,
                                                    Account account,
                                                    Patient patient,
+                                                   AccountPatient accountPatient,
                                                    String role,
                                                    String appellation) {
-        AccountPatient accountPatient;
-        if ( (accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id", account.getId(),
-                "patient_id", patient.getId()))) == null) {
-            Integer is_self = account.getId_number().compareTo(patient.getId_number()) == 0 ? CommonConst.TRUE : CommonConst.FALSE;
+        Integer is_self = account.getId_number().compareTo(patient.getId_number()) == 0 ? CommonConst.TRUE : CommonConst.FALSE;
+        if ( accountPatient == null) {
             if (driver.accountPatientDao.insert(new AccountPatient(account.getId(),
                     patient.getId(),
                     role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE,
@@ -95,6 +95,10 @@ public class PatientServiceUtils {
                 QuotaServiceUtils.initQuota(driver,account.getId(),patient.getId(), QuotaConst.QUOTA_INIT);
             }
             else accountPatient = null;
+        } else if ( accountPatient.getIs_super_validate().compareTo(CommonConst.TRUE) == 0) {
+            accountPatient.setIs_self(is_self);
+            accountPatient.setRole_id(RoleUtils.getRoleId(role));
+            accountPatient.setAppellation_id(AppellationUtils.getAppellationId(appellation));
         }
 
         if (role.compareTo(RoleConst.ROLE_COMMON) == 0){

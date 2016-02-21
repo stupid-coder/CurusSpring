@@ -80,7 +80,7 @@ public class AccountUpdateService {
                 patient.setId_number(account.getId_number()); patient.setAddress(account.getAddress()); patient.setOther_contact(account.getOther_contact());
                 driver.patientDao.save(patient,"id");
             }
-            patient = PatientServiceUtils.AddPatient(driver,account, patient, AppellationConst.APPELLATION_SELF);
+            patient = PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF);
 
             QuotaServiceUtils.addWeightHeight(driver,account.getId(),patient.getId(),request.getWeight(),request.getHeight());
 
