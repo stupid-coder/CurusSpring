@@ -97,7 +97,7 @@ public class QuotaServiceUtils {
         if (cate_id.compareTo(0L) != 0) {
             for (Quota q : quotaList) {
                 JSONObject record = JSONObject.parseObject(q.getRecord());
-                response.add(new TsValueData(TimeUtils.timestamp2String(q.getMeasure_time().getTime()), record.getJSONObject(cate)));
+                response.add(new TsValueData(TimeUtils.timestamp2String(q.getMeasure_time().getTime()), record.get(cate)));
             }
         } else logger.warn(LogUtils.Msg("Unknown cate",cate));
         return response.size();
