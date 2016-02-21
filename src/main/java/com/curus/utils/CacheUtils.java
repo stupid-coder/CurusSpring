@@ -35,8 +35,6 @@ public class CacheUtils {
         else return null;
     }
 
-
-
     public static void putCode2Cache(String cate, String token, String phone, String code) {
         String ckey = getCodeCacheKey(cate, token, phone);
         if (ckey != null)

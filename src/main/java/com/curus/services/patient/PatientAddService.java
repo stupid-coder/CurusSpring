@@ -75,7 +75,7 @@ public class PatientAddService {
         } else {
             patient = PatientServiceUtils.select(driver,request.getId_number());
             if ( (errorData = CodeValidate.validateAddPatientCode(request.getToken(),
-                    patient !=null ? patient.getPhone() : request.getPhone(),
+                    request.getPhone(),
                     request.getCode())) != null ) {
                 logger.warn(LogUtils.Msg(errorData, request, patient));
             } else {

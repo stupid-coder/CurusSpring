@@ -6,10 +6,7 @@ import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientListResponseData;
 import com.curus.services.patient.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Created by stupid-coder on 25/1/16.
@@ -56,4 +53,10 @@ public class PatientController {
         return service.process();
     }
 
+    @RequestMapping(value="/agree",method= RequestMethod.GET)
+    public @ResponseBody
+    ResponseBase agree(@RequestParam Long aid, @RequestParam Long pid) {
+        PatientAgreeService service = new PatientAgreeService(aid,pid,driver);
+        return service.process();
+    }
 }
