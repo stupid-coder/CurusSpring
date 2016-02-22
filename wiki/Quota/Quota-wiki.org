@@ -17,13 +17,17 @@
   生理指标接口提供两个基本接口：获取和添加接口。
 ** 获取生理指标
    获取接口URI：http://ip:port/hostname/quota/add
+   
+   其中 *lastest* 字段控制，是否返回最近多少个，还是返回最近90天数据。
 *** 请求结构体
    #+CAPTION: 获取生理指标接口
-   | 字段名     | 类型   | 说明                     |
-   |------------+--------+--------------------------|
-   | token      | String | 用户标示                 |
-   | patient_id | String | 获取生理指标的管理对象ID  |
-   | cate       | String | 获取生理指标标识，必须为接口常量说明表的一个  |
+   | 字段名     | 类型            | 说明                                         |
+   |------------+-----------------+----------------------------------------------|
+   | token      | String          | 用户标示                                     |
+   | patient_id | String          | 获取生理指标的管理对象ID                     |
+   | cate       | String          | 获取生理指标标识，必须为接口常量说明表的一个 |
+   | lastest    | String.OPTIONAL | 获取最新的多少个生理指标                     |
+
 *** 响应结构体
     #+CAPTION: 响应结构体
     | 字段名            | 类型   | 说明                     |
@@ -41,6 +45,7 @@
     | token        | String | 用户标示                 |
     | patient_id   | String | 添加生理指标的管理对象ID |
     | cate         | String | 添加生理指标标识         |
+    | measure_date | String | 添加生理指标纪录日期     |
     | value        | String | 生理指标                 |
 *** 响应结构体
     #+CAPTION: 响应结构体
