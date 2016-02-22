@@ -58,7 +58,7 @@ public class QuotaListService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            QuotaServiceUtils.listQuota(driver,account.getId(),Long.parseLong(request.getPatient_id()),request.getCate(),responseData);
+            QuotaServiceUtils.listQuotas(driver,request.getLastest(),account.getId(),Long.parseLong(request.getPatient_id()),request.getCate(),responseData);
             Collections.sort(responseData);
         }
 

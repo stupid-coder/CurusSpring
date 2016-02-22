@@ -3,9 +3,11 @@ package com.curus.dao.quota;
 import com.curus.dao.BaseDao;
 import com.curus.model.database.Quota;
 import com.curus.utils.TimeUtils;
+import com.curus.utils.TypeUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +17,26 @@ import java.util.List;
  */
 public class QuotaDao extends BaseDao<Quota> {
 
-    final Long days90ago = -90L * 24L * 3600L ;
+    final Long days90ago = -90L;
 
-    public List<Quota> selectByMeasureTime90Days(Long account_id, Long patient_id,
+    public List<Quota> selectByMeasureDateLast90Days(Long account_id, Long patient_id,
                                                  Long cate_id) {
         RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
-        List<Quota> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_time >= ?", tableName),
-                rowMapper, new Object[] {account_id, patient_id, cate_id, TimeUtils.getTimestamp(days90ago)});
-        return rs;
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_date >= ?", tableName),
+                rowMapper, account_id, patient_id, cate_id, TimeUtils.getDate(days90ago));
     }
 
-    public int insert(Long account_id, Long patient_id, Long quota_id, Timestamp date, String value) {
+    public Quota selectByMeasureDate(Long account_id, Long patient_id, Long quota_id, Date date) {
+        return select(TypeUtils.getWhereHashMap("account_id",account_id,"patient_id",patient_id,"quota_cat_id",quota_id,"measure_date",date));
+    }
+
+    public List<Quota> selectLastestQuota(Long account_id, Long patient_id, Long quota_id, Long limits) {
+        RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? ORDER BY measure_date DESC LIMIT %d",tableName,limits),
+                rowMapper,account_id,patient_id,quota_id);
+    }
+
+    public int insert(Long account_id, Long patient_id, Long quota_id, Date date, String value) {
         Quota quota = new Quota(account_id,patient_id,date,quota_id, value);
         return insert(quota);
     }

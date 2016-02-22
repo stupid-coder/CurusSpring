@@ -3,6 +3,7 @@ package com.curus.model.database;
 import com.curus.utils.TimeUtils;
 
 import java.io.Serializable;
+import java.sql.Date;
 import java.sql.Timestamp;
 
 /**
@@ -14,8 +15,7 @@ public class Quota implements Serializable {
     private Long id;
     private Long account_id;
     private Long patient_id;
-    private Timestamp submit_time;
-    private Timestamp measure_time;
+    private Date measure_date;
     private Long quota_cat_id;
     private String record;
     private String sub_cat;
@@ -23,22 +23,12 @@ public class Quota implements Serializable {
     public Quota() {
     }
 
-    public Quota(Long account_id, Long patient_id, Timestamp submit_time, Timestamp measure_time, Long quota_cat_id, String record) {
+    public Quota(Long account_id, Long patient_id, Date measure_date, Long quota_cat_id, String record) {
         this.account_id = account_id;
         this.patient_id = patient_id;
-        this.submit_time = submit_time;
-        this.measure_time = measure_time;
+        this.measure_date = measure_date;
         this.quota_cat_id = quota_cat_id;
         this.record = record;
-    }
-
-    public Quota(Long account_id, Long patient_id, Timestamp measure_time, Long quota_cat_id, String record) {
-        this.account_id = account_id;
-        this.patient_id = patient_id;
-        this.measure_time = measure_time;
-        this.quota_cat_id = quota_cat_id;
-        this.record = record;
-        this.submit_time = TimeUtils.getTimestamp();
         this.id = null;
         this.sub_cat = null;
     }
@@ -67,20 +57,12 @@ public class Quota implements Serializable {
         this.patient_id = patient_id;
     }
 
-    public Timestamp getSubmit_time() {
-        return submit_time;
+    public Date getMeasure_date() {
+        return measure_date;
     }
 
-    public void setSubmit_time(Timestamp submit_time) {
-        this.submit_time = submit_time;
-    }
-
-    public Timestamp getMeasure_time() {
-        return measure_time;
-    }
-
-    public void setMeasure_time(Timestamp measure_time) {
-        this.measure_time = measure_time;
+    public void setMeasure_date(Date measure_date) {
+        this.measure_date = measure_date;
     }
 
     public Long getQuota_cat_id() {
@@ -113,8 +95,7 @@ public class Quota implements Serializable {
                 "id=" + id +
                 ", account_id=" + account_id +
                 ", patient_id=" + patient_id +
-                ", submit_time=" + submit_time +
-                ", measure_time=" + measure_time +
+                ", measure_date=" + measure_date +
                 ", quota_cat_id=" + quota_cat_id +
                 ", record='" + record + '\'' +
                 ", sub_cat='" + sub_cat + '\'' +

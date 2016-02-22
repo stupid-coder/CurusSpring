@@ -92,7 +92,7 @@ public class PatientServiceUtils {
                     AppellationUtils.getAppellationId(appellation)))>0) {
                 accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id", account.getId(),
                         "patient_id", patient.getId()));
-                QuotaServiceUtils.initQuota(driver,account.getId(),patient.getId(), QuotaConst.QUOTA_INIT);
+                QuotaServiceUtils.addQuotas(driver,account.getId(),patient.getId(), TimeUtils.getDate(), QuotaConst.QUOTA_INIT);
             }
             else accountPatient = null;
         } else if ( accountPatient.getIs_super_validate().compareTo(CommonConst.TRUE) == 0) {

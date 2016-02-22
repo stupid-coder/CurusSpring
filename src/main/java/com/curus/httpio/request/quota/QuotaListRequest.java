@@ -8,6 +8,15 @@ public class QuotaListRequest {
     private String token;
     private String cate;
     private String patient_id;
+    private String lastest;
+
+    public String getLastest() {
+        return lastest;
+    }
+
+    public void setLastest(String lastest) {
+        this.lastest = lastest;
+    }
 
     public String getToken() {
         return token;
@@ -39,6 +48,7 @@ public class QuotaListRequest {
                 "token='" + token + '\'' +
                 ", cate='" + cate + '\'' +
                 ", patient_id='" + patient_id + '\'' +
+                ", lastest='" + lastest + '\'' +
                 '}';
     }
 }

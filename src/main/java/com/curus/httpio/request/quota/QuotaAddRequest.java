@@ -5,7 +5,7 @@ package com.curus.httpio.request.quota;
  */
 public class QuotaAddRequest {
     private String token;
-    private String date;
+    private String measure_date;
     private String cate;
     private String patient_id;
     private String value;
@@ -26,12 +26,12 @@ public class QuotaAddRequest {
         this.token = token;
     }
 
-    public String getDate() {
-        return date;
+    public String getMeasure_date() {
+        return measure_date;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setMeasure_date(String measure_date) {
+        this.measure_date = measure_date;
     }
 
     public String getCate() {
@@ -54,7 +54,7 @@ public class QuotaAddRequest {
     public String toString() {
         return "QuotaAddRequest{" +
                 "token='" + token + '\'' +
-                ", date='" + date + '\'' +
+                ", measure_date='" + measure_date + '\'' +
                 ", cate='" + cate + '\'' +
                 ", patient_id='" + patient_id + '\'' +
                 ", value='" + value + '\'' +

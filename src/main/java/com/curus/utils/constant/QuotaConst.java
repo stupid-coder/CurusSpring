@@ -29,8 +29,8 @@ public class QuotaConst {
         put("ph",1L); put("lf",2L);
     }};
 
-    static public Map<String,Object> QUOTA_INIT = new HashMap<String, Object>() {{
-        put("diet",new HashMap<String,Long>(){{put("lunch",8L);put("dinner",9L);put("snacks",3L);put("fatink",0L);}});
-        put("act",new HashMap<String,Object>() {{put("sport",0L);}});
+    static public Map<String,String> QUOTA_INIT = new HashMap<String, String>() {{
+        put("diet","{\"lunch\":0,\"dinner\":0,\"snacks\":0,\"fatink\":0}");
+        put("act","{\"sport\":0}");
     }};
 }
