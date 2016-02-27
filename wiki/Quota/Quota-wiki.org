@@ -16,7 +16,7 @@
 * 接口说明
   生理指标接口提供两个基本接口：获取和添加接口。
 ** 获取生理指标
-   获取接口URI：http://ip:port/hostname/quota/add
+   获取接口URI：http://ip:port/hostname/quota/list
    
    其中 *lastest* 字段控制，是否返回最近多少个，还是返回最近90天数据。
 *** 请求结构体
