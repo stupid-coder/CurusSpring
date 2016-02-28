@@ -82,7 +82,7 @@ public class AccountUpdateService {
             }
             patient = PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF);
 
-            QuotaServiceUtils.addWeightHeight(driver,account.getId(),patient.getId(),request.getWeight(),request.getHeight());
+            QuotaServiceUtils.addWeightHeight(driver,account.getId(),patient.getId(),Double.parseDouble(request.getWeight()),Double.parseDouble(request.getHeight()));
 
         }
         return errorData;

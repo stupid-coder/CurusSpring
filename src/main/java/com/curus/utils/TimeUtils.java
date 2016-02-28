@@ -18,4 +18,7 @@ public class TimeUtils {
     public static Date getDate(Long days) { return new Date(System.currentTimeMillis()+days*1000*3600*24); }
     public static Date parseDate(String unix_time) { return new Date(Long.parseLong(unix_time)*1000); }
     public static String date2String(Date date) { return new Long(date.getTime()/1000).toString(); }
+    public static Long timestampDiff(Timestamp bts, Timestamp ets) {
+        return (ets.getTime()-bts.getTime())/(24*3600000);
+    }
 }

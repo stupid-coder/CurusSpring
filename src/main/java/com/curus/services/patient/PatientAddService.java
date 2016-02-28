@@ -98,7 +98,7 @@ public class PatientAddService {
                 }
                 patient = PatientServiceUtils.AddPatient(driver, account, patient, accountPatient, request.getAppellation());
                 responseData.setPatient_id(patient.getId());
-                QuotaServiceUtils.addWeightHeight(driver, account.getId(), patient.getId(), request.getWeight(), request.getHeight());
+                QuotaServiceUtils.addWeightHeight(driver, account.getId(), patient.getId(), Double.parseDouble(request.getWeight()), Double.parseDouble(request.getHeight()));
             }
         }
         return errorData;

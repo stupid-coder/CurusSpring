@@ -17,13 +17,20 @@ import java.util.List;
  */
 public class QuotaDao extends BaseDao<Quota> {
 
-    final Long days90ago = -90L;
 
-    public List<Quota> selectByMeasureDateLast90Days(Long account_id, Long patient_id,
-                                                 Long cate_id) {
+
+    public List<Quota> selectByMeasureDateLastDays(Long account_id, Long patient_id,
+                                                   Long cate_id, Date date) {
         RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
-        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_date >= ?", tableName),
-                rowMapper, account_id, patient_id, cate_id, TimeUtils.getDate(days90ago));
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_date >= ? ORDER by measure_date DESC", tableName),
+                rowMapper, account_id, patient_id, cate_id, date);
+    }
+
+    public List<Quota> selectByMeasureDateLastDays(Long account_id, Long patient_id,
+                                                 Long cate_id, Long lastdays) {
+        RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_date >= ? ORDER by measure_date DESC", tableName),
+                rowMapper, account_id, patient_id, cate_id, TimeUtils.getDate(lastdays*-1L));
     }
 
     public Quota selectByMeasureDate(Long account_id, Long patient_id, Long quota_id, Date date) {

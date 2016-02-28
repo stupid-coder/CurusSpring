@@ -56,7 +56,7 @@ public class QuotaAddService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( QuotaServiceUtils.addQuota(driver, account.getId(), Long.parseLong(request.getPatient_id()),
-                request.getCate(), request.getMeasure_date(),request.getValue()) == 0) {
+                request.getCate(), TimeUtils.parseDate(request.getMeasure_date()),request.getValue()) == 0) {
             errorData = new ErrorData(ErrorConst.IDX_SERVER_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         }

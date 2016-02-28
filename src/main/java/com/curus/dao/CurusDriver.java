@@ -7,6 +7,8 @@ import com.curus.dao.message.MessageDao;
 import com.curus.dao.patient.PatientDao;
 import com.curus.dao.patient.PatientIssueDao;
 import com.curus.dao.quota.QuotaDao;
+import com.curus.dao.supervise.PatientSuperviseDao;
+import com.curus.dao.supervise.PatientSuperviseListDao;
 import com.curus.utils.SpringContextUtils;
 
 import javax.sql.DataSource;
@@ -27,6 +29,8 @@ public class CurusDriver {
     public PatientIssueDao patientIssueDao;
     public MessageDao messageDao;
     public QuotaDao quotaDao;
+    public PatientSuperviseDao patientSuperviseDao;
+    public PatientSuperviseListDao patientSuperviseListDao;
 
     public CurusDriver(DataSource ds) {
         this.accountDao = new AccountDao();
@@ -46,5 +50,11 @@ public class CurusDriver {
 
         this.quotaDao = new QuotaDao();
         this.quotaDao.setDataSource(ds);
+
+        this.patientSuperviseDao = new PatientSuperviseDao();
+        this.patientSuperviseDao.setDataSource(ds);
+
+        this.patientSuperviseListDao = new PatientSuperviseListDao();
+        this.patientSuperviseListDao.setDataSource(ds);
     }
 }
