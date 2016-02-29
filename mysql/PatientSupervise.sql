@@ -6,7 +6,7 @@ CREATE TABLE `PatientSupervise` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) DEFAULT NULL,
   `patient_id` int(11) DEFAULT NULL,
-  `quota_cate_id` int(11) DEFAULT NULL,
+  `quota_cat_id` int(11) DEFAULT NULL,
   `create_time` datetime NOT NULL,
   `end_date` date DEFAULT NULL,
   `initial` varchar(300) DEFAULT NULL,

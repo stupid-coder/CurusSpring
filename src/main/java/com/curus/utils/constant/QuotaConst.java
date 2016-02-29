@@ -30,7 +30,7 @@ public class QuotaConst {
     }};
 
     static public Map<String,String> QUOTA_INIT = new HashMap<String, String>() {{
-        put(QUOTA_DIET,"{\"lunch\":0,\"dinner\":0,\"snacks\":0,\"fatink\":0}");
-        put(QUOTA_ACT,"{\"1\":0}");
+        put(QUOTA_DIET,"{\"lunch\":\"10\",\"dinner\":\"9\",\"snacks\":\"2\",\"fatink\":\"3\"}");
+        put(QUOTA_ACT,"{\"1\":\"20\"}");
     }};
 }

@@ -1,0 +1,77 @@
+#+TITLE: 项目管理接口
+#+AUTHOR: stupid_coder@163.com
+#+DATE: Sat Feb 20 15:32:37 2016
+
+* 描述
+  项目管理接口用于管理对象的生理状态，习惯等。用来监控用户的健康。
+
+* 接口说明
+  项目管理分为多个项目接口：
+** 体重管理
+*** 评估指导接口
+    接口URI：http://ip:port/curus/supervise/weight/estimate
+**** 请求结构体
+     #+CAPTION: 评估指导请求结构体
+     | 字段名     | 类型   | 说明               |
+     |------------+--------+--------------------|
+     | token      | Stirng | 用户标示           |
+     | patient_id | String | 评估指导管理对象ID |
+**** 响应结构体
+     #+CAPTION: 评估指导接口响应结构体
+     | 字段名              | 类型   | 说明                                                                  |
+     |---------------------+--------+-----------------------------------------------------------------------|
+     | data.day_wemanagement | String | 参与体重管理天数，未参与为0                                           |
+     | data.weight_change  | String | 用户减重在体重百分比中的KEY                                           |
+     | data.weight_lossposition | Map    | 用户减重在全部参与减重人群中的百分比图,kEY为减重的阈值，VALUE为百分比 |
+     | data.weight_loss    | String | 用户减重的实际数值                                                    |
+     | data.BMI            | String | 用户的BMI数据                                                         |
+     | data.BMI_evaluation | String | 用户的BMI评价                                                         |
+     | data.weloss_evaluation | String | 用户减重的评价，为参与减重则为NULL                                    |
+
+*** 获取减重目标
+    接口URI：http://ip:port/curus/supervise/weight/tips
+**** 请求结构体
+   #+CAPTION: 获取减重目标请求结构体
+   | 字段名     | 类型            | 说明                                         |
+   |------------+-----------------+----------------------------------------------|
+   | token      | String          | 用户标示                                     |
+   | patient_id | String          | 获取生理指标的管理对象ID                     |
+**** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名               | 类型   | 说明                               |
+    |----------------------+--------+------------------------------------|
+    | data.weight_losstips | String | 减重目标设定提示，即合理减重的数值 |
+*** 计划评估接口
+    接口URI：http://ip:port/curus/supervise/weight/pretest
+**** 请求结构体
+   #+CAPTION: 请求结构体
+   | 字段名      | 类型   | 说明                                                             |
+   |-------------+--------+------------------------------------------------------------------|
+   | token       | String | 用户标示                                                         |
+   | patient_id  | String | 获取生理指标的管理对象ID                                         |
+   | weight_loss | String | 用户减重目标                                                     |
+   | diet        | Map    | 用户的饮食：{"lunch":"7","dinner":"8","snacks":"1","fatink":"2"} |
+   | sports      | Map    | 用户的运动：{"1":"200"} 标示用户要参与运动1，200分钟             |
+     
+**** 响应结构体
+     #+CAPTION: 响应结构体
+     | 字段名     | 类型   | 说明                   |
+     |------------+--------+------------------------|
+     | wtloss     | String | 用户按计划30天减重数据 |
+     | evaluation | String | 用户计划的评价         |
+*** 计划添加接口
+    接口URI：http://ip:port/curus/supervise/weight/add
+**** 请求结构体
+   #+CAPTION: 请求结构体
+   | 字段名      | 类型   | 说明                                                             |
+   |-------------+--------+------------------------------------------------------------------|
+   | token       | String | 用户标示                                                         |
+   | patient_id  | String | 获取生理指标的管理对象ID                                         |
+   | weight_loss | String | 用户减重目标                                                     |
+   | diet        | Map    | 用户的饮食：{"lunch":"7","dinner":"8","snacks":"1","fatink":"2"} |
+   | sports      | Map    | 用户的运动：{"1":"200"} 标示用户要参与运动1，200分钟             |
+
+**** 响应结构体
+     #+CAPTION: 响应结构体
+     | 字段名 | 类型 | 说明 |
+     | data   | null | null |

@@ -6,7 +6,7 @@ package com.curus.httpio.response.supervise.weight;
 public class SWeightPretestResponseData {
 
     private Double wtloss;
-    private String prompt;
+    private String evaluation;
 
     public Double getWtloss() {
         return wtloss;
@@ -16,19 +16,19 @@ public class SWeightPretestResponseData {
         this.wtloss = wtloss;
     }
 
-    public String getPrompt() {
-        return prompt;
+    public String getEvaluation() {
+        return evaluation;
     }
 
-    public void setPrompt(String prompt) {
-        this.prompt = prompt;
+    public void setEvaluation(String evaluation) {
+        this.evaluation = evaluation;
     }
 
     @Override
     public String toString() {
         return "SWeightPretestResponseData{" +
                 "wtloss=" + wtloss +
-                ", prompt='" + prompt + '\'' +
+                ", evaluation='" + evaluation + '\'' +
                 '}';
     }
 }

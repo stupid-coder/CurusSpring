@@ -36,15 +36,11 @@ public class SWeightAddService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getPatient_id(),"patient_id")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getLunch(),"lunch")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDinner(),"dinner")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getSnachs(),"snacks")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getFatink(),"fatink")) != null ) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDiet(),"diet")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getSports(),"sports")) != null ) {
+            logger.warn(LogUtils.Msg(errorData,request));
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getWeight_loss(),"weight_loss")) != null ){
             logger.warn(LogUtils.Msg(errorData,request));
         }
         return errorData;
@@ -62,7 +58,7 @@ public class SWeightAddService {
     }
 
     public ResponseBase process() {
-        if ( validate() != null && addWeightSupervise() != null ) {
+        if ( validate() == null && addWeightSupervise() == null ) {
             logger.info(LogUtils.Msg("Success To Add Weight Supervice",request,null));
             return new ResponseBase(StatusConst.OK,null);
         } else {

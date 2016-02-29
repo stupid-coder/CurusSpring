@@ -47,7 +47,7 @@ public class QuotaServiceUtils {
                                       Long account_id, Long patient_id,
                                       Double weight, Double height) {
         Map<String,String> quotas = new HashMap<String, String>();
-        quotas.put("weight",new QuotaHeightRecord(weight).RecordString()); quotas.put("height",new QuotaHeightRecord().RecordString(height));
+        quotas.put("weight", weight.toString()); quotas.put("height",height.toString());
         return addQuotas(driver, account_id, patient_id, TimeUtils.getDate(), quotas);
     }
 
@@ -57,16 +57,18 @@ public class QuotaServiceUtils {
                                String cate, Date date, String record) {
         Long quota_id = QuotaUtils.getQuotaIds(cate);
         Quota quota;
+        if ( date == null ) date = TimeUtils.getDate();
         int ret = 0;
+        JSONObject jo = new JSONObject();
+        jo.put(cate, record);
         if ( quota_id.compareTo(0L) == 0 ) {
-            logger.warn(LogUtils.Msg("Unknown Cate", cate, record));
+            logger.warn(LogUtils.Msg("Unknown Cate", cate, jo.toJSONString()));
         } else if ( (quota = driver.quotaDao.selectByMeasureDate(account_id,patient_id,quota_id,date)) == null ) {
-            ret = driver.quotaDao.insert(account_id,patient_id,quota_id,date, record);
+            ret = driver.quotaDao.insert(account_id,patient_id,quota_id,date, jo.toJSONString());
         } else {
-            quota.setRecord(record);
+            quota.setRecord(jo.toJSONString());
             ret =  driver.quotaDao.update(quota,"id");
         }
-        logger.info(LogUtils.Msg("Success to Add Quota",record));
         return ret;
     }
 

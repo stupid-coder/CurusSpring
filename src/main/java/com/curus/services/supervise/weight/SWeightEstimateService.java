@@ -27,7 +27,7 @@ public class SWeightEstimateService {
     private SWeightEstimateResponseData responseData;
     private ErrorData errorData;
 
-    public SWeightEstimateService(CurusDriver driver, SWeightEstimateRequest request) {
+    public SWeightEstimateService(SWeightEstimateRequest request, CurusDriver driver) {
         this.driver = driver;
         this.request = request;
         this.errorData = null;
@@ -49,7 +49,7 @@ public class SWeightEstimateService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData, request));
         } else {
-            SWeightSerivceUtils.EstimateWeightLoss(driver, account.getId(), request, responseData);
+            responseData = SWeightSerivceUtils.EstimateWeightLoss(driver, account.getId(), request);
         }
         return errorData;
     }

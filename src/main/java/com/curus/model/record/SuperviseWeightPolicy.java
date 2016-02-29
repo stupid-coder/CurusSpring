@@ -6,13 +6,19 @@ import com.alibaba.fastjson.JSONObject;
  * Created by stupid-coder on 28/2/16.
  */
 public class SuperviseWeightPolicy {
-    private QuotaActivityRecord activity;
-    private QuotaDietRecord diet;
+    private JSONObject activity;
+    private JSONObject diet;
 
 
-    public String RecordString(QuotaActivityRecord quotaActivityRecord, QuotaDietRecord quotaDietRecord) {
-        setActivity(quotaActivityRecord);
-        setDiet(quotaDietRecord);
+    public SuperviseWeightPolicy(JSONObject activity, JSONObject diet) {
+        this.activity = activity;
+        this.diet = diet;
+    }
+
+    public SuperviseWeightPolicy() {
+    }
+
+    public String RecordString() {
         return JSONObject.toJSONString(this);
     }
 
@@ -24,19 +30,19 @@ public class SuperviseWeightPolicy {
                 '}';
     }
 
-    public QuotaActivityRecord getActivity() {
+    public JSONObject getActivity() {
         return activity;
     }
 
-    public void setActivity(QuotaActivityRecord activity) {
+    public void setActivity(JSONObject activity) {
         this.activity = activity;
     }
 
-    public QuotaDietRecord getDiet() {
+    public JSONObject getDiet() {
         return diet;
     }
 
-    public void setDiet(QuotaDietRecord diet) {
+    public void setDiet(JSONObject diet) {
         this.diet = diet;
     }
 

@@ -19,7 +19,6 @@ import com.curus.utils.constant.CommonConst;
 
 import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.quota.QuotaServiceUtils;
-import com.sun.tools.internal.xjc.reader.TypeUtil;
 
 import java.util.*;
 
@@ -29,20 +28,19 @@ import java.util.*;
  */
 public class SWeightSerivceUtils {
 
-    public static Double CalculateDietEnergy(Long lunch, Long dinner, Long snacks, Long fatink) {
-        return lunch * 0.8 + dinner * 1.2 + snacks / 7.0 * 3 * 1.2 + fatink / 4.0 * 3;
+    public static Double CalculateDietEnergy(JSONObject diet) {
+        return diet.getLong("lunch") * 0.8 + diet.getLong("dinner") * 1.2 + diet.getLong("snacks") / 7.0 * 3 * 1.2 + diet.getLong("fatink") / 4.0 * 3;
     }
-    public static Double CalculateActivityEnergy( Iterator<Map<String,Long>> iter) {
+    public static Double CalculateActivityEnergy( JSONObject activity) {
         Double energy = 0.0;
-        while ( iter.hasNext() ) {
-            Map<String,Long> sportitem = iter.next();
-            energy += sportitem.get("sport_value") * ActivityConst.ACTIVITY_ENERGY.get(sportitem.get("sport_id"));
+        for ( String key : activity.keySet() ) {
+            energy += activity.getLong(key) / ActivityConst.ACTIVITY_ENERGY.get(key);
         }
         return energy;
     }
     public static Double CalculateLastSuperviseWeightLoss(CurusDriver driver, Long account_id, Long patient_id, Double currentWeight) {
         Double dayloss = 0.0;
-        PatientSupervise patientSupervise = driver.patientSuperviseDao.select(TypeUtils.getWhereHashMap("account_id", account_id, "patient_id", patient_id, "quota_cate_id", QuotaConst.QUOTA_WEIGHT_ID, "last", CommonConst.TRUE));
+        PatientSupervise patientSupervise = driver.patientSuperviseDao.select(TypeUtils.getWhereHashMap("account_id", account_id, "patient_id", patient_id, "quota_cat_id", QuotaConst.QUOTA_WEIGHT_ID, "last", CommonConst.TRUE));
         if (patientSupervise != null) {
             Long duration = TimeUtils.timestampDiff(TimeUtils.getTimestamp(), patientSupervise.getCreate_time());
             Double initWeight = QuotaServiceUtils.getWeight(patientSupervise.getInitial());
@@ -60,33 +58,33 @@ public class SWeightSerivceUtils {
     public static Double CalculateDietWeightLoss(CurusDriver driver, Long account_id, Long patient_id, SWeightPretestRequest request) {
         Double oldDietSum = 0.0;
         Double requestDietSum = 0.0;
-        QuotaDietRecord oldDiet;
+        JSONObject oldDiet;
 
         List<Quota> dietQuotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_DIET_ID,1L);
         if ( dietQuotaList == null ) {
             QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_DIET,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
-            oldDiet = JSONObject.parseObject(QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET),QuotaDietRecord.class);
+            oldDiet = JSONObject.parseObject(QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
         } else {
-            oldDiet = JSONObject.parseObject(dietQuotaList.get(0).getRecord(), QuotaDietRecord.class);
+            oldDiet = JSONObject.parseObject(JSONObject.parseObject(dietQuotaList.get(0).getRecord()).getString(QuotaConst.QUOTA_DIET));
         }
-        oldDietSum = CalculateDietEnergy(oldDiet.getLunch(),oldDiet.getDinner(), oldDiet.getSnacks(), oldDiet.getFatink());
-        requestDietSum = CalculateDietEnergy(request.getLunch(),request.getDinner(),request.getSnacks(),request.getFatink());
+        oldDietSum = CalculateDietEnergy(oldDiet);
+        requestDietSum = CalculateDietEnergy(JSONObject.parseObject(request.getDiet()));
         return (oldDietSum - requestDietSum) / oldDietSum * 2000 / 60 / 6.5 / 1000 / 0.35;
     }
     public static Double CalculateActivityLoss(CurusDriver driver, Long account_id, Long patient_id, SWeightPretestRequest request, Double currentWeight, SWeightPretestResponseData responseData) {
         List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
         Quota quota;
         Double old_energy = 0.0; Double request_energy = 0.0;
-        if ( quotaList == null && quotaList.size() == 0 ) {
-            QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_ACT,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
-            quota = new Quota(); quota.setRecord(QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
+        if ( quotaList == null || quotaList.size() == 0 ) {
+            QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_ACT,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_ACT));
+            quota = new Quota(); quota.setRecord((String)QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_ACT));
         } else { quota = quotaList.get(0); }
 
-        QuotaActivityRecord quotaActivityRecord = JSONObject.parseObject(quota.getRecord(),QuotaActivityRecord.class);
-        old_energy = CalculateActivityEnergy(quotaActivityRecord.getSports().iterator());
-        request_energy = CalculateActivityEnergy(request.getSports().iterator());
+        old_energy = CalculateActivityEnergy(JSONObject.parseObject(JSONObject.parseObject(quota.getRecord()).getString(QuotaConst.QUOTA_ACT)));
 
-        if ( request_energy <= 20 ) responseData.setPrompt("减重过多地依赖饮食控制，对健康不利，建议适当增加运动量。");
+        request_energy = CalculateActivityEnergy(JSONObject.parseObject(request.getSports()));
+
+        if ( request_energy <= 20 ) responseData.setEvaluation("减重过多地依赖饮食控制，对健康不利，建议适当增加运动量。");
         return (request_energy - old_energy) * 0.525 / 7 * currentWeight / 6.5 / 1000 / 0.35 * 2;
     }
     public static Double Pretest(CurusDriver driver, Long account_id,  SWeightPretestRequest request, SWeightPretestResponseData responseData) {
@@ -123,7 +121,7 @@ public class SWeightSerivceUtils {
         patientSupervise.setTarget(new SuperviseWeightLossRecord().RecordString(request.getWeight_loss()));
         patientSupervise.setCurrent(new SuperviseWeightLossRecord().RecordString(0.0));
         patientSupervise.setLast(CommonConst.TRUE);
-        patientSupervise.setPolicy(new SuperviseWeightPolicy().RecordString(new QuotaActivityRecord(request.getSports()),new QuotaDietRecord(request.getLunch(),request.getDinner(),request.getSnachs(),request.getFatink())));
+        patientSupervise.setPolicy(new SuperviseWeightPolicy(JSONObject.parseObject(request.getSports()),JSONObject.parseObject(request.getDiet())).RecordString());
         patientSupervise.setResult(null);
 
         return driver.patientSuperviseDao.insert(patientSupervise);
@@ -142,42 +140,44 @@ public class SWeightSerivceUtils {
     public static String WeightLossEvaluation(CurusDriver driver, Long account_id, Long patient_id,
                                               Double curwtloss, Double targetloss, Long days,
                                               PatientSupervise patientSupervise) {
+        if ( patientSupervise == null ) return null;
+
         Double expectwtloss = targetloss * days * (64 - days) / 30 / ( 64 - 30 );
-        Double losspercent = curwtloss / expectwtloss;
+        Double losspercent = expectwtloss.compareTo(0.0) == 0 ? 0.0 : curwtloss / expectwtloss;
+
         if ( losspercent >= 1.0 && losspercent < 1.3 ) return "减重很有成效，继续坚持！";
         if ( losspercent >= 0.7 && losspercent < 1.0 ) return "减重有成效，但还需再加把劲才能顺利达到既定目标，无需变更计划！";
 
         Double plan_diet = 0.0;
         Double plan_act = 0.0;
 
-        if ( patientSupervise != null ) {
-            SuperviseWeightPolicy policy = JSONObject.parseObject(patientSupervise.getPolicy(), SuperviseWeightPolicy.class);
-            plan_diet = CalculateDietEnergy(policy.getDiet().getLunch(),policy.getDiet().getDinner(),policy.getDiet().getSnacks(),policy.getDiet().getFatink());
-            plan_act = CalculateActivityEnergy(policy.getActivity().getSports().iterator());
-        }
+
+        SuperviseWeightPolicy policy = JSONObject.parseObject(patientSupervise.getPolicy(), SuperviseWeightPolicy.class);
+        plan_diet = CalculateDietEnergy(policy.getDiet());
+        plan_act = CalculateActivityEnergy(policy.getActivity());
 
         Double real_diet = 0.0;
         Double real_act = 0.0;
 
-        if ( patientSupervise != null ) {
-            List<Quota> dietList = driver.quotaDao.selectByMeasureDateLastDays(account_id,patient_id,
-                    QuotaConst.QUOTA_DIET_ID, days);
-            for ( Quota diet : dietList ) {
-                QuotaDietRecord dietRecord = JSONObject.parseObject(diet.getRecord(),QuotaDietRecord.class);
-                real_diet += CalculateDietEnergy(dietRecord.getLunch(),dietRecord.getDinner(),dietRecord.getSnacks(),dietRecord.getFatink());
-            }
-            if ( dietList != null && dietList.size() != 0 ) real_diet /= dietList.size();
-            else real_diet = plan_diet;
-            List<Quota> actList = driver.quotaDao.selectByMeasureDateLastDays(account_id,patient_id,
-                    QuotaConst.QUOTA_ACT_ID, days);
-            for ( Quota act : actList ) {
-                QuotaActivityRecord actRecord = JSONObject.parseObject(act.getRecord(),QuotaActivityRecord.class);
-                real_act += CalculateActivityEnergy(actRecord.getSports().iterator());
-            }
-            if ( actList != null && actList.size() != 0 ) real_act /= dietList.size();
-            else real_act = plan_act;
+        List<Quota> dietList = driver.quotaDao.selectByMeasureDateLastDays(account_id,patient_id,
+                QuotaConst.QUOTA_DIET_ID, days);
+        for ( Quota diet : dietList ) {
+            JSONObject dietRecord = JSONObject.parseObject(diet.getRecord());
+            real_diet += CalculateDietEnergy(dietRecord);
         }
+        if ( dietList != null && dietList.size() != 0 ) real_diet /= dietList.size();
+        else real_diet = plan_diet;
+        List<Quota> actList = driver.quotaDao.selectByMeasureDateLastDays(account_id,patient_id,
+                QuotaConst.QUOTA_ACT_ID, days);
+        for ( Quota act : actList ) {
+            real_act += CalculateActivityEnergy(JSONObject.parseObject(act.getRecord()));
+        }
+        if ( actList != null && actList.size() != 0 ) real_act /= dietList.size();
+        else real_act = plan_act;
+
         Double diet_act_percent = 0.5 * plan_act / real_act + 0.5 * plan_diet / real_diet;
+        if ( real_act.compareTo(0.0) == 0 && real_diet.compareTo(0.0) == 0 ) diet_act_percent = 1.0;
+
         if ( losspercent >= 0.0 && losspercent < 0.7 )
             if (diet_act_percent >= 0.7 && diet_act_percent < 1.3 ) return "饮食运动在按计划执行，也有一定成效，但目前减重速度难达预期，建议加强干预力度或重新制定计划！";
             else if ( diet_act_percent < 0.7 ) return "饮食运动计划执行较差，若计划执行有困难，请重新调整！，如有决心再按计划执行，可不必更改计划";
@@ -196,10 +196,10 @@ public class SWeightSerivceUtils {
         else return "15";
     }
     public static SuperviseWeightListRecord WeightLossList(CurusDriver driver, Double old, Double cur) {
-        PatientSuperviseList superviseList = driver.patientSuperviseListDao.select(TypeUtils.getWhereHashMap("quota_cate_id",QuotaConst.QUOTA_WEIGHT_ID));
+        PatientSuperviseList superviseList = driver.patientSuperviseListDao.select(TypeUtils.getWhereHashMap("quota_cat_id",QuotaConst.QUOTA_WEIGHT_ID));
         if ( superviseList == null ) {
             superviseList = new PatientSuperviseList();
-            superviseList.setQuota_cate_id(QuotaConst.QUOTA_WEIGHT_ID);
+            superviseList.setQuota_cat_id(QuotaConst.QUOTA_WEIGHT_ID);
             superviseList.setList( JSONObject.toJSONString(new HashMap<String,Double>() {{
                 put("0",0.0); put("3",0.0); put("5",0.0); put("10",0.0); put("15",0.0);
             }}) );
@@ -209,15 +209,16 @@ public class SWeightSerivceUtils {
 
         String oldIndex = WeightLossIndex(old);
         String curIndex = WeightLossIndex(cur);
-        if ( oldIndex.compareTo(curIndex) != 0 ) {
-            Double count = listRecordJson.getDouble(oldIndex);
-            if (count > 0) listRecordJson.put(oldIndex, count - 1);
-            count = listRecordJson.getDouble(curIndex);
-            listRecordJson.put(curIndex, count + 1);
-        }
+
+        Double count = listRecordJson.getDouble(oldIndex);
+        if (count > 0) listRecordJson.put(oldIndex, count - 1);
+        count = listRecordJson.getDouble(curIndex);
+        listRecordJson.put(curIndex, count + 1);
+        superviseList.setList(listRecordJson.toJSONString()); driver.patientSuperviseListDao.update(superviseList,"id");
+
         return new SuperviseWeightListRecord(listRecordJson);
     }
-    public static void EstimateWeightLoss(CurusDriver driver, Long account_id, SWeightEstimateRequest request, SWeightEstimateResponseData responseData) {
+    public static SWeightEstimateResponseData EstimateWeightLoss(CurusDriver driver, Long account_id, SWeightEstimateRequest request) {
         List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,request.getPatient_id(),QuotaConst.QUOTA_WEIGHT_ID,1L);
         QuotaWeightRecord currentWeightRecord = JSONObject.parseObject(quotaList.get(0).getRecord(), QuotaWeightRecord.class);
         quotaList = driver.quotaDao.selectLastestQuota(account_id, request.getPatient_id(),QuotaConst.QUOTA_HEIGHT_ID,1L);
@@ -225,14 +226,14 @@ public class SWeightSerivceUtils {
 
         PatientSupervise patientSupervise = driver.patientSuperviseDao.select(TypeUtils.getWhereHashMap("account_id",account_id,"patient_id",request.getPatient_id(),"quota_cat_id",QuotaConst.QUOTA_WEIGHT_ID,"last", CommonConst.TRUE));
         PatientSuperviseList superviseList;
-        responseData = new SWeightEstimateResponseData();
+        SWeightEstimateResponseData responseData = new SWeightEstimateResponseData();
 
 
         Double curwtloss = 0.0;
         Double oldwtloss = 0.0;
         Double expectloss =0.0;
         Double curwt = currentWeightRecord.getWeight();
-        Double curht = currentHeightRecord.getHeight();
+        Double curht = currentHeightRecord.getHeight()/100;
         Double initwt = curwt;
         Long days = 0L;
 
@@ -240,13 +241,13 @@ public class SWeightSerivceUtils {
             QuotaWeightRecord initWeightRecord = JSONObject.parseObject(patientSupervise.getInitial(),QuotaWeightRecord.class);
             initwt = initWeightRecord.getWeight();
 
-            SuperviseWeightLossRecord targetWeightLossRecord = JSONObject.parseObject(patientSupervise.getTarget(),SuperviseWeightLossRecord.class);
+            SuperviseWeightLossRecord targetWeightLossRecord = JSONObject.parseObject(patientSupervise.getTarget(), SuperviseWeightLossRecord.class);
             expectloss = targetWeightLossRecord.getWeight_loss();
 
             SuperviseWeightLossRecord oldWeightLossRecord =  JSONObject.parseObject(patientSupervise.getCurrent(), SuperviseWeightLossRecord.class);
             oldwtloss = oldWeightLossRecord.getWeight_loss();
 
-            days = TimeUtils.timestampDiff(TimeUtils.getTimestamp(),patientSupervise.getCreate_time());
+            days = TimeUtils.timestampDiff(TimeUtils.getTimestamp(),patientSupervise.getCreate_time())+1;
 
             curwtloss = initwt - curwt;
             if ( curwtloss.compareTo(oldwtloss) != 0 ) {
@@ -264,6 +265,7 @@ public class SWeightSerivceUtils {
         responseData.setBMI(BMI(curht,curwt));
         responseData.setBMI_evaluation(BMIEvaluation(curht, curwt));
         responseData.setWe_loss_evaluation(WeightLossEvaluation(driver, account_id,request.getPatient_id(),curwtloss,expectloss,days,patientSupervise));
+        return responseData;
 
     }
     public static Double WeightLossTips(CurusDriver driver, Long account_id, Long patient_id) {
@@ -274,7 +276,8 @@ public class SWeightSerivceUtils {
         List<Quota> heightList = driver.quotaDao.selectLastestQuota(account_id, patient_id, QuotaConst.QUOTA_HEIGHT_ID,1L);
         Double weight = JSONObject.parseObject(weightList.get(0).getRecord(), QuotaWeightRecord.class).getWeight();
         Double height = JSONObject.parseObject(heightList.get(0).getRecord(), QuotaHeightRecord.class).getHeight();
-        Double standweight = patient.getGender() == CommonConst.GENDER_MALE ? 23 * height * height : 21 * height *height;
+        height /= 100;
+        Double standweight = patient.getGender().compareTo(CommonConst.GENDER_MALE) == 0 ? 23 * height * height : 21 * height * height;
         return Math.max(0, (weight-standweight)/standweight)*10;
     }
 }

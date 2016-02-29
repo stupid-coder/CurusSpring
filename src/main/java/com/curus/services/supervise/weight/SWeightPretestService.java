@@ -41,13 +41,7 @@ public class SWeightPretestService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getWeight_loss(), "weight_loss")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDinner(), "dinner")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getLunch(), "lunch")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getFatink(), "fatink")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getSnacks(),"snacks")) != null ) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDiet(), "diet")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getSports(),"sports")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
@@ -63,8 +57,8 @@ public class SWeightPretestService {
         } else {
             responseData = new SWeightPretestResponseData();
             SWeightSerivceUtils.Pretest(driver, account.getId(),request,responseData);
-            if ( responseData.getWtloss() < request.getWeight_loss() ) responseData.setPrompt("累计减重不能达到预期目标，请调整。");
-            else if ( responseData.getPrompt() == null ) responseData.setPrompt("恭喜，减重计划可行！请发布计划，系统会给予必要提醒和评估，也会得到其他管理者的帮助和督促。");
+            if ( responseData.getWtloss() < request.getWeight_loss() ) responseData.setEvaluation("累计减重不能达到预期目标，请调整。");
+            else if ( responseData.getEvaluation() == null ) responseData.setEvaluation("恭喜，减重计划可行！请发布计划，系统会给予必要提醒和评估，也会得到其他管理者的帮助和督促。");
         }
         return errorData;
     }

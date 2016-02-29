@@ -8,7 +8,7 @@ import java.util.List;
 public class PatientSuperviseList {
 
     private Long id;
-    private Long quota_cate_id;
+    private Long quota_cat_id;
     private String list;
 
     public Long getId() {
@@ -19,12 +19,12 @@ public class PatientSuperviseList {
         this.id = id;
     }
 
-    public Long getQuota_cate_id() {
-        return quota_cate_id;
+    public Long getQuota_cat_id() {
+        return quota_cat_id;
     }
 
-    public void setQuota_cate_id(Long quota_cate_id) {
-        this.quota_cate_id = quota_cate_id;
+    public void setQuota_cat_id(Long quota_cat_id) {
+        this.quota_cat_id = quota_cat_id;
     }
 
     public String getList() {

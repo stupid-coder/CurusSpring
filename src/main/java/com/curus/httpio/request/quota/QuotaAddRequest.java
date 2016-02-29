@@ -5,16 +5,16 @@ package com.curus.httpio.request.quota;
  */
 public class QuotaAddRequest {
     private String token;
-    private String measure_date;
+    private Long measure_date;
     private String cate;
-    private String patient_id;
+    private Long patient_id;
     private String value;
 
-    public String getPatient_id() {
+    public Long getPatient_id() {
         return patient_id;
     }
 
-    public void setPatient_id(String patient_id) {
+    public void setPatient_id(Long patient_id) {
         this.patient_id = patient_id;
     }
 
@@ -26,11 +26,11 @@ public class QuotaAddRequest {
         this.token = token;
     }
 
-    public String getMeasure_date() {
+    public Long getMeasure_date() {
         return measure_date;
     }
 
-    public void setMeasure_date(String measure_date) {
+    public void setMeasure_date(Long measure_date) {
         this.measure_date = measure_date;
     }
 

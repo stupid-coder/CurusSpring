@@ -11,11 +11,8 @@ public class SWeightAddRequest {
     private String token;
     private Long patient_id;
     private Double weight_loss;
-    private Long lunch;
-    private Long dinner;
-    private Long snachs;
-    private Long fatink;
-    private List<Map<String,Long>> sports;
+    private String diet;
+    private String sports;
 
     public String getToken() {
         return token;
@@ -41,44 +38,20 @@ public class SWeightAddRequest {
         this.weight_loss = weight_loss;
     }
 
-    public Long getLunch() {
-        return lunch;
+    public String getDiet() {
+        return diet;
     }
 
-    public void setLunch(Long lunch) {
-        this.lunch = lunch;
+    public void setDiet(String diet) {
+        this.diet = diet;
     }
 
-    public Long getDinner() {
-        return dinner;
-    }
-
-    public void setDinner(Long dinner) {
-        this.dinner = dinner;
-    }
-
-    public Long getSnachs() {
-        return snachs;
-    }
-
-    public void setSnachs(Long snachs) {
-        this.snachs = snachs;
-    }
-
-    public Long getFatink() {
-        return fatink;
-    }
-
-    public void setFatink(Long fatink) {
-        this.fatink = fatink;
-    }
-
-    public List<Map<String, Long>> getSports() {
+    public String getSports() {
         return sports;
     }
 
-    public void setSports(List<Map<String, Long>> sprots) {
-        this.sports = sprots;
+    public void setSports(String sports) {
+        this.sports = sports;
     }
 
     @Override
@@ -87,11 +60,8 @@ public class SWeightAddRequest {
                 "token='" + token + '\'' +
                 ", patient_id=" + patient_id +
                 ", weight_loss=" + weight_loss +
-                ", lunch=" + lunch +
-                ", dinner=" + dinner +
-                ", snachs=" + snachs +
-                ", fatink=" + fatink +
-                ", sports=" + sports +
+                ", diet='" + diet + '\'' +
+                ", sports='" + sports + '\'' +
                 '}';
     }
 }

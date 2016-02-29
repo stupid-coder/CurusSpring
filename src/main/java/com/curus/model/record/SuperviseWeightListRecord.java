@@ -32,7 +32,7 @@ public class SuperviseWeightListRecord {
         for ( String key : jo.keySet() ) {
             Map<String,String> record = new HashMap<String,String>();
             record.put("weight",key);
-            record.put("percent",Double.toString(jo.getDouble(key)/count));
+            record.put("percent",Double.toString(count.compareTo(0.0)==0?0.0:jo.getDouble(key)/count));
             weight_lossposition.add(record);
         }
     }

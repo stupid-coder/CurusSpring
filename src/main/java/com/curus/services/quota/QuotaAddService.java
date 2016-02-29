@@ -16,6 +16,7 @@ import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 /**
@@ -40,11 +41,11 @@ public class QuotaAddService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = QuotaValidate.quotaCateValidate(request.getCate(),"cate")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData =ValueValidate.valueLongValidate(request.getPatient_id(), "patient_id")) != null) {
+        } else if ( (errorData =ValueValidate.valueExistValidate(request.getPatient_id(), "patient_id")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getValue(), "value")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueLongValidate(request.getMeasure_date(), "meaure_date")) != null) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getMeasure_date(), "meaure_date")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         }
         return errorData;
@@ -55,8 +56,8 @@ public class QuotaAddService {
         if ( (account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( QuotaServiceUtils.addQuota(driver, account.getId(), Long.parseLong(request.getPatient_id()),
-                request.getCate(), TimeUtils.parseDate(request.getMeasure_date()),request.getValue()) == 0) {
+        } else if ( QuotaServiceUtils.addQuota(driver, account.getId(), request.getPatient_id(),
+                request.getCate(), new Date(request.getMeasure_date()*1000L),request.getValue()) == 0) {
             errorData = new ErrorData(ErrorConst.IDX_SERVER_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         }

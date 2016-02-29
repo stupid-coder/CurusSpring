@@ -11,11 +11,8 @@ public class SWeightPretestRequest {
     private String token;
     private Long patient_id;
     private Double weight_loss;
-    private Long lunch;
-    private Long dinner;
-    private Long snacks;
-    private Long fatink;
-    private List<Map<String,Long>> sports;
+    private String diet;
+    private String sports;
 
 
     public String getToken() {
@@ -42,43 +39,19 @@ public class SWeightPretestRequest {
         this.weight_loss = weight_loss;
     }
 
-    public Long getLunch() {
-        return lunch;
+    public String getDiet() {
+        return diet;
     }
 
-    public void setLunch(Long lunch) {
-        this.lunch = lunch;
+    public void setDiet(String diet) {
+        this.diet = diet;
     }
 
-    public Long getDinner() {
-        return dinner;
-    }
-
-    public void setDinner(Long dinner) {
-        this.dinner = dinner;
-    }
-
-    public Long getSnacks() {
-        return snacks;
-    }
-
-    public void setSnacks(Long snacks) {
-        this.snacks = snacks;
-    }
-
-    public Long getFatink() {
-        return fatink;
-    }
-
-    public void setFatink(Long fatink) {
-        this.fatink = fatink;
-    }
-
-    public List<Map<String, Long>> getSports() {
+    public String getSports() {
         return sports;
     }
 
-    public void setSports(List<Map<String, Long>> sports) {
+    public void setSports(String sports) {
         this.sports = sports;
     }
 
@@ -88,11 +61,8 @@ public class SWeightPretestRequest {
                 "token='" + token + '\'' +
                 ", patient_id=" + patient_id +
                 ", weight_loss=" + weight_loss +
-                ", lunch=" + lunch +
-                ", dinner=" + dinner +
-                ", snacks=" + snacks +
-                ", fatink=" + fatink +
-                ", sports=" + sports +
+                ", diet='" + diet + '\'' +
+                ", sports='" + sports + '\'' +
                 '}';
     }
 }

@@ -7,6 +7,10 @@ public class SWeightLossTipsResponseData {
 
     private Double weight_losstips;
 
+    public SWeightLossTipsResponseData(Double weight_losstips) {
+        this.weight_losstips = weight_losstips;
+    }
+
     public Double getWeight_losstips() {
         return weight_losstips;
     }
