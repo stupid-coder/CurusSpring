@@ -27,9 +27,11 @@ public class QuotaServiceUtils {
 
     private static Log logger = LogFactory.getLog(QuotaServiceUtils.class);
 
-    static public Double getWeight(String weight_quota) {
-        return JSONObject.parseObject(weight_quota).getDouble("weight");
-
+    static public Double getWeight(String quota) {
+        return JSONObject.parseObject(quota).getDouble("weight");
+    }
+    static public Double getHeight(String quota) {
+        return JSONObject.parseObject(quota).getDouble("height");
     }
 
     static public String getKVJSON(String k, String v) {
@@ -90,7 +92,7 @@ public class QuotaServiceUtils {
             List<Quota> quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
             for ( Quota q : quotaList ) {
                 JSONObject item = JSONObject.parseObject(q.getRecord());
-                item.put("measure_date", q.getMeasure_date().getTime());
+                item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
                 valuelist.add(item);
             }
         }

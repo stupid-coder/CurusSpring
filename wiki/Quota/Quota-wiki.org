@@ -13,18 +13,18 @@
   | height     | 身高指标 | {"height":167}                                        |
   | smoke      | 吸烟指标 |                                                       |
   | activity   | 运动指标 | {"1":20}                                              |
-  | bdpressure | 血压     |                                                       |
-  | bdsugar    | 血糖     |                                                       |
+  | bdpressure | 血压   |                                                       |
+  | bdsugar    | 血糖     | {"acmethods":"指尖","bdsugarValue":"0.0"}               |
   | bdlipid    | 血脂     |                                                       |
   | diet       | 饮食习惯 | {"lunch":"10","dinner":"9","snacks":"2","fatink":"3"} |
-  | food       | 膳食结构 | {""}                                                  |
+  | food       | 膳食结构 | {"salt":0,"fruit":0,"vegeables":0,"milk":0,"cereal":0,"beans":0,"meat":0} |
 
 * 接口说明
   生理指标接口提供两个基本接口：获取和添加接口。
 ** 获取生理指标
    获取接口URI：http://ip:port/hostname/quota/list
    
-   其中 *lastest* 字段控制，是否返回最近多少个，还是返回最近90天数据。
+   其中 *days* 字段控制，是否返回最近多少个，还是返回最近90天数据。
 *** 请求结构体
    #+CAPTION: 获取生理指标接口
    | 字段名     | 类型            | 说明                                         |
@@ -42,7 +42,6 @@
     | status     | Int    | 返回状态           |
     | data.value | List   | 对应生理指标链表   |
     | data.score | Double | 某些接口所得的分数 |
-
 
 ** 添加生理指标
    添加结构URI: http://ip:port/hostname/quota/add
@@ -68,9 +67,6 @@
 
 
 
-
-    
-    
 * 示例：
 ** Weight
    #+BEGIN_SRC 

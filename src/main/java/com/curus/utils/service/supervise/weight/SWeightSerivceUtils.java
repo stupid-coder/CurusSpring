@@ -220,9 +220,9 @@ public class SWeightSerivceUtils {
     }
     public static SWeightEstimateResponseData EstimateWeightLoss(CurusDriver driver, Long account_id, SWeightEstimateRequest request) {
         List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,request.getPatient_id(),QuotaConst.QUOTA_WEIGHT_ID,1L);
-        QuotaWeightRecord currentWeightRecord = JSONObject.parseObject(quotaList.get(0).getRecord(), QuotaWeightRecord.class);
+        JSONObject currentWeightRecord = JSONObject.parseObject(quotaList.get(0).getRecord());
         quotaList = driver.quotaDao.selectLastestQuota(account_id, request.getPatient_id(),QuotaConst.QUOTA_HEIGHT_ID,1L);
-        QuotaHeightRecord currentHeightRecord = JSONObject.parseObject(quotaList.get(0).getRecord(),QuotaHeightRecord.class);
+        JSONObject currentHeightRecord = JSONObject.parseObject(quotaList.get(0).getRecord());
 
         PatientSupervise patientSupervise = driver.patientSuperviseDao.select(TypeUtils.getWhereHashMap("account_id",account_id,"patient_id",request.getPatient_id(),"quota_cat_id",QuotaConst.QUOTA_WEIGHT_ID,"last", CommonConst.TRUE));
         PatientSuperviseList superviseList;
@@ -232,26 +232,28 @@ public class SWeightSerivceUtils {
         Double curwtloss = 0.0;
         Double oldwtloss = 0.0;
         Double expectloss =0.0;
-        Double curwt = currentWeightRecord.getWeight();
-        Double curht = currentHeightRecord.getHeight()/100;
+        Double curwt = currentWeightRecord.getDouble(QuotaConst.QUOTA_WEIGHT);
+        Double curht = currentHeightRecord.getDouble(QuotaConst.QUOTA_HEIGHT)/100;
         Double initwt = curwt;
         Long days = 0L;
 
         if ( patientSupervise != null ) {
-            QuotaWeightRecord initWeightRecord = JSONObject.parseObject(patientSupervise.getInitial(),QuotaWeightRecord.class);
-            initwt = initWeightRecord.getWeight();
+            JSONObject initWeightRecord = JSONObject.parseObject(patientSupervise.getInitial());
+            initwt = initWeightRecord.getDouble(QuotaConst.QUOTA_WEIGHT);
 
-            SuperviseWeightLossRecord targetWeightLossRecord = JSONObject.parseObject(patientSupervise.getTarget(), SuperviseWeightLossRecord.class);
-            expectloss = targetWeightLossRecord.getWeight_loss();
+            JSONObject targetWeightLossRecord = JSONObject.parseObject(patientSupervise.getTarget());
+            expectloss = targetWeightLossRecord.getDouble("weight_loss");
 
-            SuperviseWeightLossRecord oldWeightLossRecord =  JSONObject.parseObject(patientSupervise.getCurrent(), SuperviseWeightLossRecord.class);
-            oldwtloss = oldWeightLossRecord.getWeight_loss();
+            JSONObject oldWeightLossRecord =  JSONObject.parseObject(patientSupervise.getCurrent());
+            oldwtloss = oldWeightLossRecord.getDouble("weight_loss");
 
             days = TimeUtils.timestampDiff(TimeUtils.getTimestamp(),patientSupervise.getCreate_time())+1;
 
             curwtloss = initwt - curwt;
+
             if ( curwtloss.compareTo(oldwtloss) != 0 ) {
-                patientSupervise.setCurrent(currentWeightRecord.RecordString());
+                oldWeightLossRecord.put("weight_loss",curwtloss);
+                patientSupervise.setCurrent(oldWeightLossRecord.toJSONString());
                 driver.patientSuperviseDao.update(patientSupervise, "id");
             }
         } else {
@@ -274,8 +276,8 @@ public class SWeightSerivceUtils {
 
         List<Quota> weightList = driver.quotaDao.selectLastestQuota(account_id, patient_id, QuotaConst.QUOTA_WEIGHT_ID, 1L);
         List<Quota> heightList = driver.quotaDao.selectLastestQuota(account_id, patient_id, QuotaConst.QUOTA_HEIGHT_ID,1L);
-        Double weight = JSONObject.parseObject(weightList.get(0).getRecord(), QuotaWeightRecord.class).getWeight();
-        Double height = JSONObject.parseObject(heightList.get(0).getRecord(), QuotaHeightRecord.class).getHeight();
+        Double weight = QuotaServiceUtils.getWeight(weightList.get(0).getRecord());
+        Double height = QuotaServiceUtils.getHeight(heightList.get(0).getRecord());
         height /= 100;
         Double standweight = patient.getGender().compareTo(CommonConst.GENDER_MALE) == 0 ? 23 * height * height : 21 * height * height;
         return Math.max(0, (weight-standweight)/standweight)*10;

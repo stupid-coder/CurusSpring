@@ -7,18 +7,22 @@ import java.sql.Timestamp;
  * Created by stupid-coder on 24/1/16.
  */
 public class TimeUtils {
+    public static final Long unit = 1000L;
+    public static Long t2m(Long time) { return time*unit; }
+    public static Long m2t(Long millis) { return millis/unit; }
     public static Timestamp getTimestamp() {
         return new Timestamp(System.currentTimeMillis());
     }
-    public static Timestamp getTimestamp(Long unix_time) { return new Timestamp(System.currentTimeMillis()+unix_time*1000); }
+    public static Timestamp getTimestamp(Long unix_time) { return new Timestamp(System.currentTimeMillis()+t2m(unix_time)); }
     public static Timestamp parseTimestamp(String ts) {
-        return new Timestamp(Long.parseLong(ts)*1000);
+        return new Timestamp(t2m(Long.parseLong(ts)));
     }
     public static Date getDate() { return new Date(System.currentTimeMillis()); }
-    public static Date getDate(Long days) { return new Date(System.currentTimeMillis()+days*1000*3600*24); }
-    public static Date parseDate(String unix_time) { return new Date(Long.parseLong(unix_time)*1000); }
-    public static String date2String(Date date) { return new Long(date.getTime()/1000).toString(); }
+    public static Date getDate(Long days) { return new Date(System.currentTimeMillis()+days*t2m(3600*24L)); }
+    public static Date parseDate(String unix_time) { return new Date(t2m(Long.parseLong(unix_time))); }
+    public static String date2String(Date date) { return m2t(date.getTime()).toString(); }
+    public static Long date2Long(Date date) { return m2t(date.getTime()); }
     public static Long timestampDiff(Timestamp bts, Timestamp ets) {
-        return (ets.getTime()-bts.getTime())/(24*3600000);
+        return (ets.getTime()-bts.getTime())/t2m(24*3600L);
     }
 }
