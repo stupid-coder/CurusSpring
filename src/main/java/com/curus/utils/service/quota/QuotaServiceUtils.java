@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
 import com.curus.httpio.response.TsValueData;
+import com.curus.model.database.PatientSupervise;
 import com.curus.model.database.Quota;
 import com.curus.model.record.QuotaHeightRecord;
 import com.curus.model.record.QuotaWeightRecord;
@@ -12,6 +13,8 @@ import com.curus.utils.LogUtils;
 import com.curus.utils.QuotaUtils;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.QuotaConst;
+import com.curus.utils.service.supervise.food.SFoodServiceUtils;
+import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -86,17 +89,39 @@ public class QuotaServiceUtils {
         days = days == null || days.compareTo(0L) == 0 ? 90L : days;
         Long quota_id = QuotaUtils.getQuotaIds(cate);
         Long subcate_id = QuotaUtils.getSubQuotaIds(subcate);
-        response.put("value",new JSONArray());
-        JSONArray valuelist = response.getJSONArray("value");
+        List<Quota> quotaList = null;
+        if ( quota_id.compareTo(QuotaConst.QUOTA_ACT_ID) == 0 ) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
+            if (quotaList != null && quotaList.size() != 0 ) {
+                JSONObject act = JSONObject.parseObject(quotaList.get(0).getRecord());
+                response.put("score", SWeightSerivceUtils.CalculateActivityEnergy(act));
+                act.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+                response.put("value",act);
+            }
+        } else if ( quota_id.compareTo(QuotaConst.QUOTA_FOOD_ID) == 0 ) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
+            JSONObject food = JSONObject.parseObject(quotaList.get(0).getRecord());
+            response.put("score", SFoodServiceUtils.CalculateFoodScore(food));
+            response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+            response.put("value",food);
+        } else if (quota_id.compareTo(QuotaConst.QUOTA_DIET_ID) == 0 ) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
+            JSONObject diet = JSONObject.parseObject(quotaList.get(0).getRecord());
+            response.put("score", SWeightSerivceUtils.CalculateDietEnergy(diet));
+            response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+            response.put("value",diet);
+        }
         if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
-            List<Quota> quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
+            response.put("value",new JSONArray());
+            JSONArray valuelist = response.getJSONArray("value");
+            quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
             for ( Quota q : quotaList ) {
                 JSONObject item = JSONObject.parseObject(q.getRecord());
                 item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
                 valuelist.add(item);
             }
         }
-        return valuelist.size();
+        return quotaList != null ? quotaList.size() : 0;
     }
 
 }
