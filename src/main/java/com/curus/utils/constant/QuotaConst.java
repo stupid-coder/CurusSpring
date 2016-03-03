@@ -26,14 +26,14 @@ public class QuotaConst {
     }};
 
     static public Map<String,Long> SUB_QUOTA_IDS = new HashMap<String, Long>() {{
-        put("空腹",1L);
-        put("早餐后2h",2L);
-        put("午餐前",3L);
-        put("午餐后2h",4L);
-        put("睡前",5L);
-        put("晚餐后2h",6L);
-        put("晚餐前",7L);
-        put("夜间",8L);
+        put("kf",1L);
+        put("zch",2L);
+        put("wfq",3L);
+        put("wfh",4L);
+        put("sq",5L);
+        put("wch",6L);
+        put("wcq",7L);
+        put("yj",8L);
     }};
 
     static public Map<String,Long> QUOTA_TYPE = new HashMap<String, Long>() {{
