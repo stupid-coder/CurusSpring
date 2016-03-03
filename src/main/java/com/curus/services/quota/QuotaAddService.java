@@ -39,13 +39,11 @@ public class QuotaAddService {
     private ErrorData validate() {
         if ( (errorData = ValueValidate.valueExistValidate(request.getToken(), "token")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = QuotaValidate.quotaCateValidate(request.getCate(),"cate")) != null) {
-            logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData =ValueValidate.valueExistValidate(request.getPatient_id(), "patient_id")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getValue(), "value")) != null) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getQuota(), "quota")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getMeasure_date(), "meaure_date")) != null) {
+        } else if ( (errorData = QuotaValidate.quotaCateValidate(request.getCate(),"cate")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         }
         return errorData;
@@ -56,8 +54,8 @@ public class QuotaAddService {
         if ( (account = (Account) CacheUtils.getObject4Cache(request.getToken())) == null) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( QuotaServiceUtils.addQuota(driver, account.getId(), request.getPatient_id(),
-                request.getCate(), new Date(request.getMeasure_date()*1000L),request.getValue()) == 0) {
+        } else if ( QuotaServiceUtils.addQuota(driver, account.getId(), request.getPatient_id(),request.getCate(),request.getSubcate(),
+                request.getMeasure_date() == null ? null : new Date(request.getMeasure_date()*1000L),request.getQuota()) == 0) {
             errorData = new ErrorData(ErrorConst.IDX_SERVER_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         }

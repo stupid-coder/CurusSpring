@@ -1,5 +1,7 @@
 package com.curus.utils.service.quota;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
 import com.curus.httpio.response.TsValueData;
@@ -26,71 +28,73 @@ public class QuotaServiceUtils {
     private static Log logger = LogFactory.getLog(QuotaServiceUtils.class);
 
     static public Double getWeight(String weight_quota) {
-        return JSONObject.parseObject(weight_quota, QuotaWeightRecord.class).getWeight();
+        return JSONObject.parseObject(weight_quota).getDouble("weight");
 
+    }
+
+    static public String getKVJSON(String k, String v) {
+        return String.format("{\"%s\":%s}",k,v);
     }
 
     static public int addQuotas(CurusDriver driver,
                                 Long account_id,
                                 Long patient_id,
-                                Date date, Map<String, String> quotas) {
+                                Date date,
+                                Map<String,String> quotas) {
         int ret = 0;
-        for ( Map.Entry<String,String> entry : quotas.entrySet() ) {
-            if (QuotaUtils.getQuotaIds(entry.getKey()) != QuotaConst.QUOTA_UNKNOW_ID) {
-               ret += addQuota(driver,account_id,patient_id,entry.getKey(),date,entry.getValue());
-            }
+        for ( Map.Entry<String,String> quota : quotas.entrySet()) {
+            ret += addQuota(driver,account_id,patient_id,quota.getKey(),null,date,quota.getValue());
+
         }
         return ret;
     }
 
-    static public int addWeightHeight(CurusDriver driver,
-                                      Long account_id, Long patient_id,
-                                      Double weight, Double height) {
-        Map<String,String> quotas = new HashMap<String, String>();
-        quotas.put("weight", weight.toString()); quotas.put("height",height.toString());
-        return addQuotas(driver, account_id, patient_id, TimeUtils.getDate(), quotas);
-    }
 
     static public int addQuota(CurusDriver driver,
-                               Long account_id,
-                               Long patient_id,
-                               String cate, Date date, String record) {
-        Long quota_id = QuotaUtils.getQuotaIds(cate);
+                                Long account_id,
+                                Long patient_id,
+                                String cate,
+                                String subcate,
+                                Date date,
+                                String quota_str) {
+
         Quota quota;
-        if ( date == null ) date = TimeUtils.getDate();
+        Long quota_id = QuotaUtils.getQuotaIds(cate);
+        Long sub_quota_id = QuotaUtils.getSubQuotaIds(subcate);
+        date = date == null ? TimeUtils.getDate() : date;
         int ret = 0;
-        JSONObject jo = new JSONObject();
-        jo.put(cate, record);
-        if ( quota_id.compareTo(0L) == 0 ) {
-            logger.warn(LogUtils.Msg("Unknown Cate", cate, jo.toJSONString()));
-        } else if ( (quota = driver.quotaDao.selectByMeasureDate(account_id,patient_id,quota_id,date)) == null ) {
-            ret = driver.quotaDao.insert(account_id,patient_id,quota_id,date, jo.toJSONString());
+        if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) == 0 ) {
+            return 0;
         } else {
-            quota.setRecord(jo.toJSONString());
-            ret =  driver.quotaDao.update(quota,"id");
+            quota = driver.quotaDao.selectByMeasureDate(account_id,patient_id,quota_id,sub_quota_id,date);
+
+            if ( quota != null ) {
+                quota.setRecord(quota_str);
+                ret += driver.quotaDao.update(quota,"id");
+            } else ret += driver.quotaDao.insert(account_id,patient_id,quota_id,sub_quota_id,date,quota_str);
+
         }
         return ret;
     }
 
-    static public int listQuotas(CurusDriver driver, String lastestdays,
-                                Long account_id, Long patient_id,
-                                String cate,
-                                List<TsValueData> response) {
-
+    static public int listQuotas(CurusDriver driver, Long days,
+                                 Long account_id, Long patient_id,
+                                 String cate, String subcate,
+                                 JSONObject response) {
+        days = days == null || days.compareTo(0L) == 0 ? 90L : days;
         Long quota_id = QuotaUtils.getQuotaIds(cate);
-        List<Quota> quotaList;
-        Long days = lastestdays == null ? 0L : Long.parseLong(lastestdays);
-        if (quota_id.compareTo(0L) != 0) {
-            if ( days > 0L ) quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, days);
-            else quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, 90L);
-
-            for (Quota q : quotaList) {
-                JSONObject jo = JSONObject.parseObject(q.getRecord());
-                response.add(new TsValueData(TimeUtils.date2String(q.getMeasure_date()), jo.getString(cate)));
+        Long subcate_id = QuotaUtils.getSubQuotaIds(subcate);
+        response.put("value",new JSONArray());
+        JSONArray valuelist = response.getJSONArray("value");
+        if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
+            List<Quota> quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
+            for ( Quota q : quotaList ) {
+                JSONObject item = JSONObject.parseObject(q.getRecord());
+                item.put("measure_date", q.getMeasure_date().getTime());
+                valuelist.add(item);
             }
-
-        } else logger.warn(LogUtils.Msg("Unknown cate", cate));
-        return response.size();
+        }
+        return valuelist.size();
     }
 
 }

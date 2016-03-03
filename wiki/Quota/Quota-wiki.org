@@ -5,20 +5,19 @@
 * 描述
   生理指标接口于提交用户生理指标：体重，身高，吸烟等。这些指标将用于后
   续的健康管理中。
-
 * 接口常量说明
   #+CAPTION: 生理指标常量说明及默认值
   | 常量       | 说明     | 默认                                                  |
   |------------+----------+-------------------------------------------------------|
-  | weight     | 体重指标 | 66.2                                                  |
-  | height     | 身高指标 | 167                                                   |
+  | weight     | 体重指标 | {"weight":180}                                        |
+  | height     | 身高指标 | {"height":167}                                        |
   | smoke      | 吸烟指标 |                                                       |
   | activity   | 运动指标 | {"1":20}                                              |
   | bdpressure | 血压     |                                                       |
   | bdsugar    | 血糖     |                                                       |
   | bdlipid    | 血脂     |                                                       |
   | diet       | 饮食习惯 | {"lunch":"10","dinner":"9","snacks":"2","fatink":"3"} |
-  | dietary    | 膳食结构 |                                                       |
+  | food       | 膳食结构 | {""}                                                  |
 
 * 接口说明
   生理指标接口提供两个基本接口：获取和添加接口。
@@ -33,15 +32,17 @@
    | token      | String          | 用户标示                                     |
    | patient_id | String          | 获取生理指标的管理对象ID                     |
    | cate       | String          | 获取生理指标标识，必须为接口常量说明表的一个 |
-   | lastest    | String.OPTIONAL | 获取最新的多少个生理指标                     |
+   | subcate    | String.OPTIONAL | 二级标识，例如血糖的采集时间                 |
+   | days       | String.OPTIONAL | 获取最新的多少个生理指标                     |
 
 *** 响应结构体
     #+CAPTION: 响应结构体
-    | 字段名            | 类型   | 说明                     |
-    |-------------------+--------+--------------------------|
-    | status            | Int    | 返回状态                 |
-    | data.measure_time | Long   | 指标纪录时间戳，Unix时间 |
-    | data.value        | String | 对应生理指标             |
+    | 字段名     | 类型   | 说明               |
+    |------------+--------+--------------------|
+    | status     | Int    | 返回状态           |
+    | data.value | List   | 对应生理指标链表   |
+    | data.score | Double | 某些接口所得的分数 |
+
 
 ** 添加生理指标
    添加结构URI: http://ip:port/hostname/quota/add
@@ -53,7 +54,9 @@
     | patient_id   | String | 添加生理指标的管理对象ID |
     | cate         | String | 添加生理指标标识         |
     | measure_date | String | 添加生理指标纪录日期     |
-    | value        | String | 生理指标                 |
+    | quota        | String | 生理指标字符串       |
+    | subcate      | String | 二级指标标识         |
+
 *** 响应结构体
     #+CAPTION: 响应结构体
     | 字段名 | 类型   | 说明     |
@@ -67,10 +70,28 @@
 
 
     
-*** 请求value样例
-    为保证后台数据一致，请添加的所有结构体都为Map结构，不要用list结构，
-    例如：
-    #+BEGIN_SRC json
-    {"1":"20"} 标示运动为：id为1，运动时间长度为20分钟。
-    #+END_SRC
     
+* 示例：
+** Weight
+   #+BEGIN_SRC 
+   quota = '{"weight":90}'  
+   => 
+   { "status" : 0,
+     "data" : {
+             "value":['measure_date':1555000011,'weight':90]
+     } 
+   }
+   #+END_SRC
+** Height 
+   #+BEGIN_SRC 
+   quota = '{"height":180}'
+   #+END_SRC
+** bdsugar
+   #+BEGIN_SRC 
+   subcate = "空腹" ;; 表明采集时间
+   quota = '{"acmethods":"指尖",bdsugarValue:"Hi"}' ;; 存储的实际数据
+   #+END_SRC
+** sports
+   #+BEGIN_SRC 
+   quota = '{"1":100,"2":300}'
+   #+END_SRC

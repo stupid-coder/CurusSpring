@@ -7,15 +7,27 @@ public class QuotaListRequest {
 
     private String token;
     private String cate;
-    private String patient_id;
-    private String lastest;
+    private String subcate;
+    private Long patient_id;
+    private Long days;
 
-    public String getLastest() {
-        return lastest;
+    @Override
+    public String toString() {
+        return "QuotaListRequest{" +
+                "token='" + token + '\'' +
+                ", cate='" + cate + '\'' +
+                ", subcate='" + subcate + '\'' +
+                ", patient_id=" + patient_id +
+                ", days=" + days +
+                '}';
     }
 
-    public void setLastest(String lastest) {
-        this.lastest = lastest;
+    public String getSubcate() {
+        return subcate;
+    }
+
+    public void setSubcate(String subcate) {
+        this.subcate = subcate;
     }
 
     public String getToken() {
@@ -34,21 +46,19 @@ public class QuotaListRequest {
         this.cate = cate;
     }
 
-    public String getPatient_id() {
+    public Long getPatient_id() {
         return patient_id;
     }
 
-    public void setPatient_id(String patient_id) {
+    public void setPatient_id(Long patient_id) {
         this.patient_id = patient_id;
     }
 
-    @Override
-    public String toString() {
-        return "QuotaListRequest{" +
-                "token='" + token + '\'' +
-                ", cate='" + cate + '\'' +
-                ", patient_id='" + patient_id + '\'' +
-                ", lastest='" + lastest + '\'' +
-                '}';
+    public Long getDays() {
+        return days;
+    }
+
+    public void setDays(Long days) {
+        this.days = days;
     }
 }

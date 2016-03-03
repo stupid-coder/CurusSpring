@@ -18,7 +18,7 @@ public class Quota implements Serializable {
     private Date measure_date;
     private Long quota_cat_id;
     private String record;
-    private String sub_cat;
+    private Long sub_cat;
 
     public Quota() {
     }
@@ -81,11 +81,11 @@ public class Quota implements Serializable {
         this.record = record;
     }
 
-    public String getSub_cat() {
+    public Long getSub_cat() {
         return sub_cat;
     }
 
-    public void setSub_cat(String sub_cat) {
+    public void setSub_cat(Long sub_cat) {
         this.sub_cat = sub_cat;
     }
 

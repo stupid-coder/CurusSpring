@@ -26,4 +26,13 @@ public class QuotaUtils {
         return null;
     }
 
+    static public Long getSubQuotaIds(String subquota) {
+        if ( subquota == null ) return null;
+        else {
+            for ( Map.Entry<String,Long> entry : QuotaConst.SUB_QUOTA_IDS.entrySet()) {
+                if ( subquota.compareTo(entry.getKey()) == 0 ) return entry.getValue();
+            }
+        }
+        return null;
+    }
 }

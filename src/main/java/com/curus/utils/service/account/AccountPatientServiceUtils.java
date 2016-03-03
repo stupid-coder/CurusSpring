@@ -27,7 +27,7 @@ public class AccountPatientServiceUtils {
         return driver.accountPatientDao.selectAll(TypeUtils.getWhereHashMap(
                 "patient_id", patient_id,
                 "is_super_validate", CommonConst.TRUE,
-                //"is_patient_validate", CommonConst.TRUE,
+                "is_patient_validate", CommonConst.TRUE,
                 "role_id", RoleUtils.getRoleId(RoleConst.ROLE_SUPER)
         ));
     }

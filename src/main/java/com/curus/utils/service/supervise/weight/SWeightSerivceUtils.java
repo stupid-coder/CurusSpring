@@ -62,7 +62,7 @@ public class SWeightSerivceUtils {
 
         List<Quota> dietQuotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_DIET_ID,1L);
         if ( dietQuotaList == null ) {
-            QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_DIET,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
+            QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_DIET,null,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
             oldDiet = JSONObject.parseObject(QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
         } else {
             oldDiet = JSONObject.parseObject(JSONObject.parseObject(dietQuotaList.get(0).getRecord()).getString(QuotaConst.QUOTA_DIET));
@@ -76,8 +76,8 @@ public class SWeightSerivceUtils {
         Quota quota;
         Double old_energy = 0.0; Double request_energy = 0.0;
         if ( quotaList == null || quotaList.size() == 0 ) {
-            QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_ACT,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_ACT));
-            quota = new Quota(); quota.setRecord((String)QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_ACT));
+            QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_ACT,null,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_ACT));
+            quota = new Quota(); quota.setRecord(QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_ACT));
         } else { quota = quotaList.get(0); }
 
         old_energy = CalculateActivityEnergy(JSONObject.parseObject(JSONObject.parseObject(quota.getRecord()).getString(QuotaConst.QUOTA_ACT)));

@@ -1,5 +1,7 @@
 package com.curus.services.quota;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.quota.QuotaListRequest;
 import com.curus.httpio.response.ErrorData;
@@ -29,22 +31,22 @@ public class QuotaListService {
 
     private QuotaListRequest request;
     private CurusDriver driver;
-    private List<TsValueData> responseData;
+    private JSONObject responseData;
     private ErrorData errorData;
 
     public QuotaListService(QuotaListRequest request, CurusDriver driver) {
         this.request = request;
         this.driver = driver;
-        this.responseData = new ArrayList<TsValueData>();
+        this.responseData = new JSONObject();
         this.errorData = null;
     }
 
     private ErrorData validate() {
         if ( (errorData = ValueValidate.valueExistValidate(request.getToken(),"token")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueLongValidate(request.getPatient_id(), "patient_id")) != null) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getPatient_id(), "patient_id")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( QuotaUtils.getQuotaIds(request.getCate()) == 0L ) {
+        } else if ( (errorData=ValueValidate.valueExistValidate(request.getCate(),"cate")) != null ) {
             errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"cate");
             logger.warn(LogUtils.Msg(errorData,request));
         }
@@ -58,8 +60,7 @@ public class QuotaListService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            QuotaServiceUtils.listQuotas(driver,request.getLastest(),account.getId(),Long.parseLong(request.getPatient_id()),request.getCate(),responseData);
-            Collections.sort(responseData);
+            QuotaServiceUtils.listQuotas(driver,request.getDays(),account.getId(),request.getPatient_id(),request.getCate(),request.getSubcate(),responseData);
         }
 
         return errorData;

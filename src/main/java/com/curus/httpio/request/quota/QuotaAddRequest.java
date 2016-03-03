@@ -7,8 +7,18 @@ public class QuotaAddRequest {
     private String token;
     private Long measure_date;
     private String cate;
+    private String subcate;
     private Long patient_id;
-    private String value;
+    private String quota;
+
+
+    public String getSubcate() {
+        return subcate;
+    }
+
+    public void setSubcate(String subcate) {
+        this.subcate = subcate;
+    }
 
     public Long getPatient_id() {
         return patient_id;
@@ -42,22 +52,23 @@ public class QuotaAddRequest {
         this.cate = cate;
     }
 
-    public String getValue() {
-        return value;
+    public String getQuota() {
+        return quota;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setQuota(String quota) {
+        this.quota = quota;
     }
 
     @Override
     public String toString() {
         return "QuotaAddRequest{" +
                 "token='" + token + '\'' +
-                ", measure_date='" + measure_date + '\'' +
+                ", measure_date=" + measure_date +
                 ", cate='" + cate + '\'' +
-                ", patient_id='" + patient_id + '\'' +
-                ", value='" + value + '\'' +
+                ", subcate='" + subcate + '\'' +
+                ", patient_id=" + patient_id +
+                ", quota='" + quota + '\'' +
                 '}';
     }
 }

@@ -8,6 +8,7 @@ import com.curus.httpio.response.patient.PatientAddResponseData;
 import com.curus.model.database.Account;
 import com.curus.model.database.AccountPatient;
 import com.curus.model.database.Patient;
+import com.curus.model.database.Quota;
 import com.curus.utils.*;
 import com.curus.utils.constant.*;
 import com.curus.utils.service.patient.PatientServiceUtils;
@@ -98,7 +99,11 @@ public class PatientAddService {
                 }
                 patient = PatientServiceUtils.AddPatient(driver, account, patient, accountPatient, request.getAppellation());
                 responseData.setPatient_id(patient.getId());
-                QuotaServiceUtils.addWeightHeight(driver, account.getId(), patient.getId(), Double.parseDouble(request.getWeight()), Double.parseDouble(request.getHeight()));
+                QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_WEIGHT,null,null,
+                        QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_WEIGHT, request.getWeight()));
+
+                QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_HEIGHT,null,null,
+                        QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_HEIGHT, request.getHeight()));
             }
         }
         return errorData;
