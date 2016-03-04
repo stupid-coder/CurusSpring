@@ -12,6 +12,7 @@ import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
 import com.curus.utils.QuotaUtils;
 import com.curus.utils.constant.ErrorConst;
+import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.validate.ValueValidate;
@@ -46,7 +47,7 @@ public class QuotaListService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getPatient_id(), "patient_id")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData=ValueValidate.valueExistValidate(request.getCate(),"cate")) != null ) {
+        } else if ( QuotaUtils.getQuotaIds(request.getCate()).compareTo(QuotaConst.QUOTA_UNKNOW_ID) == 0 ) {
             errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"cate");
             logger.warn(LogUtils.Msg(errorData,request));
         }

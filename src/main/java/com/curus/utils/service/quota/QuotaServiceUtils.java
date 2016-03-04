@@ -30,12 +30,35 @@ public class QuotaServiceUtils {
 
     private static Log logger = LogFactory.getLog(QuotaServiceUtils.class);
 
+    static public String getWeightLossQuota(Double weight_loss) {
+        JSONObject jo = new JSONObject(); jo.put("weight_loss",weight_loss);
+        return jo.toJSONString();
+    }
+
+    static public Double getWeightLoss(String quota) {
+        return JSONObject.parseObject(quota).getDouble("weight_loss");
+    }
+
     static public Double getWeight(String quota) {
         return JSONObject.parseObject(quota).getDouble("weight");
     }
     static public Double getHeight(String quota) {
         return JSONObject.parseObject(quota).getDouble("height");
     }
+
+    static public Double getLastWeight(CurusDriver driver, Long account_id, Long patient_id) {
+        List<Quota> weightList = driver.quotaDao.selectLastestQuota(account_id,patient_id, QuotaConst.QUOTA_WEIGHT_ID, 1L);
+        if ( weightList != null && weightList.size() > 0 ) return getWeight(weightList.get(0).getRecord());
+        return null;
+    }
+
+    static public Double getLastHeight(CurusDriver driver, Long account_id, Long patient_id) {
+        List<Quota> heightList = driver.quotaDao.selectLastestQuota(account_id,patient_id, QuotaConst.QUOTA_HEIGHT_ID, 1L);
+        if ( heightList != null && heightList.size() > 0 ) return getHeight(heightList.get(0).getRecord());
+        return null;
+    }
+
+
 
     static public String getKVJSON(String k, String v) {
         return String.format("{\"%s\":%s}",k,v);
@@ -100,16 +123,20 @@ public class QuotaServiceUtils {
             }
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_FOOD_ID) == 0 ) {
             quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
-            JSONObject food = JSONObject.parseObject(quotaList.get(0).getRecord());
-            response.put("score", SFoodServiceUtils.CalculateFoodScore(food));
-            response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
-            response.put("value",food);
+            if ( quotaList != null && quotaList.size() > 0) {
+                JSONObject food = JSONObject.parseObject(quotaList.get(0).getRecord());
+                response.put("score", SFoodServiceUtils.CalculateFoodScore(food));
+                response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+                response.put("value", food);
+            }
         } else if (quota_id.compareTo(QuotaConst.QUOTA_DIET_ID) == 0 ) {
             quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
-            JSONObject diet = JSONObject.parseObject(quotaList.get(0).getRecord());
-            response.put("score", SWeightSerivceUtils.CalculateDietEnergy(diet));
-            response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
-            response.put("value",diet);
+            if ( quotaList != null && quotaList.size() > 0) {
+                JSONObject diet = JSONObject.parseObject(quotaList.get(0).getRecord());
+                response.put("score", SWeightSerivceUtils.CalculateDietEnergy(diet));
+                response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+                response.put("value", diet);
+            }
         }
         if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
             response.put("value",new JSONArray());

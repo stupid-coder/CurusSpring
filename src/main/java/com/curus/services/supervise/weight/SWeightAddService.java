@@ -38,7 +38,7 @@ public class SWeightAddService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getDiet(),"diet")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getSports(),"sports")) != null ) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getActivity(),"activity")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getWeight_loss(),"weight_loss")) != null ){
             logger.warn(LogUtils.Msg(errorData,request));

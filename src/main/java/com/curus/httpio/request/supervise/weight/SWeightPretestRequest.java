@@ -12,7 +12,7 @@ public class SWeightPretestRequest {
     private Long patient_id;
     private Double weight_loss;
     private String diet;
-    private String sports;
+    private String activity;
 
 
     public String getToken() {
@@ -47,12 +47,12 @@ public class SWeightPretestRequest {
         this.diet = diet;
     }
 
-    public String getSports() {
-        return sports;
+    public String getActivity() {
+        return activity;
     }
 
-    public void setSports(String sports) {
-        this.sports = sports;
+    public void setActivity(String activity) {
+        this.activity = activity;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SWeightPretestRequest {
                 ", patient_id=" + patient_id +
                 ", weight_loss=" + weight_loss +
                 ", diet='" + diet + '\'' +
-                ", sports='" + sports + '\'' +
+                ", activity='" + activity + '\'' +
                 '}';
     }
 }

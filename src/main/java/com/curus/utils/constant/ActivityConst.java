@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class ActivityConst {
     public static Map<String,Double> ACTIVITY_ENERGY = new HashMap<String, Double>() {{
-        put("MediumWalk ",10.0); // 中速步行
+        put("MediumWalk",10.0); // 中速步行
         put("FastWalk",9.1); // 较快步行
         put("BriskWalk",7.5); // 快速步行
         put("Scurry",6.0); // 疾走
@@ -31,7 +31,7 @@ public class ActivityConst {
         put("MediumRopeSkip",3.0); // 跳绳中
         put("Dance",10.0);// 跳舞
         put("Exercise",8.6); // 做操
-        put("TaijiBoxing",7.5); // 太极拳
+        put("TaiJiBoxing",7.5); // 太极拳
         put("FastDance",6.7); // 舞厅快舞
         put("DownMountain",10.0); // 下山、下楼
         put("ClimbMountain",7.5); // 中慢速爬山或上楼
