@@ -23,6 +23,9 @@ public class TimeUtils {
     public static String date2String(Date date) { return m2t(date.getTime()).toString(); }
     public static Long date2Long(Date date) { return m2t(date.getTime()); }
     public static Long timestampDiff(Timestamp bts, Timestamp ets) {
-        return (ets.getTime()-bts.getTime())/t2m(24*3600L);
+        return (ets.getTime()-bts.getTime())/t2m(24*3600L) + 1;
+    }
+    public static Long dateDiff(Date bdate, Date edate) {
+        return ( edate.getTime() - bdate.getTime() ) /t2m(24*3600L) + 1;
     }
 }

@@ -30,6 +30,11 @@ public class QuotaDao extends BaseDao<Quota> {
         return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_date >= ? ORDER by measure_date DESC", tableName), rowMapper, account_id, patient_id, quota_id, TimeUtils.getDate(lastdays*-1L));
     }
 
+    public List<Quota> selectAfterMeasureDate(Long account_id, Long patient_id,
+                                           Long quota_id, Date date) {
+        RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? AND measure_date >= ? ORDER by measure_date", tableName), rowMapper, account_id, patient_id, quota_id, date);
+    }
 
     public Quota selectByMeasureDate(Long account_id, Long patient_id, Long quota_id, Long subquota_id, Date date) {
         if ( subquota_id != null )
@@ -42,6 +47,8 @@ public class QuotaDao extends BaseDao<Quota> {
         return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id = ? AND quota_cat_id = ? ORDER BY measure_date DESC LIMIT %d",tableName,limits),
                 rowMapper,account_id,patient_id,quota_id);
     }
+
+
 
     public int insert(Long account_id, Long patient_id, Long quota_id, Long subquota_id, Date date, String value) {
         Quota quota = new Quota(account_id,patient_id,date,quota_id, value);

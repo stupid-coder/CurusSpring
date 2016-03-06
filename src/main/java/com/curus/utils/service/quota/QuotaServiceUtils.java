@@ -14,6 +14,7 @@ import com.curus.utils.QuotaUtils;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
+import com.curus.utils.service.supervise.smoke.SSmokeServiseUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,36 +35,33 @@ public class QuotaServiceUtils {
         JSONObject jo = new JSONObject(); jo.put("weight_loss",weight_loss);
         return jo.toJSONString();
     }
-
     static public Double getWeightLoss(String quota) {
         return JSONObject.parseObject(quota).getDouble("weight_loss");
     }
-
     static public Double getWeight(String quota) {
         return JSONObject.parseObject(quota).getDouble("weight");
     }
     static public Double getHeight(String quota) {
         return JSONObject.parseObject(quota).getDouble("height");
     }
-
     static public Double getLastWeight(CurusDriver driver, Long account_id, Long patient_id) {
         List<Quota> weightList = driver.quotaDao.selectLastestQuota(account_id,patient_id, QuotaConst.QUOTA_WEIGHT_ID, 1L);
         if ( weightList != null && weightList.size() > 0 ) return getWeight(weightList.get(0).getRecord());
         return null;
     }
-
     static public Double getLastHeight(CurusDriver driver, Long account_id, Long patient_id) {
         List<Quota> heightList = driver.quotaDao.selectLastestQuota(account_id,patient_id, QuotaConst.QUOTA_HEIGHT_ID, 1L);
         if ( heightList != null && heightList.size() > 0 ) return getHeight(heightList.get(0).getRecord());
         return null;
     }
-
-
-
+    static public Quota getLastSmokeQuota(CurusDriver driver, Long account_id, Long patient_id) {
+        List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_SMOKE_ID,1L);
+        if ( quotaList != null && quotaList.size() > 0 ) return quotaList.get(0);
+        return null;
+    }
     static public String getKVJSON(String k, String v) {
         return String.format("{\"%s\":%s}",k,v);
     }
-
     static public int addQuotas(CurusDriver driver,
                                 Long account_id,
                                 Long patient_id,
@@ -76,8 +74,6 @@ public class QuotaServiceUtils {
         }
         return ret;
     }
-
-
     static public int addQuota(CurusDriver driver,
                                 Long account_id,
                                 Long patient_id,
@@ -95,7 +91,6 @@ public class QuotaServiceUtils {
             return 0;
         } else {
             quota = driver.quotaDao.selectByMeasureDate(account_id,patient_id,quota_id,sub_quota_id,date);
-
             if ( quota != null ) {
                 quota.setRecord(quota_str);
                 ret += driver.quotaDao.update(quota,"id");
@@ -104,7 +99,6 @@ public class QuotaServiceUtils {
         }
         return ret;
     }
-
     static public int listQuotas(CurusDriver driver, Long days,
                                  Long account_id, Long patient_id,
                                  String cate, String subcate,
@@ -137,8 +131,14 @@ public class QuotaServiceUtils {
                 response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
                 response.put("value", diet);
             }
-        }
-        if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
+        } else if (quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0 ) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
+            if ( quotaList != null && quotaList.size() > 0) {
+                //JSONObject smoke = JSONObject.parseObject(quotaList.get(0).getRecord());
+                response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+                response.put("value",quotaList.get(0).getRecord());
+            }
+        } else if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
             response.put("value",new JSONArray());
             JSONArray valuelist = response.getJSONArray("value");
             quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
@@ -150,5 +150,4 @@ public class QuotaServiceUtils {
         }
         return quotaList != null ? quotaList.size() : 0;
     }
-
 }

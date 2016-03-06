@@ -1,8 +1,12 @@
 package com.curus.utils.service.supervise.food;
 
 import com.alibaba.fastjson.JSONObject;
+import com.curus.dao.CurusDriver;
+import com.curus.model.database.Quota;
+import com.curus.utils.constant.QuotaConst;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,5 +31,12 @@ public class SFoodServiceUtils {
         }
         return score;
     }
-
+    public static  Double CalculateFoodScore(CurusDriver driver,
+                                             Long account_id,
+                                             Long patient_id) {
+        List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id, QuotaConst.QUOTA_FOOD_ID,1L);
+        if ( quotaList.size() != 0 )
+            return CalculateFoodScore(JSONObject.parseObject(quotaList.get(0).getRecord()));
+        else return 0.0;
+    }
 }
