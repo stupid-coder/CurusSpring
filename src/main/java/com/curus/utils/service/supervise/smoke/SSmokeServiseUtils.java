@@ -33,10 +33,11 @@ public class SSmokeServiseUtils {
             patientSupervise.setLast(CommonConst.TRUE);
         } else {
             patientSupervise.setLast(CommonConst.FALSE);
-            position(driver, Long.parseLong(patientSupervise.getCurrent()),null);
+            position(driver, Long.parseLong(patientSupervise.getCurrent()),0L);
             driver.patientSuperviseDao.update(patientSupervise,"id");
             patientSupervise.setId(null);
         }
+        position(driver,patientSupervise.getCurrent() == null ? null : Long.parseLong(patientSupervise.getCurrent()),0L);
         patientSupervise.setCreate_time(TimeUtils.getTimestamp());
         patientSupervise.setInitial(smokeQuota.getRecord());
         patientSupervise.setTarget(smplan);
@@ -55,15 +56,17 @@ public class SSmokeServiseUtils {
     public static Double calculateMoney(List<Quota> quotaList, Date begin, Date end) {
 
         Double money = 0.0;
-        if ( quotaList.size() != 0 ) money = TimeUtils.dateDiff(begin,quotaList.get(0).getMeasure_date())*dayMoney(quotaList.get(0).getRecord());
+        //if ( quotaList.size() != 0 ) money = (TimeUtils.dateDiff(begin,quotaList.get(0).getMeasure_date())-1)*dayMoney(quotaList.get(0).getRecord());
+        Quota quota = quotaList.get(0);
 
-        for ( int i = 1; i < quotaList.size(); ++ i ) {
-            money += (TimeUtils.dateDiff(begin,quotaList.get(i).getMeasure_date())-1) * dayMoney(quotaList.get(i).getRecord());
+        for ( int i = 0; i < quotaList.size(); ++ i ) {
+            money += (TimeUtils.dateDiff(begin,quotaList.get(i).getMeasure_date())-1) * dayMoney(quota.getRecord());
+            quota = quotaList.get(i);
+            begin = quota.getMeasure_date();
         }
 
-        if ( quotaList.size() != 0 && quotaList.get(0).getMeasure_date().toString().compareTo(end.toString()) != 0 ) {
-            Quota quota = quotaList.get(quotaList.size()-1);
-            money += TimeUtils.dateDiff(quota.getMeasure_date(),end) * dayMoney(quota.getRecord());
+        if ( quotaList.size() != 0 ) {
+            money += TimeUtils.dateDiff(begin,end) * dayMoney(quota.getRecord());
         }
         return money;
     }
@@ -102,13 +105,14 @@ public class SSmokeServiseUtils {
                 put("1195", 0.0);
             }}));
             driver.patientSuperviseListDao.insert(superviseList);
+            superviseList = driver.patientSuperviseListDao.select(TypeUtils.getWhereHashMap("quota_cat_id", QuotaConst.QUOTA_SMOKE_ID));
         }
         JSONObject list = JSONObject.parseObject(superviseList.getList());
 
         if ( oldays != null ) {
             String index = positionIndex(oldays);
             Double count = list.getDouble(index);
-            if ( count > 0 ) list.put(index,count-1);
+            if ( count.compareTo(0.0) > 0 ) list.put(index,count-1);
         }
 
         if ( newdays != null ) {
@@ -116,12 +120,16 @@ public class SSmokeServiseUtils {
             Double count = list.getDouble(index);
             list.put(index,count+1);
         }
+
+        superviseList.setList(list.toJSONString());
+        driver.patientSuperviseListDao.update(superviseList,"id");
+
         if ( newdays != null ) {
             Double sum = 0.0;
             for ( String key : list.keySet() ) {
                 sum += list.getDouble(key);
             }
-            if ( sum == 0.0 ) sum = 1.0;
+            if ( sum.compareTo(0.0) == 0 ) sum = 1.0;
             JSONArray position = new JSONArray();
             for (String key : list.keySet()) {
                 JSONObject item = new JSONObject();
@@ -147,6 +155,8 @@ public class SSmokeServiseUtils {
             days = TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp());
             st_goal = patientSupervise.getTarget();
             sv_money = sv_money(driver, account_id, patient_id, patientSupervise.getInitial(),new Date(patientSupervise.getCreate_time().getTime()));
+            patientSupervise.setCurrent(days.toString());
+            driver.patientSuperviseDao.update(patientSupervise,"id");
             responseData.setLossposition(position(driver,Long.parseLong(patientSupervise.getCurrent()),days));
         }
         responseData.setDays(days);

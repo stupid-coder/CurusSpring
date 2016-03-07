@@ -1,6 +1,9 @@
 package com.curus.controllers;
 
 import com.curus.dao.CurusDriver;
+import com.curus.httpio.request.supervise.bdpressure.SBdPressureAddSuperviseRequest;
+import com.curus.httpio.request.supervise.bdpressure.SBdPressureEstimateSuperviseRequest;
+import com.curus.httpio.request.supervise.bdpressure.SBdPressureNonmedRequest;
 import com.curus.httpio.request.supervise.smoke.SSmokeAddRequest;
 import com.curus.httpio.request.supervise.smoke.SSmokeAddSuperviseRequest;
 import com.curus.httpio.request.supervise.smoke.SSmokeEstimateSuperviseRequest;
@@ -10,6 +13,9 @@ import com.curus.httpio.request.supervise.weight.SWeightEstimateRequest;
 import com.curus.httpio.request.supervise.weight.SWeightLossTipsRequst;
 import com.curus.httpio.request.supervise.weight.SWeightPretestRequest;
 import com.curus.httpio.response.ResponseBase;
+import com.curus.services.supervise.bdpressure.SBdPressureAddSuperviseService;
+import com.curus.services.supervise.bdpressure.SBdPressureEstimateSuperviseService;
+import com.curus.services.supervise.bdpressure.SBdPressureNonmedService;
 import com.curus.services.supervise.smoke.SSmokeAddService;
 import com.curus.services.supervise.smoke.SSmokeAddSuperviseServise;
 import com.curus.services.supervise.smoke.SSmokeEstimateSuperviseService;
@@ -76,6 +82,29 @@ public class SuperviceController {
         SSmokeAddSuperviseServise service = new SSmokeAddSuperviseServise(request,driver);
         return service.process();
     }
+
+    @RequestMapping(value="/bdpressure/add",method= RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody
+    ResponseBase BdPressureAdd(@RequestBody SBdPressureAddSuperviseRequest request) {
+        SBdPressureAddSuperviseService service = new SBdPressureAddSuperviseService(request,driver);
+        return service.process();
+    }
+
+    @RequestMapping(value="/bdpressure/estimate",method= RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody
+    ResponseBase BdPressureAdd(@RequestBody SBdPressureEstimateSuperviseRequest request) {
+        SBdPressureEstimateSuperviseService service = new SBdPressureEstimateSuperviseService(request,driver);
+        return service.process();
+    }
+
+    @RequestMapping(value="/bdpressure/nonmed",method= RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody
+    ResponseBase BdPressureAdd(@RequestBody SBdPressureNonmedRequest request) {
+        SBdPressureNonmedService service = new SBdPressureNonmedService(request,driver);
+        return service.process();
+    }
+
+
 
 
 }

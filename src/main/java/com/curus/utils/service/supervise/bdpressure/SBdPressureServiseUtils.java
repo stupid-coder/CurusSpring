@@ -1,0 +1,284 @@
+package com.curus.utils.service.supervise.bdpressure;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.curus.dao.CurusDriver;
+import com.curus.httpio.request.supervise.bdpressure.SBdPressureAddSuperviseRequest;
+import com.curus.httpio.request.supervise.bdpressure.SBdPressureNonmedRequest;
+import com.curus.httpio.response.supervise.bdpressure.SBdPressureEstimateSuperviseResponseData;
+import com.curus.model.database.PatientSupervise;
+import com.curus.model.database.PatientSuperviseList;
+import com.curus.model.database.Quota;
+import com.curus.utils.TimeUtils;
+import com.curus.utils.TypeUtils;
+import com.curus.utils.constant.CommonConst;
+import com.curus.utils.constant.QuotaConst;
+import com.curus.utils.service.supervise.food.SFoodServiceUtils;
+import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Created by stupid-coder on 7/3/16.
+ */
+public class SBdPressureServiseUtils {
+
+    static private List<Quota> GetBdPressureQuoaList(CurusDriver driver, Long account_id,
+                                           Long patient_id, Long size) {
+        return driver.quotaDao.selectLastestQuota(account_id, patient_id, QuotaConst.QUOTA_BP_ID, size);
+    }
+
+    static private List<JSONObject> GetBdPressureJSONList(CurusDriver driver, Long account_id,
+                                            Long patient_id, Long size) {
+        List<Quota> quotaList = GetBdPressureQuoaList(driver, account_id, patient_id, size);
+        List<JSONObject> retJson = new ArrayList<JSONObject>();
+        for ( Quota quota : quotaList ) {
+            retJson.add(JSONObject.parseObject(quota.getRecord()));
+        }
+        return retJson;
+    }
+
+    static private JSONObject GetLastBdPressure(CurusDriver driver, Long account_id,
+                                                      Long patient_id) {
+        List<JSONObject> jsonObjectList = GetBdPressureJSONList(driver, account_id, patient_id, 1L);
+        if ( jsonObjectList.size()>0 ) return jsonObjectList.get(0);
+        else return null;
+    }
+
+    static public JSONObject BdPressureNonmedLoss(CurusDriver driver, Long account_id,
+                                              SBdPressureNonmedRequest request) {
+        JSONObject jo = new JSONObject();
+        JSONObject bdpressure = GetLastBdPressure(driver, account_id, request.getPatient_id());
+        if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_WEIGHT) == 0 ) {
+            WeightLossPressure(driver, account_id, request.getPatient_id(), request.getValue(), bdpressure, jo);
+        } else if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_FOOD) == 0 ) {
+            FoodLossPressure(driver, account_id, request.getPatient_id(), request.getValue(), bdpressure, jo);
+        } else if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_ACT) == 0 ) {
+            ActivityLossPressure(driver,account_id,request.getPatient_id(),request.getValue(), bdpressure, jo);
+        }
+        return jo;
+    }
+
+    static public void WeightLossPressure(CurusDriver driver, Long account_id,
+                                          Long patient_id, Long query_wtloss,
+                                          JSONObject bdpressure, JSONObject bplossResult) {
+        Long bploss = 0L;
+        Long wtloss = 0L;
+
+        if ( bdpressure != null ) {
+            Double sbp = bdpressure.getDouble("sbloodpre");
+            Long wtloss_max = Math.round(SWeightSerivceUtils.WeightLossTips(driver, account_id, patient_id));
+            if ( query_wtloss.compareTo(wtloss_max) < 0 ) {
+                wtloss = query_wtloss;
+            } else {
+                wtloss = wtloss_max;
+            }
+            bploss = Math.min(Math.round(Math.min(Math.max(sbp-120,0), Math.round(wtloss * 2 * sbp / 160))), 20);
+        }
+        bplossResult.put("status", wtloss);
+        bplossResult.put("value", bploss);
+    }
+
+    static public void FoodLossPressure(CurusDriver driver, Long account_id,
+                                        Long patient_id, Long query_food,
+                                        JSONObject bdpressure, JSONObject bplossResult) {
+        Long bploss = 0L;
+        Long foodinc = 0L;
+
+        if ( bdpressure != null ) {
+            Double sbp = bdpressure.getDouble("sbloodpre");
+            Long max_inc = Math.round((100-SFoodServiceUtils.CalculateFoodScore(driver,account_id,patient_id))*0.9);
+            if ( query_food.compareTo(max_inc) < 0 ) foodinc = query_food;
+            else foodinc = max_inc;
+            bploss = Math.round(Math.min(Math.max(sbp - 120, 0), Math.min(foodinc / 2 * sbp / 160, 20)));
+        }
+        bplossResult.put("value",bploss);
+        bplossResult.put("status",foodinc);
+    }
+
+    static public Double CalculateActivity(CurusDriver driver, Long account_id,
+                                           Long patient_id) {
+        List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
+        if ( quotaList.size() > 0 ) {
+            return SWeightSerivceUtils.CalculateActivityEnergy(JSONObject.parseObject(quotaList.get(0).getRecord()));
+        } else {
+            return 0.0;
+        }
+    }
+
+    static public void ActivityLossPressure(CurusDriver driver, Long account_id,
+                                            Long patient_id, Long query_act,
+                                            JSONObject bdpressure, JSONObject bplossResult) {
+        Long bploss = 0L;
+        Long actinc = 0L;
+
+        if ( bdpressure != null ) {
+            Double sbp = bdpressure.getDouble("sbloodpre");
+            Long max_act = Math.round(Math.min(Math.max((40 - CalculateActivity(driver, account_id, patient_id))*0.8, 0), 20));
+            if ( query_act.compareTo(max_act) < 0 )  actinc = query_act;
+            else actinc = max_act;
+            bploss = Math.round(Math.min(Math.min(Math.max(sbp - 120, 0), Math.max(40 - actinc, 0) / 4 * sbp / 160), 20));
+        }
+
+        bplossResult.put("value",bploss);
+        bplossResult.put("status",actinc);
+    }
+
+    static public int AddSupervise(CurusDriver driver,
+                                    Long account_id, SBdPressureAddSuperviseRequest request) {
+        PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id,request.getPatient_id(),QuotaConst.QUOTA_BP_ID);
+        if ( patientSupervise == null ) {
+            patientSupervise = new PatientSupervise();
+            patientSupervise.setAccount_id(account_id);
+            patientSupervise.setPatient_id(request.getPatient_id());
+            patientSupervise.setQuota_cat_id(QuotaConst.QUOTA_BP_ID);
+        } else {
+            patientSupervise.setLast(CommonConst.FALSE);
+            driver.patientSuperviseDao.update(patientSupervise,"id");
+            patientSupervise.setId(null);
+        }
+
+        JSONObject policy = new JSONObject();
+        policy.put("lossweight",request.getLossweight());
+        policy.put("dihealthscore",request.getDihealthscore());
+        policy.put("phyactivity",request.getPhyactivity());
+        patientSupervise.setLast(CommonConst.TRUE);
+        patientSupervise.setCreate_time(TimeUtils.getTimestamp());
+        patientSupervise.setPolicy(policy.toJSONString());
+        JSONObject bdp = GetLastBdPressure(driver,account_id,request.getPatient_id());
+        SBdPressurePosition(driver, Double.parseDouble(patientSupervise.getCurrent()==null?"-1.0":patientSupervise.getCurrent()),GetBPLevel(bdp));
+        patientSupervise.setCurrent(GetBPLevel(bdp).toString());
+        return driver.patientSuperviseDao.insert(patientSupervise);
+    }
+
+    static public Long GetMonitorFreq(Double sbp) {
+        return Math.round(Math.pow(225854.0 * Math.exp(1.0), -0.063 * sbp));
+    }
+    static public Double GetBPLevel(JSONObject bdpJson) {
+        if ( bdpJson == null ) return -1.0;
+
+        Double sbp = bdpJson.getDouble("sbloodpre");
+        Double dbp = bdpJson.getDouble("dbloodpre");
+        if ( sbp < 120.0 && dbp < 80.0 ) return 0.0;
+        if ( sbp < 140.0 && dbp < 90.0 ) return 0.5;
+        if ( sbp < 160.0 && dbp < 100.0) return 1.0;
+        if ( sbp < 180.0 && dbp < 110.0) return 2.0;
+        else return 3.0;
+
+    }
+
+    static public String SBdPressurePosition(CurusDriver driver, Double lastlevel, Double curlevel) {
+        PatientSuperviseList superviseList = driver.patientSuperviseListDao.select(TypeUtils.getWhereHashMap("quota_cat_id",QuotaConst.QUOTA_BP_ID));
+        if (superviseList == null) {
+            superviseList = new PatientSuperviseList();
+            superviseList.setQuota_cat_id(QuotaConst.QUOTA_BP_ID);
+            superviseList.setList( JSONObject.toJSONString(new HashMap<String,Double>() {{
+                put("0.0",0.0); put("0.5",0.0); put("1.0",0.0); put("2.0",0.0); put("3.0",0.0);
+            }}));
+            driver.patientSuperviseListDao.insert(superviseList);
+            superviseList = driver.patientSuperviseListDao.select(TypeUtils.getWhereHashMap("quota_cat_id",QuotaConst.QUOTA_BP_ID));
+        }
+
+        JSONObject list = JSONObject.parseObject(superviseList.getList());
+
+        if ( lastlevel != null && lastlevel != -1.0 ) {
+            Double count = list.getDouble(lastlevel.toString());
+            if ( count.compareTo(1.0) >= 0 ) list.put(lastlevel.toString(),count-1);
+        }
+
+        if ( curlevel != null && curlevel != -1.0 ) {
+            list.put(curlevel.toString(),list.getDouble(curlevel.toString())+1);
+        }
+
+        superviseList.setList(list.toJSONString());
+        driver.patientSuperviseListDao.update(superviseList,"id");
+
+
+        JSONArray jsonArray = new JSONArray();
+
+        Double sum = 0.0;
+
+        for ( String key : list.keySet() ) {
+            sum += list.getDouble(key);
+        }
+
+        for ( String key : list.keySet() ) {
+            JSONObject item = new JSONObject();
+            item.put("level", key);
+            item.put("percent", sum == 0.0 ? 0.0 : list.getDouble(key) / sum);
+            jsonArray.add(item);
+        }
+        return jsonArray.toJSONString();
+    }
+
+    static public SBdPressureEstimateSuperviseResponseData estimate(CurusDriver driver,
+                                                                    Long account_id, Long patient_id) {
+        SBdPressureEstimateSuperviseResponseData responseData = new SBdPressureEstimateSuperviseResponseData();
+        List<Quota> bdpreQuotaList = GetBdPressureQuoaList(driver, account_id, patient_id, 2L);
+
+        if ( bdpreQuotaList.size() == 0 ) {
+            responseData.setBptimelines("请先进行血压测量后，方可给出评价和建议！");
+            responseData.setPosition(SBdPressurePosition(driver,null,null));
+        } else {
+            JSONObject curbdp = JSONObject.parseObject(bdpreQuotaList.get(0).getRecord());
+            JSONObject lastbdp = bdpreQuotaList.size() > 1 ? JSONObject.parseObject(bdpreQuotaList.get(1).getRecord()) : null;
+
+            Long days = TimeUtils.dateDiffToNow(bdpreQuotaList.get(0).getMeasure_date()) - 1;
+            if ( days.compareTo(GetMonitorFreq(curbdp.getDouble("sbloodpre"))) > 0 ) {
+                responseData.setBptimelines("上次血压测量太久了，据此给出的评价和建议没有意义，建议更新血压监控指标后再进行评估");
+            } else if ( days.compareTo(1L) >= 0 ){
+                responseData.setBptimelines(String.format("本次评价所依据的血压值是 ％d 天前测得，最好使用当天数据进行评价！", days));
+            }
+
+            Double cur_bplevel = GetBPLevel(curbdp);
+            Double last_bplevel = GetBPLevel(lastbdp);
+            String nonmed_suggestion = "";
+            if ( cur_bplevel == 0.0 ) {
+                if ( last_bplevel >= 0.5 ) nonmed_suggestion = "【管理对象】血压降至理想水平，请保持健康生活方式；因上次血压较高，建议半年内至少监测血压一次！";
+                else nonmed_suggestion = "【管理对象】血压维持在理想水平，请注意保持，每年至少测量和评价一次血压。";
+            } else if ( cur_bplevel == 0.5 ) {
+                if ( last_bplevel == -1.0 ) nonmed_suggestion = "本次【管理对象】血压正常偏高，需强化健康生活方式，防止发展成为高血压，建议3个月内至少测量血压一次。";
+                else if ( last_bplevel == 0.0 ) nonmed_suggestion = "本次【管理对象】血压正常偏高，且比上次略有上升，需强化健康生活方式，防止发展成为高血压，建议3个月内至少测量血压一次。";
+                else if ( last_bplevel == 0.5 ) nonmed_suggestion = "【管理对象】血压连续处在正常偏高水平，请务必注意培养健康生活方式，防止发展成为高血压，建议3个月内至少测量血压一次。";
+                else nonmed_suggestion = "【管理对象】血压降至正常水平，但仍然偏高，建议继续加大生活方式干预力度，一个月内至少测量一次血压！";
+            } else if (cur_bplevel == 1.0 ) {
+                if ( last_bplevel < 1.0 ) nonmed_suggestion = "本次【管理对象】血压已处高血压水平，可根据生活方式改善可能带来的降压效果确定血压控制策略，也可尽早咨询医生，同时建议一个月内至少测量血压一次。";
+                else if ( last_bplevel == 1.0 ) nonmed_suggestion = "【管理对象】血压仍维持在一级高血压水平，如果非药物（健康生活方式）治疗的降压空间有限或实施难度很大，建议尽早咨询医生启动药物治疗。之前每个月至少测量血压一次。";
+                else nonmed_suggestion = "【管理对象】血压降至一级高血压水平，如果非药物（健康生活方式）治疗的降压空间有限或实施难度很大，建议尽早咨询医生启动药物治疗。之前每2周至少测量血压一次。";
+            } else if ( cur_bplevel == 2.0 ) {
+                if ( last_bplevel <= 1.0 ) nonmed_suggestion = "【管理对象】血压已升至二级高血压水平，建议尽早看医生，同时根据生活方式改善的降压效果与医生共商血压控制策略，之前每周至少测量血压一次。";
+                else if ( last_bplevel == 2.0 ) nonmed_suggestion = "【管理对象】血压仍维持在二级高血压水平，建议尽早看医生，同时根据生活方式改善的降压效果与医生共商血压控制策略，之前每周至少测量血压一次。";
+                else nonmed_suggestion = "【管理对象】血压虽有所下降，当仍处在二级高血压水平，建议尽早看医生，同时根据生活方式改善的降压效果与医生共商血压控制策略，之前每天监测血压。";
+            } else nonmed_suggestion = "本次【管理对象】血压水平高危，建议马上去看医生，并密切监测血压。";
+            responseData.setNonmed_suggestion(nonmed_suggestion);
+            PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id,patient_id,QuotaConst.QUOTA_BP_ID);
+
+            if ( patientSupervise != null ) {
+                Double old_bplevel = Double.parseDouble(patientSupervise.getCurrent());
+                responseData.setPosition(SBdPressurePosition(driver,old_bplevel,cur_bplevel));
+            } else responseData.setPosition(SBdPressurePosition(driver,null,null));
+
+
+
+            JSONArray nonmed = new JSONArray();
+            JSONObject weight = new JSONObject();
+            WeightLossPressure(driver,account_id,patient_id,100L,curbdp,weight);
+            weight.put("mode", QuotaConst.QUOTA_WEIGHT); nonmed.add(weight);
+
+            JSONObject food = new JSONObject();
+            FoodLossPressure(driver,account_id,patient_id,100L,curbdp,food);
+            food.put("mode",QuotaConst.QUOTA_FOOD); nonmed.add(food);
+
+            JSONObject activity = new JSONObject();
+            ActivityLossPressure(driver,account_id,patient_id,40L,curbdp,activity);
+            activity.put("mode",QuotaConst.QUOTA_ACT); nonmed.add(activity);
+
+            responseData.setNonmed_status(nonmed.toJSONString());
+        }
+
+        return responseData;
+    }
+}
+

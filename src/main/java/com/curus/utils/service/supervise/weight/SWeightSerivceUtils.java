@@ -110,8 +110,8 @@ public class SWeightSerivceUtils {
             Long duration = TimeUtils.timestampDiff(TimeUtils.getTimestamp(), patientSupervise.getCreate_time());
             Double initWeight = QuotaServiceUtils.getWeight(patientSupervise.getInitial());
             Double wtloss = initWeight - currentWeight;
-            if ( duration <= 30 ) {
-                if ( wtloss > 0 ) {
+            if ( duration.compareTo(30L) <= 0 ) {
+                if ( wtloss.compareTo(0.0) > 0 ) {
                     dayloss = wtloss*(65-2*duration)/duration/(64-duration);
                 } else {
                     dayloss = wtloss/duration;
@@ -138,7 +138,7 @@ public class SWeightSerivceUtils {
         }
         oldDietSum = CalculateDietEnergy(oldDiet);
         requestDietSum = CalculateDietEnergy(JSONObject.parseObject(request.getDiet()));
-        if ( oldDietSum != 0.0 )
+        if ( oldDietSum.compareTo(0.0) > 0 )
             return (oldDietSum - requestDietSum) / oldDietSum * 2000 / 60 / 6.5 / 1000 / 0.35;
         else return 0.0;
     }
@@ -155,7 +155,7 @@ public class SWeightSerivceUtils {
 
         request_energy = CalculateActivityEnergy(JSONObject.parseObject(request.getActivity()));
 
-        if ( request_energy <= 20 ) responseData.setEvaluation("减重过多地依赖饮食控制，对健康不利，建议适当增加运动量。");
+        if ( request_energy.compareTo(20.0) <= 0 ) responseData.setEvaluation("减重过多地依赖饮食控制，对健康不利，建议适当增加运动量。");
         return (request_energy - old_energy) * 0.525 / 7 * currentWeight / 6.5 / 1000 / 0.35 * 2;
     }
     public static Double Pretest(CurusDriver driver, Long account_id,  SWeightPretestRequest request, SWeightPretestResponseData responseData) {
@@ -181,9 +181,8 @@ public class SWeightSerivceUtils {
         else {
             patientSupervise.setLast(CommonConst.FALSE);
             driver.patientSuperviseDao.update(patientSupervise,"id");
-            WeightLossList(driver,JSONObject.parseObject(patientSupervise.getCurrent()).getDouble("weight_loss"),null);
+            WeightLossList(driver,JSONObject.parseObject(patientSupervise.getCurrent()).getDouble("weight_loss"),0.0);
         }
-        patientSupervise.setId(null);
         JSONObject jo = new JSONObject();
         patientSupervise.setCreate_time(TimeUtils.getTimestamp());
         patientSupervise.setEnd_date(TimeUtils.getDate(30L));
@@ -198,12 +197,12 @@ public class SWeightSerivceUtils {
         jo.put("diet", request.getDiet() == null ? null : JSONObject.parseObject(request.getDiet()));
         patientSupervise.setPolicy(jo.toJSONString());
         patientSupervise.setResult(null);
-
+        patientSupervise.setId(null);
         return driver.patientSuperviseDao.insert(patientSupervise);
     }
-    public static Double BMI(Double height, Double weight) { return weight / height / height; }
+    public static double BMI(Double height, Double weight) { return weight / height / height; }
     public static String BMIEvaluation(Double height, Double weight) {
-        Double bmi = BMI(height,weight);
+        double bmi = BMI(height,weight);
         if ( bmi < 18.5 ) {
             return String.format("根据我国成人体重判定标准，【管理对象】目前的体重过低（BMI<18.5kg/m2)，需要吃动结合使体重增加。达到健康体重尚需增重至少 %f 公斤。",18.5*height*height-weight);
         } else if ( bmi < 24.0 ) {
@@ -218,7 +217,7 @@ public class SWeightSerivceUtils {
         if ( patientSupervise == null ) return null;
 
         Double expectwtloss = targetloss * days * (64 - days) / 30 / ( 64 - 30 );
-        Double losspercent = expectwtloss.compareTo(0.0) == 0 ? 0.0 : curwtloss / expectwtloss;
+        Double losspercent = expectwtloss == 0.0 ? 0.0 : curwtloss / expectwtloss;
 
         if ( losspercent >= 1.0 && losspercent < 1.3 ) return "减重很有成效，继续坚持！";
         if ( losspercent >= 0.7 && losspercent < 1.0 ) return "减重有成效，但还需再加把劲才能顺利达到既定目标，无需变更计划！";
@@ -238,15 +237,15 @@ public class SWeightSerivceUtils {
         if ( real_act == null ) real_act = plan_act;
 
         Double diet_act_percent = 0.5 * plan_act / real_act + 0.5 * plan_diet / real_diet;
-        if ( real_act.compareTo(0.0) == 0 && real_diet.compareTo(0.0) == 0 ) diet_act_percent = 1.0;
+        if ( real_act == 0.0 && real_diet == 0.0 ) diet_act_percent = 1.0;
 
         if ( losspercent >= 0.0 && losspercent < 0.7 )
-            if (diet_act_percent >= 0.7 && diet_act_percent < 1.3 ) return "饮食运动在按计划执行，也有一定成效，但目前减重速度难达预期，建议加强干预力度或重新制定计划！";
-            else if ( diet_act_percent < 0.7 ) return "饮食运动计划执行较差，若计划执行有困难，请重新调整！，如有决心再按计划执行，可不必更改计划";
+            if (diet_act_percent.compareTo(0.7) >= 0 && diet_act_percent.compareTo(1.3) < 0 ) return "饮食运动在按计划执行，也有一定成效，但目前减重速度难达预期，建议加强干预力度或重新制定计划！";
+            else if ( diet_act_percent.compareTo(0.7) < 0 ) return "饮食运动计划执行较差，若计划执行有困难，请重新调整！，如有决心再按计划执行，可不必更改计划";
 
         if ( losspercent > 1.3 )
-            if ( diet_act_percent <= 1.3 ) return "体重下降速度过快，之前饮食运动计划不太适合，建议重新制定，系统会根据情况作出调整！";
-            else if ( diet_act_percent > 1.3) return "与计划相比，实际饮食控制和运动强度有点太过，导致体重下降过快，不利于健康，建议按计划执行！";
+            if ( diet_act_percent.compareTo(1.3) <= 0 ) return "体重下降速度过快，之前饮食运动计划不太适合，建议重新制定，系统会根据情况作出调整！";
+            else if ( diet_act_percent.compareTo(1.3) > 0 ) return "与计划相比，实际饮食控制和运动强度有点太过，导致体重下降过快，不利于健康，建议按计划执行！";
 
         return "体重不降反升，还请认真对待，避免各种心脑肾和关节等健康问题的发生！";
     }
@@ -267,6 +266,7 @@ public class SWeightSerivceUtils {
                 put("0",0.0); put("3",0.0); put("5",0.0); put("10",0.0); put("15",0.0);
             }}) );
             driver.patientSuperviseListDao.insert(superviseList);
+            superviseList = driver.patientSuperviseListDao.select(TypeUtils.getWhereHashMap("quota_cat_id",QuotaConst.QUOTA_WEIGHT_ID));
         }
         JSONObject listRecordJson = JSONObject.parseObject(superviseList.getList());
 
@@ -275,13 +275,14 @@ public class SWeightSerivceUtils {
 
         if ( oldIndex != null ) {
             Double count = listRecordJson.getDouble(oldIndex);
-            if (count > 0) listRecordJson.put(oldIndex, count - 1);
+            if ( count.compareTo(1.0) >= 0 ) listRecordJson.put(oldIndex, count - 1);
         }
         if ( curIndex != null ) {
             Double count = listRecordJson.getDouble(curIndex);
             listRecordJson.put(curIndex, count + 1);
         }
-        superviseList.setList(listRecordJson.toJSONString()); driver.patientSuperviseListDao.update(superviseList,"id");
+        superviseList.setList(listRecordJson.toJSONString());
+        driver.patientSuperviseListDao.update(superviseList,"id");
 
         return new SuperviseWeightListRecord(listRecordJson);
     }

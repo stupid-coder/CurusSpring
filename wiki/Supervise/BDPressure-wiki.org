@@ -1,0 +1,94 @@
+#+TITLE: 血压管理接口
+#+AUTHOR: stupid_coder@163.com
+#+DATE: Sat Mar  5 00:21:38 2016
+
+* 描述
+  血压管理接口用于管理对象的血压状态，并提供降血压相关咨询。
+* 血压管理
+** 添加血压情况
+   复用Quota接口即可
+   URI: http://ip:port/curus/quota/add
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名     | 类型   | 说明                                                                   |
+    |------------+--------+------------------------------------------------------------------------|
+    | token      | String | 用户标识                                                               |
+    | patient_id | Long   | 管理对象ID                                                             |
+    | cate       | String | bdpressue                                                              |
+    | Quota      | String | 血压情况JSON字符串,例如{"dbloodpre":74,"sbloodpre":132,"heartrate":68} |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名 | 类型 | 说明 |
+    | data   | null | null |
+
+** 查询查询情况
+   复用Quota接口即可
+   URI: http://ip:port/curus/quota/list
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名     | 类型   | 说明       |
+    |------------+--------+------------|
+    | token      | String | 用户标识   |
+    | patient_id | Long   | 管理对象ID |
+    | cate       | String | bdpressure |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名       | 类型 | 说明                       |
+    |--------------+------+----------------------------|
+    | measure_date | Long | 时间戳                     |
+    | value        | JSON | 对应的添加血压的JSON字符床 |
+
+** 血压计划添加接口
+   URI: http://ip:port/curus/supervise/bdpressure/add
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名        | 类型   | 说明       |
+    |---------------+--------+------------|
+    | token         | String |            |
+    | patient_id    | Long   |            |
+    | lossweight    | Double | 计划中减重 |
+    | dihealthscore | Double | 计划善事提高的分数 |
+    | phyactivity   | Double | 计划增加的运动千步量 |
+    
+** 血压效果评估
+   URI: http://ip:port/curus/supervise/dbpressure/estimate
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名     | 类型   | 说明     |
+    |------------+--------+----------|
+    | token      | String |          |
+    | patient_id | Long   |          |
+
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名            | 类型   | 说明                     |
+    |-------------------+--------+--------------------------|
+    | bptimelines       | String | 血压监控的实效性评语     |
+    | nonmed_suggestion | String | 非药物减压的评语         |
+    | position          | String | 血压排行榜的JSON字符串   |
+    | nonmed_status     | String | 非药物减压的最大减压效果 |
+    
+    其中 nonmed_status的JSON字符串如：
+    "[{\"mode\":\"weight\",\"value\":0,\"status\":0},{\"mode\":\"food\",\"value\":12,\"status\":67},{\"mode\":\"activity\",\"value\":4,\"status\":20}]"
+    mode 标示为那种非药物减压，[weight|food|activity] 对应着指标中心
+** 血压非药物减压效果查询
+   URI: http://ip:port/curus/supervise/dbpressure/nonmed
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名     | 类型   | 说明                                 |
+    |------------+--------+--------------------------------------|
+    | token      |        |                                      |
+    | patient_id |        |                                      |
+    | mode       | String | 对应指标中心中的weight,food,activity |
+    | value      | Double | 对应的增加或者减少的值               |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名      | 类型   | 说明         |
+    |-------------+--------+--------------|
+    | date.value  | Double | 对应的减压值 |
+    | data.status | Double | 对应的最大增加活动量，饮食的份或者减少的体重值 |
+
+
+
+    
+    

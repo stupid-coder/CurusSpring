@@ -2,12 +2,13 @@ package com.curus.utils;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-
+import java.util.*;
 /**
  * Created by stupid-coder on 24/1/16.
  */
 public class TimeUtils {
     public static final Long unit = 1000L;
+    public static final int offset = TimeZone.getDefault().getRawOffset();
     public static Long t2m(Long time) { return time*unit; }
     public static Long m2t(Long millis) { return millis/unit; }
     public static Timestamp getTimestamp() {
@@ -23,9 +24,12 @@ public class TimeUtils {
     public static String date2String(Date date) { return m2t(date.getTime()).toString(); }
     public static Long date2Long(Date date) { return m2t(date.getTime()); }
     public static Long timestampDiff(Timestamp bts, Timestamp ets) {
-        return (ets.getTime()-bts.getTime())/t2m(24*3600L) + 1;
+        return (ets.getTime()+offset)/t2m(24*3600L)-(bts.getTime()+offset)/t2m(24*3600L) + 1;
     }
     public static Long dateDiff(Date bdate, Date edate) {
-        return ( edate.getTime() - bdate.getTime() ) /t2m(24*3600L) + 1;
+        return (edate.getTime()+offset)/t2m(24*3600L) - (bdate.getTime()+offset)/t2m(24*3600L) + 1;
+    }
+    public static Long dateDiffToNow(Date bdate) {
+        return (System.currentTimeMillis()+offset)/t2m(24*3600L) - (bdate.getTime()+offset)/t2m(24*3600L) + 1;
     }
 }

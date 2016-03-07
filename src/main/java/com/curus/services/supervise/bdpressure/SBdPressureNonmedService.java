@@ -10,7 +10,7 @@ import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
-import com.curus.utils.service.supervise.bdpressure.BdPressureServiseUtils;
+import com.curus.utils.service.supervise.bdpressure.SBdPressureServiseUtils;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,16 +18,16 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Created by stupid-coder on 7/3/16.
  */
-public class NonmedServise {
+public class SBdPressureNonmedService {
 
-    private Log logger = LogFactory.getLog(NonmedServise.class);
+    private Log logger = LogFactory.getLog(SBdPressureNonmedService.class);
 
     private CurusDriver driver;
     private SBdPressureNonmedRequest request;
     private JSONObject responseData;
     private ErrorData errorData;
 
-    public NonmedServise(CurusDriver driver, SBdPressureNonmedRequest request) {
+    public SBdPressureNonmedService(SBdPressureNonmedRequest request, CurusDriver driver) {
         this.driver = driver;
         this.request = request;
         this.responseData = new JSONObject();
@@ -53,8 +53,7 @@ public class NonmedServise {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            responseData.put("bploss",
-                    BdPressureServiseUtils.BdPressureNonmedLoss(driver,account,request));
+            responseData = SBdPressureServiseUtils.BdPressureNonmedLoss(driver,account.getId(),request);
         }
         return errorData;
     }
