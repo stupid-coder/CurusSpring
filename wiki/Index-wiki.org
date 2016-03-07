@@ -7,7 +7,9 @@
   + [[https://github.com/stupid-coder/CurusSpring/wiki/quota-interface][生理指标接口]] :: 提交和查询生理指标相关的接口说明
   + [[https://github.com/stupid-coder/CurusSpring/wiki/patient-interface][管理对象接口]] :: 管理对象相关接口说明
   + 项目管理接口 :: 项目管理相关接口说明
-                    + [[https://github.com/stupid-coder/CurusSpring/wiki/supervise-weight-interface][体重管理]] :: 体重管理相关接口
+    + [[https://github.com/stupid-coder/CurusSpring/wiki/supervise-weight-interface][体重管理]] :: 体重管理相关接口
+    + [[https://github.com/stupid-coder/CurusSpring/wiki/supervise-smoke-interface][吸烟管理]] :: 吸烟管理相关接口
+    + [[https://github.com/stupid-coder/CurusSpring/wiki/superivse-bdpressure-interface][血压管理]] :: 血压管理相关接口
 ** Links
   + [[https://github.com/palfan/ncd_api][原有服务API]]
   
