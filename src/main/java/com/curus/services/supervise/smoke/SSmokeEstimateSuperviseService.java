@@ -12,7 +12,6 @@ import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.service.supervise.smoke.SSmokeServiseUtils;
 import com.curus.utils.validate.ValueValidate;
-import com.sun.javaws.CacheUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
