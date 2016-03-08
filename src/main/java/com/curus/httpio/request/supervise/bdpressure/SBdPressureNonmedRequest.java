@@ -7,7 +7,7 @@ public class SBdPressureNonmedRequest {
     private String token;
     private Long patient_id;
     private String mode;
-    private Long value;
+    private Double value;
 
     public String getToken() {
         return token;
@@ -33,11 +33,11 @@ public class SBdPressureNonmedRequest {
         this.mode = mode;
     }
 
-    public Long getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(Long value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 

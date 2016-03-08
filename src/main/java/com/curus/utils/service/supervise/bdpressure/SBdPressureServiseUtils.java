@@ -62,14 +62,14 @@ public class SBdPressureServiseUtils {
     }
 
     static public void WeightLossPressure(CurusDriver driver, Long account_id,
-                                          Long patient_id, Long query_wtloss,
+                                          Long patient_id, Double query_wtloss,
                                           JSONObject bdpressure, JSONObject bplossResult) {
         Long bploss = 0L;
-        Long wtloss = 0L;
+        Double wtloss = 0.0;
 
         if ( bdpressure != null ) {
             Double sbp = bdpressure.getDouble("sbloodpre");
-            Long wtloss_max = Math.round(SWeightSerivceUtils.WeightLossTips(driver, account_id, patient_id));
+            Double wtloss_max = SWeightSerivceUtils.WeightLossTips(driver, account_id, patient_id);
             if ( query_wtloss.compareTo(wtloss_max) < 0 ) {
                 wtloss = query_wtloss;
             } else {
@@ -82,7 +82,7 @@ public class SBdPressureServiseUtils {
     }
 
     static public void FoodLossPressure(CurusDriver driver, Long account_id,
-                                        Long patient_id, Long query_food,
+                                        Long patient_id, Double query_food,
                                         JSONObject bdpressure, JSONObject bplossResult) {
         Long bploss = 0L;
         Long foodinc = 0L;
@@ -90,7 +90,7 @@ public class SBdPressureServiseUtils {
         if ( bdpressure != null ) {
             Double sbp = bdpressure.getDouble("sbloodpre");
             Long max_inc = Math.round((100-SFoodServiceUtils.CalculateFoodScore(driver,account_id,patient_id))*0.9);
-            if ( query_food.compareTo(max_inc) < 0 ) foodinc = query_food;
+            if ( query_food < max_inc.doubleValue() ) foodinc = query_food.longValue();
             else foodinc = max_inc;
             bploss = Math.round(Math.min(Math.max(sbp - 120, 0), Math.min(foodinc / 2 * sbp / 160, 20)));
         }
@@ -109,7 +109,7 @@ public class SBdPressureServiseUtils {
     }
 
     static public void ActivityLossPressure(CurusDriver driver, Long account_id,
-                                            Long patient_id, Long query_act,
+                                            Long patient_id, Double query_act,
                                             JSONObject bdpressure, JSONObject bplossResult) {
         Long bploss = 0L;
         Long actinc = 0L;
@@ -117,7 +117,7 @@ public class SBdPressureServiseUtils {
         if ( bdpressure != null ) {
             Double sbp = bdpressure.getDouble("sbloodpre");
             Long max_act = Math.round(Math.min(Math.max((40 - CalculateActivity(driver, account_id, patient_id))*0.8, 0), 20));
-            if ( query_act.compareTo(max_act) < 0 )  actinc = query_act;
+            if ( query_act < max_act.doubleValue() )  actinc = query_act.longValue();
             else actinc = max_act;
             bploss = Math.round(Math.min(Math.min(Math.max(sbp - 120, 0), Math.max(40 - actinc, 0) / 4 * sbp / 160), 20));
         }
@@ -267,15 +267,15 @@ public class SBdPressureServiseUtils {
 
             JSONArray nonmed = new JSONArray();
             JSONObject weight = new JSONObject();
-            WeightLossPressure(driver,account_id,patient_id,100L,curbdp,weight);
+            WeightLossPressure(driver,account_id,patient_id,100.0,curbdp,weight);
             weight.put("mode", QuotaConst.QUOTA_WEIGHT); nonmed.add(weight);
 
             JSONObject food = new JSONObject();
-            FoodLossPressure(driver,account_id,patient_id,100L,curbdp,food);
+            FoodLossPressure(driver,account_id,patient_id,100.0,curbdp,food);
             food.put("mode",QuotaConst.QUOTA_FOOD); nonmed.add(food);
 
             JSONObject activity = new JSONObject();
-            ActivityLossPressure(driver,account_id,patient_id,40L,curbdp,activity);
+            ActivityLossPressure(driver,account_id,patient_id,40.0,curbdp,activity);
             activity.put("mode",QuotaConst.QUOTA_ACT); nonmed.add(activity);
 
             responseData.setNonmed_status(nonmed.toJSONString());

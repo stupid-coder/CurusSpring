@@ -51,7 +51,7 @@
     | phyactivity   | Double | 计划增加的运动千步量 |
     
 ** 血压效果评估
-   URI: http://ip:port/curus/supervise/dbpressure/estimate
+   URI: http://ip:port/curus/supervise/bdpressure/estimate
 *** 请求结构体
     #+CAPTION: 请求结构体
     | 字段名     | 类型   | 说明     |
@@ -74,7 +74,7 @@
     "[{\"mode\":\"weight\",\"value\":0,\"status\":0},{\"mode\":\"food\",\"value\":12,\"status\":67},{\"mode\":\"activity\",\"value\":4,\"status\":20}]"
     mode 标示为那种非药物减压，[weight|food|activity] 对应着指标中心
 ** 血压非药物减压效果查询
-   URI: http://ip:port/curus/supervise/dbpressure/nonmed
+   URI: http://ip:port/curus/supervise/bdpressure/nonmed
 *** 请求结构体
     #+CAPTION: 请求结构体
     | 字段名     | 类型   | 说明                                 |
