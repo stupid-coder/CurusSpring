@@ -10,11 +10,12 @@
    URI: http://ip:port/curus/quota/add
 *** 请求结构体
     #+CAPTION: 请求结构体
-    | 字段名     | 类型   | 说明       |
-    |------------+--------+------------|
-    | token      | String | 用户标识   |
-    | patient_id | Long   | 管理对象ID |
-    | Quota | String | 吸烟情况JSON字符串,例如{"price":10.5,"number":10}, 标示20根烟10.5块，每天吸10根 |
+    | 字段名     | 类型   | 说明                                                                            |
+    |------------+--------+---------------------------------------------------------------------------------|
+    | token      | String | 用户标识                                                                        |
+    | patient_id | Long   | 管理对象ID                                                                      |
+    | cate       | String | weight                                                                          |
+    | Quota      | String | 吸烟情况JSON字符串,例如{"price":10.5,"number":10}, 标示20根烟10.5块，每天吸10根 |
 *** 响应结构体
     #+CAPTION: 响应结构体
     | 字段名 | 类型 | 说明 |
@@ -29,7 +30,8 @@
     |------------+--------+------------|
     | token      | String | 用户标识   |
     | patient_id | Long   | 管理对象ID |
-    | Quota | String | 吸烟情况JSON字符串,例如{"price":10.5,"number":10}, 标示20根烟10.5块，每天吸10根 |
+    | cate       | String | weight     |
+
 *** 响应结构体
     #+CAPTION: 响应结构体
     | 字段名       | 类型   | 说明   |
@@ -58,12 +60,14 @@
 
 *** 响应结构体
     #+CAPTION: 响应结构体
-    | 字段名       | 类型   | 说明                                                                              |
-    |--------------+--------+-----------------------------------------------------------------------------------|
-    | days         | Long   | 戒烟天数                                                                          |
-    | sv_money     | Double | 戒烟剩下的钱数                                                                    |
-    | lossposition | String | 为戒烟排行榜的JSON字符串，{["time":"0","percent":0.0],["time":"7","percent":1.0]} |
-    | st_goal      | String | 计划add中的smplan                                                                 |
+    | 字段名        | 类型   | 说明                                                                              |
+    |---------------+--------+-----------------------------------------------------------------------------------|
+    | days          | Long   | 戒烟天数                                                                          |
+    | sv_money      | Double | 戒烟剩下的钱数                                                                    |
+    | lossposition  | String | 为戒烟排行榜的JSON字符串，{["time":"0","percent":0.0],["time":"7","percent":1.0]} |
+    | st_goal       | String | 计划add中的smplan                                                                 |
+    | positionindex | String | 戒烟排行榜的index                                                                 |
+
 
 
     

@@ -8,7 +8,16 @@ public class SBdPressureEstimateSuperviseResponseData {
     private String bptimelines;
     private String nonmed_suggestion;
     private String position;
+    private String positionindex;
     private String nonmed_status;
+
+    public String getPositionindex() {
+        return positionindex;
+    }
+
+    public void setPositionindex(String positionindex) {
+        this.positionindex = positionindex;
+    }
 
     public String getBptimelines() {
         return bptimelines;
@@ -48,6 +57,7 @@ public class SBdPressureEstimateSuperviseResponseData {
                 "bptimelines='" + bptimelines + '\'' +
                 ", nonmed_suggestion='" + nonmed_suggestion + '\'' +
                 ", position='" + position + '\'' +
+                ", positionindex='" + positionindex + '\'' +
                 ", nonmed_status='" + nonmed_status + '\'' +
                 '}';
     }

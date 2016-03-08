@@ -67,6 +67,8 @@
     | nonmed_suggestion | String | 非药物减压的评语         |
     | position          | String | 血压排行榜的JSON字符串   |
     | nonmed_status     | String | 非药物减压的最大减压效果 |
+    | positionindex     | String | 排行榜的index            |
+
     
     其中 nonmed_status的JSON字符串如：
     "[{\"mode\":\"weight\",\"value\":0,\"status\":0},{\"mode\":\"food\",\"value\":12,\"status\":67},{\"mode\":\"activity\",\"value\":4,\"status\":20}]"

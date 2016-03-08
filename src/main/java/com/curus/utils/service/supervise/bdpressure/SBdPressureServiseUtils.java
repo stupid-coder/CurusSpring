@@ -191,9 +191,10 @@ public class SBdPressureServiseUtils {
         if ( curlevel != null && curlevel != -1.0 ) {
             list.put(curlevel.toString(),list.getDouble(curlevel.toString())+1);
         }
-
-        superviseList.setList(list.toJSONString());
-        driver.patientSuperviseListDao.update(superviseList,"id");
+        if ( curlevel != null && curlevel != -1.0 || lastlevel != null && lastlevel != -1.0 ) {
+            superviseList.setList(list.toJSONString());
+            driver.patientSuperviseListDao.update(superviseList, "id");
+        }
 
 
         JSONArray jsonArray = new JSONArray();
@@ -258,9 +259,11 @@ public class SBdPressureServiseUtils {
             if ( patientSupervise != null ) {
                 Double old_bplevel = Double.parseDouble(patientSupervise.getCurrent());
                 responseData.setPosition(SBdPressurePosition(driver,old_bplevel,cur_bplevel));
+                patientSupervise.setCurrent(cur_bplevel.toString());
+                driver.patientSuperviseDao.update(patientSupervise,"id");
             } else responseData.setPosition(SBdPressurePosition(driver,null,null));
 
-
+            responseData.setPositionindex(cur_bplevel.toString());
 
             JSONArray nonmed = new JSONArray();
             JSONObject weight = new JSONObject();

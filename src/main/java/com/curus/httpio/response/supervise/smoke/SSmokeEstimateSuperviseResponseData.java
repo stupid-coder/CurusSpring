@@ -7,8 +7,18 @@ public class SSmokeEstimateSuperviseResponseData {
 
     private Long days;
     private Double sv_money;
+    private String positionindex;
     private String lossposition;
     private String st_goal;
+
+
+    public String getPositionindex() {
+        return positionindex;
+    }
+
+    public void setPositionindex(String positionindex) {
+        this.positionindex = positionindex;
+    }
 
     public Long getDays() {
         return days;
@@ -47,6 +57,7 @@ public class SSmokeEstimateSuperviseResponseData {
         return "SSmokeEstimateSuperviseResponseData{" +
                 "days=" + days +
                 ", sv_money=" + sv_money +
+                ", positionindex='" + positionindex + '\'' +
                 ", lossposition='" + lossposition + '\'' +
                 ", st_goal='" + st_goal + '\'' +
                 '}';

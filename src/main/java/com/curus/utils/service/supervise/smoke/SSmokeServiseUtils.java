@@ -80,6 +80,7 @@ public class SSmokeServiseUtils {
     }
 
     public static String positionIndex(Long days) {
+        if ( days == null || days == 0L ) return null;
         if ( days.compareTo(7L) < 0 ) return "0";
         if ( days.compareTo(30L) < 0 ) return "7";
         if ( days.compareTo(90L) < 0 ) return "30";
@@ -109,37 +110,39 @@ public class SSmokeServiseUtils {
         }
         JSONObject list = JSONObject.parseObject(superviseList.getList());
 
-        if ( oldays != null ) {
+        if ( oldays != null && oldays != 0 ) {
             String index = positionIndex(oldays);
             Double count = list.getDouble(index);
             if ( count.compareTo(0.0) > 0 ) list.put(index,count-1);
         }
 
-        if ( newdays != null ) {
+        if ( newdays != null && newdays != 0) {
             String index = positionIndex(newdays);
             Double count = list.getDouble(index);
             list.put(index,count+1);
         }
 
-        superviseList.setList(list.toJSONString());
-        driver.patientSuperviseListDao.update(superviseList,"id");
-
-        if ( newdays != null ) {
-            Double sum = 0.0;
-            for ( String key : list.keySet() ) {
-                sum += list.getDouble(key);
-            }
-            if ( sum.compareTo(0.0) == 0 ) sum = 1.0;
-            JSONArray position = new JSONArray();
-            for (String key : list.keySet()) {
-                JSONObject item = new JSONObject();
-                item.put("time",key);
-                item.put("percent", list.getDouble(key)/sum);
-                position.add(item);
-            }
-            return position.toJSONString();
+        if ( newdays != null && newdays != 0 || oldays != null && oldays != 0 ) {
+            superviseList.setList(list.toJSONString());
+            driver.patientSuperviseListDao.update(superviseList, "id");
         }
-        return null;
+
+
+        Double sum = 0.0;
+        for ( String key : list.keySet() ) {
+            sum += list.getDouble(key);
+        }
+        if ( sum.compareTo(0.0) == 0 ) sum = 1.0;
+        JSONArray position = new JSONArray();
+        for (String key : list.keySet()) {
+            JSONObject item = new JSONObject();
+            item.put("time",key);
+            item.put("percent", list.getDouble(key)/sum);
+            position.add(item);
+        }
+        return position.toJSONString();
+
+
     }
 
     public static SSmokeEstimateSuperviseResponseData estimate(CurusDriver driver,
@@ -155,10 +158,14 @@ public class SSmokeServiseUtils {
             days = TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp());
             st_goal = patientSupervise.getTarget();
             sv_money = sv_money(driver, account_id, patient_id, patientSupervise.getInitial(),new Date(patientSupervise.getCreate_time().getTime()));
+            responseData.setLossposition(
+                    position(driver,Long.parseLong(patientSupervise.getCurrent()),days));
             patientSupervise.setCurrent(days.toString());
             driver.patientSuperviseDao.update(patientSupervise,"id");
-            responseData.setLossposition(position(driver,Long.parseLong(patientSupervise.getCurrent()),days));
+        } else {
+            responseData.setLossposition(position(driver, null, null));
         }
+        responseData.setPositionindex(positionIndex(days));
         responseData.setDays(days);
         responseData.setSt_goal(st_goal);
         responseData.setSv_money(sv_money);
