@@ -51,12 +51,13 @@ public class SBdPressureServiseUtils {
                                               SBdPressureNonmedRequest request) {
         JSONObject jo = new JSONObject();
         JSONObject bdpressure = GetLastBdPressure(driver, account_id, request.getPatient_id());
+        Double value = Double.parseDouble(request.getValue());
         if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_WEIGHT) == 0 ) {
-            WeightLossPressure(driver, account_id, request.getPatient_id(), request.getValue(), bdpressure, jo);
+            WeightLossPressure(driver, account_id, request.getPatient_id(), value, bdpressure, jo);
         } else if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_FOOD) == 0 ) {
-            FoodLossPressure(driver, account_id, request.getPatient_id(), request.getValue(), bdpressure, jo);
+            FoodLossPressure(driver, account_id, request.getPatient_id(), value, bdpressure, jo);
         } else if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_ACT) == 0 ) {
-            ActivityLossPressure(driver,account_id,request.getPatient_id(),request.getValue(), bdpressure, jo);
+            ActivityLossPressure(driver,account_id,request.getPatient_id(),value, bdpressure, jo);
         }
         return jo;
     }
