@@ -33,6 +33,7 @@ public class SBdPressureNonmedRequest {
         this.mode = mode;
     }
 
+
     public Double getValue() {
         return value;
     }
