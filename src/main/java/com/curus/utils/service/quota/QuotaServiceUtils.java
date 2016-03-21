@@ -211,7 +211,7 @@ public class QuotaServiceUtils {
             JSONObject responseItem = new JSONObject();
             responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
             responseItem.put("value",SFoodServiceUtils.CalculateFoodScore(quotaFood));
-            response.put(QuotaConst.QUOTA_DIET,responseItem);
+            response.put(QuotaConst.QUOTA_FOOD,responseItem);
             ret ++;
         }
 

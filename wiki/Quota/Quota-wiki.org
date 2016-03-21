@@ -35,6 +35,8 @@
    | subcate    | String.OPTIONAL | 二级标识，例如血糖的采集时间                 |
    | days       | String.OPTIONAL | 获取最新的多少个生理指标                     |
 
+   说明：增加新list all接口，其中cate可以为NULL。
+
 *** 响应结构体
     #+CAPTION: 响应结构体
     | 字段名     | 类型   | 说明               |
@@ -63,7 +65,6 @@
     | status | Int    | 返回状态 |
     | data   | Object | NULL     |
      
-
 
 
 
