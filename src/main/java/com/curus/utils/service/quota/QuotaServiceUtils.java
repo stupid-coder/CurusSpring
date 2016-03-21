@@ -134,9 +134,9 @@ public class QuotaServiceUtils {
         } else if (quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0 ) {
             quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
             if ( quotaList != null && quotaList.size() > 0) {
-                //JSONObject smoke = JSONObject.parseObject(quotaList.get(0).getRecord());
+                JSONObject smoke = JSONObject.parseObject(quotaList.get(0).getRecord());
                 response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
-                response.put("value",quotaList.get(0).getRecord());
+                response.put("value", smoke);//quotaList.get(0).getRecord());
             }
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
             response.put("value",new JSONArray());
@@ -149,5 +149,79 @@ public class QuotaServiceUtils {
             }
         }
         return quotaList != null ? quotaList.size() : 0;
+    }
+    static public int listQuotas(CurusDriver driver,
+                                 Long account_id, Long patient_id,
+                                 JSONObject response) {
+        List<Quota> quotaList = null;
+        int ret = 0;
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_WEIGHT_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaWeight = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("meassure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value", quotaWeight);
+            response.put(QuotaConst.QUOTA_WEIGHT, responseItem);
+            ret ++;
+        }
+
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_BP_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaBP = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",quotaBP);
+            response.put(QuotaConst.QUOTA_BP,responseItem);
+            ret ++;
+        }
+
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_BS_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaBS = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",quotaBS);
+            response.put(QuotaConst.QUOTA_BS,responseItem);
+            ret ++;
+        }
+
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaAct = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",SWeightSerivceUtils.CalculateActivityEnergy(quotaAct));
+            response.put(QuotaConst.QUOTA_ACT,responseItem);
+            ret ++;
+        }
+
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_DIET_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaDiet = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",SWeightSerivceUtils.CalculateDietEnergy(quotaDiet));
+            response.put(QuotaConst.QUOTA_DIET,responseItem);
+            ret ++;
+        }
+
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_FOOD_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaFood = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",SFoodServiceUtils.CalculateFoodScore(quotaFood));
+            response.put(QuotaConst.QUOTA_DIET,responseItem);
+            ret ++;
+        }
+
+        PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id, patient_id, QuotaConst.QUOTA_SMOKE_ID);
+        if (patientSupervise != null) {
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("value",TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp()));
+            response.put(QuotaConst.QUOTA_SMOKE,responseItem);
+            ret ++;
+        }
+        return ret;
     }
 }

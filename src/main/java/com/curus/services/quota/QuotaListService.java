@@ -46,8 +46,8 @@ public class QuotaListService {
         if ( (errorData = ValueValidate.valueExistValidate(request.getToken(),"token")) != null) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getPatient_id(), "patient_id")) != null) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( QuotaUtils.getQuotaIds(request.getCate()).compareTo(QuotaConst.QUOTA_UNKNOW_ID) == 0 ) {
+            logger.warn(LogUtils.Msg(errorData, request));
+        } else if ( request.getCate() != null && QuotaUtils.getQuotaIds(request.getCate()).compareTo(QuotaConst.QUOTA_UNKNOW_ID) == 0 ) {
             errorData = new ErrorData(ErrorConst.IDX_INVALIDPARM_ERROR,"cate");
             logger.warn(LogUtils.Msg(errorData,request));
         }
@@ -61,7 +61,9 @@ public class QuotaListService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            QuotaServiceUtils.listQuotas(driver,request.getDays(),account.getId(),request.getPatient_id(),request.getCate(),request.getSubcate(),responseData);
+            if ( request.getCate() == null )
+                QuotaServiceUtils.listQuotas(driver,account.getId(),request.getPatient_id(),responseData);
+            else QuotaServiceUtils.listQuotas(driver,request.getDays(),account.getId(),request.getPatient_id(),request.getCate(),request.getSubcate(),responseData);
         }
 
         return errorData;
