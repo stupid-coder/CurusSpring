@@ -103,7 +103,7 @@ public class QuotaServiceUtils {
                                  Long account_id, Long patient_id,
                                  String cate, String subcate,
                                  JSONObject response) {
-        days = days == null || days.compareTo(0L) == 0 ? 90L : days;
+        // days = (days == null ? 90L : days);
         Long quota_id = QuotaUtils.getQuotaIds(cate);
         Long subcate_id = QuotaUtils.getSubQuotaIds(subcate);
         List<Quota> quotaList = null;
@@ -141,7 +141,10 @@ public class QuotaServiceUtils {
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
             response.put("value",new JSONArray());
             JSONArray valuelist = response.getJSONArray("value");
-            quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
+            if ( days <= 0L )
+                quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,days*-1+1);
+            else
+                quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
             for ( Quota q : quotaList ) {
                 JSONObject item = JSONObject.parseObject(q.getRecord());
                 item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
