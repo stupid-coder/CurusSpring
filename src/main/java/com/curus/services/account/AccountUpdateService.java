@@ -4,6 +4,7 @@ import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.account.AccountUpdateRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
+import com.curus.im.ImQueryInterface;
 import com.curus.model.database.Account;
 import com.curus.model.database.Patient;
 import com.curus.model.database.Quota;
@@ -82,6 +83,11 @@ public class AccountUpdateService {
                 driver.patientDao.save(patient,"id");
             }
             patient = PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF);
+
+            if ( patient != null ) {
+                ImQueryInterface.Create(patient.getId().toString(),patient.getId_number(),patient.getName());
+                ImQueryInterface.Add(ImQueryInterface.curus_accid,patient.getId().toString());
+            }
 
             QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_WEIGHT,null,null,
                     QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_WEIGHT, request.getWeight()));

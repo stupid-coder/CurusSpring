@@ -5,6 +5,7 @@ import com.curus.httpio.request.patient.PatientAddRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientAddResponseData;
+import com.curus.im.ImQueryInterface;
 import com.curus.model.database.Account;
 import com.curus.model.database.AccountPatient;
 import com.curus.model.database.Patient;
@@ -104,6 +105,10 @@ public class PatientAddService {
 
                 QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_HEIGHT,null,null,
                         QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_HEIGHT, request.getHeight()));
+
+                accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account.getId(),
+                        "is_self",CommonConst.TRUE));
+                ImQueryInterface.Add(accountPatient.getPatient_id().toString(),patient.getId().toString());
             }
         }
         return errorData;

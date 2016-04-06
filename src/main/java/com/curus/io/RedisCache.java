@@ -47,19 +47,20 @@ public class RedisCache {
         Jedis jedis = jedisPool.getResource();
         jedis.set(getKey(key),value);
         jedis.expire(getKey(key),expire);
-        jedisPool.returnResource(jedis);
+        jedis.close();
     }
 
     static public String Get(String key) {
         Jedis jedis = jedisPool.getResource();
         String value = jedis.get(getKey(key));
-        jedisPool.returnResource(jedis);
+        jedis.close();
         return value;
     }
 
     static public void Delete(String key) {
         Jedis jedis = jedisPool.getResource();
         jedis.del(getKey(key));
+        jedis.close();
     }
 
     static public String DeleteAndGet(String key) {
@@ -67,6 +68,7 @@ public class RedisCache {
         String k = getKey(key);
         String v = jedis.get(k);
         if (v != null) jedis.del(k);
+        jedis.close();
         return v;
     }
 
