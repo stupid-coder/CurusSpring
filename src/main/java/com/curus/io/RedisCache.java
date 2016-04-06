@@ -34,6 +34,7 @@ public class RedisCache {
             config.setMaxWaitMillis(MAX_WAIT);
             config.setTestOnBorrow(TEST_ON_BORROW);
             jedisPool = new JedisPool(config, ADDR, PORT, TIMEOUT);
+            logger.info("Success to Static Initilization the Jedis");
         } catch ( Exception e ) {
             logger.warn("Failure to Static Initilization the Jedis");
         }
