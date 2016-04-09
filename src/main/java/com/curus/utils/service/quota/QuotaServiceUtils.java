@@ -103,7 +103,7 @@ public class QuotaServiceUtils {
                                  Long account_id, Long patient_id,
                                  String cate, String subcate,
                                  JSONObject response) {
-        // days = (days == null ? 90L : days);
+        days = (days == null ? 90L : days);
         Long quota_id = QuotaUtils.getQuotaIds(cate);
         Long subcate_id = QuotaUtils.getSubQuotaIds(subcate);
         List<Quota> quotaList = null;

@@ -15,6 +15,7 @@ public class RedisCache {
 
     static private String ADDR = "123.57.227.101";
     static private int PORT = 6379;
+    static private String PASSWD = "curus";
     static private String PREFIX = "CURUS";
     private static int expire = 7*24*3600;
     private static int MAX_TOTAL = 8;
@@ -33,7 +34,7 @@ public class RedisCache {
             config.setMaxIdle(MAX_IDLE);
             config.setMaxWaitMillis(MAX_WAIT);
             config.setTestOnBorrow(TEST_ON_BORROW);
-            jedisPool = new JedisPool(config, ADDR, PORT, TIMEOUT);
+            jedisPool = new JedisPool(config, ADDR, PORT, TIMEOUT, PASSWD);
             logger.info("Success to Static Initilization the Jedis");
         } catch ( Exception e ) {
             logger.warn("Failure to Static Initilization the Jedis");
