@@ -15,6 +15,7 @@ public class PatientListResponseData {
 
     public class PatientListInfo {
         private String patient_name;
+        private Integer gender;
         private String role_name;
         private Integer is_self;
         private Long patient_id;
@@ -22,6 +23,7 @@ public class PatientListResponseData {
 
         public PatientListInfo(Patient patient, AccountPatient accountPatient) {
             this.patient_name = patient.getName();
+            this.gender = patient.getGender();
             this.role_name = RoleUtils.getRoleName(accountPatient.getRole_id());
             this.is_self = accountPatient.getIs_self();
             this.patient_id = patient.getId();
@@ -34,6 +36,14 @@ public class PatientListResponseData {
 
         public void setPatient_name(String patient_name) {
             this.patient_name = patient_name;
+        }
+
+        public Integer getGender() {
+            return gender;
+        }
+
+        public void setGender(Integer gender) {
+            this.gender = gender;
         }
 
         public String getRole_name() {
@@ -72,6 +82,7 @@ public class PatientListResponseData {
         public String toString() {
             return "PatientListInfo{" +
                     "patient_name='" + patient_name + '\'' +
+                    ", gender=" + gender +
                     ", role_name='" + role_name + '\'' +
                     ", is_self=" + is_self +
                     ", patient_id=" + patient_id +
