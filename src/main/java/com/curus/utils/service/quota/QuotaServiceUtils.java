@@ -162,7 +162,7 @@ public class QuotaServiceUtils {
         if (quotaList != null && quotaList.size() > 0) {
             JSONObject quotaWeight = JSONObject.parseObject(quotaList.get(0).getRecord());
             JSONObject responseItem = new JSONObject();
-            responseItem.put("meassure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+            responseItem.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
             responseItem.put("value", quotaWeight);
             response.put(QuotaConst.QUOTA_WEIGHT, responseItem);
             ret ++;
