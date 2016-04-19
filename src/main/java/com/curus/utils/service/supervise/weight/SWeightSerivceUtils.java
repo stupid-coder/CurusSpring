@@ -130,7 +130,7 @@ public class SWeightSerivceUtils {
         JSONObject oldDiet;
 
         List<Quota> dietQuotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_DIET_ID,1L);
-        if ( dietQuotaList == null ) {
+        if ( dietQuotaList == null || dietQuotaList.size() == 0) {
             QuotaServiceUtils.addQuota(driver,account_id,patient_id,QuotaConst.QUOTA_DIET,null,null,QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
             oldDiet = JSONObject.parseObject(QuotaConst.QUOTA_INIT.get(QuotaConst.QUOTA_DIET));
         } else {
@@ -143,6 +143,7 @@ public class SWeightSerivceUtils {
         else return 0.0;
     }
     public static Double CalculateActivityLoss(CurusDriver driver, Long account_id, Long patient_id, SWeightPretestRequest request, Double currentWeight, SWeightPretestResponseData responseData) {
+        if (request.getActivity().compareTo("[]") == 0) return 0.0;
         List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
         Quota quota;
         Double old_energy = 0.0; Double request_energy = 0.0;
@@ -152,7 +153,6 @@ public class SWeightSerivceUtils {
         } else { quota = quotaList.get(0); }
 
         old_energy = CalculateActivityEnergy(JSONObject.parseObject(quota.getRecord()));
-
         request_energy = CalculateActivityEnergy(JSONObject.parseObject(request.getActivity()));
 
         if ( request_energy.compareTo(20.0) <= 0 ) responseData.setEvaluation("减重过多地依赖饮食控制，对健康不利，建议适当增加运动量。");
@@ -193,8 +193,8 @@ public class SWeightSerivceUtils {
         patientSupervise.setCurrent(jo.toJSONString());
         patientSupervise.setLast(CommonConst.TRUE);
         jo.clear();
-        jo.put("activity", request.getActivity() == null ? null : JSONObject.parseObject(request.getActivity()));
-        jo.put("diet", request.getDiet() == null ? null : JSONObject.parseObject(request.getDiet()));
+        jo.put("activity", request.getActivity().compareTo("[]") == 0 ? null : JSONObject.parseObject(request.getActivity()));
+        jo.put("diet", JSONObject.parseObject(request.getDiet()));
         patientSupervise.setPolicy(jo.toJSONString());
         patientSupervise.setResult(null);
         patientSupervise.setId(null);

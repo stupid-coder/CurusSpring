@@ -41,7 +41,8 @@ public class SWeightPretestService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getWeight_loss(), "weight_loss")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDiet(), "diet")) != null ) {
+        } else if ( (errorData = ValueValidate.valueExistValidate(request.getDiet(), "diet")) != null &&
+                request.getDiet().compareTo("[]") == 0 ) {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getActivity(),"activity")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
