@@ -1,6 +1,7 @@
 package com.curus.controllers;
 
 import com.curus.dao.CurusDriver;
+import com.curus.httpio.request.supervise.SuperviseGetRequest;
 import com.curus.httpio.request.supervise.SuperviseListRequest;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureAddSuperviseRequest;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureEstimateSuperviseRequest;
@@ -14,6 +15,7 @@ import com.curus.httpio.request.supervise.weight.SWeightEstimateRequest;
 import com.curus.httpio.request.supervise.weight.SWeightLossTipsRequst;
 import com.curus.httpio.request.supervise.weight.SWeightPretestRequest;
 import com.curus.httpio.response.ResponseBase;
+import com.curus.services.supervise.SuperviseGetService;
 import com.curus.services.supervise.SuperviseListService;
 import com.curus.services.supervise.bdpressure.SBdPressureAddSuperviseService;
 import com.curus.services.supervise.bdpressure.SBdPressureEstimateSuperviseService;
@@ -44,8 +46,15 @@ public class SuperviceController {
     @RequestMapping(value="/list",method=RequestMethod.POST, consumes="application/json")
     public @ResponseBody
     ResponseBase List(@RequestBody SuperviseListRequest request) {
-        SuperviseListService servise = new SuperviseListService(request,driver);
-        return servise.process();
+        SuperviseListService service = new SuperviseListService(request,driver);
+        return service.process();
+    }
+
+    @RequestMapping(value="/get",method=RequestMethod.POST, consumes="application/json")
+    public @ResponseBody
+    ResponseBase Get(@RequestBody SuperviseGetRequest request) {
+        SuperviseGetService service = new SuperviseGetService(request,driver);
+        return service.process();
     }
 
     @RequestMapping(value="/weight/pretest",method= RequestMethod.POST, consumes="application/json")

@@ -65,6 +65,9 @@ public class SuperviseListService {
         if ( validate() == null && listSupervise() == null) {
             logger.info(LogUtils.Msg("Success to List Supervise",request,responseData));
             return new ResponseBase(StatusConst.OK, responseData);
-        } else return new ResponseBase(StatusConst.ERROR, errorData);
+        } else {
+            logger.warn(LogUtils.Msg("Failure to List Supervise",request,errorData));
+            return new ResponseBase(StatusConst.ERROR, errorData);
+        }
     }
 }
