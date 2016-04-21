@@ -1,0 +1,41 @@
+#+TITLE: 项目管理总接口
+#+AUTHOR: stupid_coder@163.com
+
+* 概述
+  项目管理接口用于返回用户参与的项目管理和获取某个详细项目的信息。
+* 接口
+** 获取参与的项目接口
+   接口URI: http://ip:port/curus/supervise/list
+*** 请求结构体
+    #+CAPTION: 获取参与项目管理的请求结构体
+    | 字段名     | 类型   | 说明             |
+    |------------+--------+------------------|
+    | token      | String | 用户标示         |
+    | patient_id | Long   | 获取的管理对象ID |
+
+*** 响应结构体
+    #+CAPTION: 获取参与项目管理的响应结构体
+    | 字段名         | 类型         | 说明                                                |
+    |----------------+--------------+-----------------------------------------------------|
+    | data.quotaList | List<String> | 参与的管理项目的Quota字段名，如体重weight,吸烟smoke |
+
+** 获取某个项目管理的详情
+   接口URI: http://ip:port/curus/supervise/get
+*** 请求结构体
+    #+CAPTION: 获取详情
+    | 字段名     | 类型   | 说明             |
+    |------------+--------+------------------|
+    | token      | String | 用户标示         |
+    | patient_id | Long   | 获取的管理对象ID |
+    | cate       | String | 管理项目的Quota  |
+*** 响应结构体
+    #+CAPTION: 响应结构体
+    | 字段名      | 类型   | 说明                 |
+    |-------------+--------+----------------------|
+    | create_time | Long   | 项目创建时间戳       |
+    | end_date    | Long   | 项目结束日期时间戳   |
+    | initial     | String | 项目开始用户状态     |
+    | target      | String | 项目目标状态         |
+    | current     | String | 项目当前状态         |
+    | policy      | String | 项目中设定的达标策略 |
+    | result      | String | 结果                   |

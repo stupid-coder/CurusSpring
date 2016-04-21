@@ -24,7 +24,7 @@ public class SuperviseGetService {
     private Log logger = LogFactory.getLog(SuperviseGetService.class);
 
     private SuperviseGetRequest request;
-    private PatientSupervise responseData;
+    private SuperviseGetResponseData responseData;
     private CurusDriver driver;
     private ErrorData errorData;
 
@@ -51,7 +51,10 @@ public class SuperviseGetService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.warn(LogUtils.Msg(errorData, request));
         } else {
-            responseData = driver.patientSuperviseDao.selectLastSupervise(account.getId(),request.getPatient_id(), QuotaUtils.getQuotaIds(request.getCate()));
+            PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account.getId(),request.getPatient_id(), QuotaUtils.getQuotaIds(request.getCate()));
+            if ( patientSupervise != null ) {
+                responseData = new SuperviseGetResponseData(patientSupervise);
+            }
         }
         return errorData;
     }
