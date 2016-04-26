@@ -17,7 +17,7 @@ public class SuperviseGetResponseData {
 
     public SuperviseGetResponseData(PatientSupervise patientSupervise) {
         this.create_time = TimeUtils.m2t(patientSupervise.getCreate_time().getTime());
-        this.end_date = TimeUtils.date2Long(patientSupervise.getEnd_date());
+        this.end_date = patientSupervise.getEnd_date() != null ? TimeUtils.date2Long(patientSupervise.getEnd_date()) : null;
         this.initial = patientSupervise.getInitial();
         this.target = patientSupervise.getTarget();
         this.current = patientSupervise.getCurrent();
