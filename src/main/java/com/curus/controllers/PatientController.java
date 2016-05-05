@@ -20,21 +20,21 @@ public class PatientController {
 
     @RequestMapping(value="/preadd",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseBase register(@RequestBody PatientPreAddRequest request) {
+    ResponseBase preadd(@RequestBody PatientPreAddRequest request) {
         PatientPreAddService service = new PatientPreAddService(request,driver);
         return service.process();
     }
 
     @RequestMapping(value="/add",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseBase register(@RequestBody PatientAddRequest request) {
+    ResponseBase add(@RequestBody PatientAddRequest request) {
         PatientAddService service = new PatientAddService(request,driver);
         return service.process();
     }
 
     @RequestMapping(value="/list",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseBase register(@RequestBody PatientListRequest request) {
+    ResponseBase list(@RequestBody PatientListRequest request) {
         PatientListService service = new PatientListService(request,driver);
         return service.process();
     }
@@ -48,7 +48,7 @@ public class PatientController {
 
     @RequestMapping(value="/push_config",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseBase pushConfig(@RequestBody PatientPushConfigRequest request) {
+    ResponseBase push_config(@RequestBody PatientPushConfigRequest request) {
         PatientPushConfigService service = new PatientPushConfigService(request,driver);
         return service.process();
     }

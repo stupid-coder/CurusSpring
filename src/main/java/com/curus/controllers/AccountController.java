@@ -37,13 +37,13 @@ public class AccountController {
     }
 
     @RequestMapping(value="/update",method=RequestMethod.POST, consumes="application/json")
-    public @ResponseBody ResponseBase login(@RequestBody AccountUpdateRequest request) {
+    public @ResponseBody ResponseBase update(@RequestBody AccountUpdateRequest request) {
         AccountUpdateService service = new AccountUpdateService(request,driver);
         return service.process();
     }
 
     @RequestMapping(value="/modify_phone",method=RequestMethod.POST, consumes="application/json")
-    public @ResponseBody ResponseBase login(@RequestBody AccountModifyPhoneRequest request) {
+    public @ResponseBody ResponseBase modify_phone(@RequestBody AccountModifyPhoneRequest request) {
         AccountModifyPhoneService service = new AccountModifyPhoneService(request,driver);
         return service.process();
     }
@@ -55,13 +55,13 @@ public class AccountController {
     }
 
     @RequestMapping(value="/detail",method=RequestMethod.POST,consumes="application/json")
-    public @ResponseBody String logout(@RequestBody AccountDetailRequest request) {
+    public @ResponseBody String detail(@RequestBody AccountDetailRequest request) {
         AccountDetailService service = new AccountDetailService(request,driver);
         return service.process().toString();
     }
 
     @RequestMapping(value="/idetail",method=RequestMethod.POST,consumes="application/json")
-    public @ResponseBody String logout(@RequestBody AccountIDetailRequest request) {
+    public @ResponseBody String idetail(@RequestBody AccountIDetailRequest request) {
         AccountIDetailService service = new AccountIDetailService(request,driver);
         return service.process().toString();
     }
@@ -73,7 +73,7 @@ public class AccountController {
     }
 
     @RequestMapping(value="/passwd/forget",method=RequestMethod.POST,consumes="application/json")
-    public @ResponseBody ResponseBase passwd_modify(@RequestBody AccountPasswdForgetRequest request) {
+    public @ResponseBody ResponseBase passwd_forget(@RequestBody AccountPasswdForgetRequest request) {
         AccountPasswdForgetService service = new AccountPasswdForgetService(request,driver);
         return service.process();
     }

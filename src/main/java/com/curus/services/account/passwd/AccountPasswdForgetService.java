@@ -46,7 +46,7 @@ public class AccountPasswdForgetService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
             account.setPasswd(request.getPasswd());
-            assert(driver.accountDao.updatePasswd(account)==1);
+            driver.accountDao.updatePasswd(account);
         }
         return errorData;
     }
