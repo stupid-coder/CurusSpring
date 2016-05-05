@@ -20,9 +20,9 @@ public class SFoodServiceUtils {
         if ( !FOOD_SCORES.containsKey(value) ) return 0.0;
         Double based_score = FOOD_SCORES.get(value);
 
-        if ( key.compareTo("salt") == 0 ) return (6.0-based_score * 2.0);
+        if ( key.compareTo("salt") == 0 ) return (6.0-based_score) * 2.0;
         else if ( key.compareTo("meat") == 0 ) return (6.0-based_score);
-        else return (based_score-1.0);
+        else return based_score;
     }
     public static Double CalculateFoodScore(JSONObject foodJson) {
         Double score = 0.0;
