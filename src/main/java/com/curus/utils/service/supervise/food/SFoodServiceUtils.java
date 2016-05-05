@@ -22,14 +22,14 @@ public class SFoodServiceUtils {
 
         if ( key.compareTo("salt") == 0 ) return (6.0-based_score * 2.0);
         else if ( key.compareTo("meat") == 0 ) return (6.0-based_score);
-        else return based_score;
+        else return (based_score-1.0);
     }
     public static Double CalculateFoodScore(JSONObject foodJson) {
         Double score = 0.0;
         for ( String key : foodJson.keySet() ) {
             score += GetScoreByName(key,foodJson.getString(key));
         }
-        return score;
+        return score/40*100;
     }
     public static  Double CalculateFoodScore(CurusDriver driver,
                                              Long account_id,
