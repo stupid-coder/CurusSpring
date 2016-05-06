@@ -110,7 +110,7 @@ public class SWeightSerivceUtils {
             Long duration = TimeUtils.timestampDiff(TimeUtils.getTimestamp(), patientSupervise.getCreate_time());
             Double initWeight = QuotaServiceUtils.getWeight(patientSupervise.getInitial());
             Double wtloss = initWeight - currentWeight;
-            if ( duration.compareTo(30L) <= 0 ) {
+            if ( duration.compareTo(30L) < 0 ) {
                 if ( wtloss.compareTo(0.0) > 0 ) {
                     dayloss = wtloss*(65-2*duration)/duration/(64-duration);
                 } else {
@@ -155,7 +155,7 @@ public class SWeightSerivceUtils {
         old_energy = CalculateActivityEnergy(JSONObject.parseObject(quota.getRecord()));
         request_energy = CalculateActivityEnergy(JSONObject.parseObject(request.getActivity()));
 
-        if ( request_energy.compareTo(20.0) <= 0 ) responseData.setEvaluation("减重过多地依赖饮食控制，对健康不利，建议适当增加运动量。");
+        if ( request_energy.compareTo(20.0) <= 0 ) responseData.setEvaluation("注意:减重过多地依赖饮食控制,对健康不利, 建议适当增加运动量。但减重计划可行!可以发布计划,系统会给予必要提醒和评估，也会得到其他管理者的帮助和督促。");
         return (request_energy - old_energy) * 0.525 / 7 * currentWeight / 6.5 / 1000 / 0.35 * 2;
     }
     public static Double Pretest(CurusDriver driver, Long account_id,  SWeightPretestRequest request, SWeightPretestResponseData responseData) {
@@ -215,6 +215,7 @@ public class SWeightSerivceUtils {
                                               Double curwtloss, Double targetloss, Long days,
                                               PatientSupervise patientSupervise) {
         if ( patientSupervise == null ) return null;
+        if ( days >= 30L ) return "体重管理计划已经超过30天，请重新添加新的体重管理方案";
 
         Double expectwtloss = targetloss * days * (64 - days) / 30 / ( 64 - 30 );
         Double losspercent = expectwtloss == 0.0 ? 0.0 : curwtloss / expectwtloss;
@@ -249,6 +250,7 @@ public class SWeightSerivceUtils {
 
         return "体重不降反升，还请认真对待，避免各种心脑肾和关节等健康问题的发生！";
     }
+
     public static String WeightLossIndex(Double wl) {
         if ( wl == null ) return null;
         if ( wl < 3 ) return "0";

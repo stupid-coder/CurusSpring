@@ -16,6 +16,7 @@ import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -154,8 +155,55 @@ public class SBdPressureServiseUtils {
         return driver.patientSuperviseDao.insert(patientSupervise);
     }
 
-    static public Long GetMonitorFreq(Double sbp) {
-        return Math.round(Math.pow(225854.0 * Math.exp(1.0), -0.063 * sbp));
+    static public String GetMonitorFreq(Double sbp, Date bpmeasure, Date drugupdatedays) {
+        if ( bpmeasure == null ) {
+            return "没有有效的血压值,请首先测量血压!";
+        }
+        Date curdate = TimeUtils.getDate();
+        Long monitordays = 0L;
+        Long bpmonitordays  = Math.round(Math.pow(225854.0 * Math.exp(1.0), -0.063 * sbp));
+        if ( drugupdatedays != null ) {
+            monitordays = TimeUtils.dateDiff(drugupdatedays, curdate);
+            if ( monitordays.compareTo(bpmonitordays) > 0 ) monitordays = bpmonitordays;
+        } else monitordays = bpmonitordays;
+
+        Long noncheckdays = TimeUtils.dateDiff(bpmeasure, curdate);
+
+        if ( noncheckdays.compareTo(monitordays) > 0 ) return "上次血压测量太久了,据此给出的评价和建议没有意义, 建议更新血压等监测指标后再进行评估!";
+        else if ( noncheckdays >= 2L && noncheckdays.compareTo(monitordays) < 0 ) return String.format("本次评价所依据的血压值是【%l】天前测得,最好使用当天数据进行评价!",noncheckdays);
+        else if ( noncheckdays == 1L ) return "根据今天测得的血压值,评估指导意见如下!";
+        return "都没有满足的条件怎么办";
+    }
+    static public Long GetMeasureFreq(JSONObject curbdp, JSONObject lastbdp, Integer isDrug, Long drugUpdateDays) {
+        if (curbdp == null) return 1L; // 没有测量值
+        Double curlevel = GetBPLevel(curbdp);
+        Double lastlevel = lastbdp == null ? curlevel : GetBPLevel(lastbdp);
+        if ( isDrug > 0 ) { // 服用药物
+            if ( curlevel < 1.0 && drugUpdateDays > 7L )
+                return 30L;
+            else if ( curlevel == 1.0 && drugUpdateDays > 7L )
+                return 14L;
+            else if ( curlevel == 2.0 && drugUpdateDays > 7L || curbdp.getDouble("dbloodpre") < 60.0 )
+                return 7L;
+            else if ( curlevel == 3.0 && drugUpdateDays <= 7L )
+                return 1L;
+        } else { // 未服用药物
+            if ( curlevel == 0.0 && lastlevel == 0.0 )
+                return 365L;
+            else if ( curlevel == 0.0  && lastlevel >= 0.5 )
+                return 180L;
+            else if ( curlevel == 0.5 && lastlevel <= 0.5 )
+                return 90L;
+            else if ( curlevel == 0.5 && lastlevel >= 1.0 || curlevel == 1.0 && lastlevel <= 1.0 )
+                return 30L;
+            else if ( curlevel == 1.0 && lastlevel >= 2.0 )
+                return 14L;
+            else if ( curlevel == 2.0 && lastlevel <= 2.0 )
+                return 7L;
+            else if ( curlevel == 2.0 && lastlevel == 3.0 || curlevel ==3.0 )
+                return 1L;
+        }
+        return 1L;
     }
     static public Double GetBPLevel(JSONObject bdpJson) {
         if ( bdpJson == null ) return -1.0;
@@ -224,36 +272,42 @@ public class SBdPressureServiseUtils {
             responseData.setBptimelines("请先进行血压测量后，方可给出评价和建议！");
             responseData.setPosition(SBdPressurePosition(driver,null,null));
         } else {
+
             JSONObject curbdp = JSONObject.parseObject(bdpreQuotaList.get(0).getRecord());
             JSONObject lastbdp = bdpreQuotaList.size() > 1 ? JSONObject.parseObject(bdpreQuotaList.get(1).getRecord()) : null;
 
-            Long days = TimeUtils.dateDiffToNow(bdpreQuotaList.get(0).getMeasure_date()) - 1;
-            if ( days.compareTo(GetMonitorFreq(curbdp.getDouble("sbloodpre"))) > 0 ) {
-                responseData.setBptimelines("上次血压测量太久了，据此给出的评价和建议没有意义，建议更新血压监控指标后再进行评估");
-            } else if ( days.compareTo(1L) >= 0 ){
-                responseData.setBptimelines(String.format("本次评价所依据的血压值是 ％d 天前测得，最好使用当天数据进行评价！", days));
-            }
-
+            responseData.setBptimelines(GetMonitorFreq(curbdp.getDouble("sbloodpre"),bdpreQuotaList.get(0).getMeasure_date(),null));
             Double cur_bplevel = GetBPLevel(curbdp);
-            Double last_bplevel = GetBPLevel(lastbdp);
+            Double last_bplevel = lastbdp == null ? cur_bplevel : GetBPLevel(lastbdp);
             String nonmed_suggestion = "";
-            if ( cur_bplevel == 0.0 ) {
-                if ( last_bplevel >= 0.5 ) nonmed_suggestion = "【管理对象】血压降至理想水平，请保持健康生活方式；因上次血压较高，建议半年内至少监测血压一次！";
-                else nonmed_suggestion = "【管理对象】血压维持在理想水平，请注意保持，每年至少测量和评价一次血压。";
-            } else if ( cur_bplevel == 0.5 ) {
-                if ( last_bplevel == -1.0 ) nonmed_suggestion = "本次【管理对象】血压正常偏高，需强化健康生活方式，防止发展成为高血压，建议3个月内至少测量血压一次。";
-                else if ( last_bplevel == 0.0 ) nonmed_suggestion = "本次【管理对象】血压正常偏高，且比上次略有上升，需强化健康生活方式，防止发展成为高血压，建议3个月内至少测量血压一次。";
-                else if ( last_bplevel == 0.5 ) nonmed_suggestion = "【管理对象】血压连续处在正常偏高水平，请务必注意培养健康生活方式，防止发展成为高血压，建议3个月内至少测量血压一次。";
-                else nonmed_suggestion = "【管理对象】血压降至正常水平，但仍然偏高，建议继续加大生活方式干预力度，一个月内至少测量一次血压！";
-            } else if (cur_bplevel == 1.0 ) {
-                if ( last_bplevel < 1.0 ) nonmed_suggestion = "本次【管理对象】血压已处高血压水平，可根据生活方式改善可能带来的降压效果确定血压控制策略，也可尽早咨询医生，同时建议一个月内至少测量血压一次。";
-                else if ( last_bplevel == 1.0 ) nonmed_suggestion = "【管理对象】血压仍维持在一级高血压水平，如果非药物（健康生活方式）治疗的降压空间有限或实施难度很大，建议尽早咨询医生启动药物治疗。之前每个月至少测量血压一次。";
-                else nonmed_suggestion = "【管理对象】血压降至一级高血压水平，如果非药物（健康生活方式）治疗的降压空间有限或实施难度很大，建议尽早咨询医生启动药物治疗。之前每2周至少测量血压一次。";
-            } else if ( cur_bplevel == 2.0 ) {
-                if ( last_bplevel <= 1.0 ) nonmed_suggestion = "【管理对象】血压已升至二级高血压水平，建议尽早看医生，同时根据生活方式改善的降压效果与医生共商血压控制策略，之前每周至少测量血压一次。";
-                else if ( last_bplevel == 2.0 ) nonmed_suggestion = "【管理对象】血压仍维持在二级高血压水平，建议尽早看医生，同时根据生活方式改善的降压效果与医生共商血压控制策略，之前每周至少测量血压一次。";
-                else nonmed_suggestion = "【管理对象】血压虽有所下降，当仍处在二级高血压水平，建议尽早看医生，同时根据生活方式改善的降压效果与医生共商血压控制策略，之前每天监测血压。";
-            } else nonmed_suggestion = "本次【管理对象】血压水平高危，建议马上去看医生，并密切监测血压。";
+
+            if ( CommonConst.FALSE.compareTo(CommonConst.TRUE) == 0 ) { // 使用药物
+            } else { // 不使用药物
+
+                if (cur_bplevel == 0.0) {
+                    if (last_bplevel == 0.0) nonmed_suggestion = "【管理对象】血压维持在理想水平,请注意保持,每年 至少测量和评价一次血压";
+                    else nonmed_suggestion = "【管理对象】血压降至理想水平,请保持健康生活方式; 因上次血压较高,建议半年内至少监测血压一次";
+                } else if (cur_bplevel == 0.5) {
+                    if (last_bplevel == 0.0)
+                        nonmed_suggestion = "本次【管理对象】血压正常偏高,且比上次略有上升,需强化健康生活方式,防止发展成为高血压,建议 3 个月 内至少测量血压一次";
+                    else if (last_bplevel == 0.5)
+                        nonmed_suggestion = "【管理对象】血压连续处在正常偏高水平,请务必注意培养健康生活方式,防止发展成为高血压,建议 3 个月内至少测量血压一次";
+                    else nonmed_suggestion = "【管理对象】血压降至正常水平,但仍然偏高,建议继续 加大生活方式干预力度,一个月内至少测量一次血压";
+                } else if (cur_bplevel == 1.0) {
+                    if (last_bplevel < 1.0)
+                        nonmed_suggestion = "本次【管理对象】血压已处高血压水平,可根据生活方式改善可能带来的降压效果确定血压控制策略,也可尽早咨询医生,同时建议一个月内至少测量血压一次";
+                    else if (last_bplevel == 1.0)
+                        nonmed_suggestion = "【管理对象】血压仍维持在一级高血压水平,如果非药物 (健康生活方式)治疗的降压空间有限或实施难度很大,建议尽早咨询医生启动药物治疗。之前每个月至少测量血压一次";
+                    else
+                        nonmed_suggestion = "【管理对象】血压降至一级高血压水平,如果非药物( 健康生活方式)治疗的降压空间有限或实施难度很大,建议尽早咨询医生启动药物治疗。之前每 2 周至少测量血压一次";
+                } else if (cur_bplevel == 2.0) {
+                    if (last_bplevel <= 1.0)
+                        nonmed_suggestion = "【管理对象】血压已升至二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与医生共商血压控制 策略,之前每周至少测量血压一次";
+                    else if (last_bplevel == 2.0)
+                        nonmed_suggestion = "【管理对象】血压仍维持在二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与医生共商血压控制策略,之前每周至少测量血压一次";
+                    else nonmed_suggestion = "【管理对象】血压虽有所下降,当仍处在二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与 医生共商血压控制策略,之前每天监测血压";
+                } else nonmed_suggestion = "本次【管理对象】血压水平高危,建议马上去看医生, 并密切监测血压";
+            }
             responseData.setNonmed_suggestion(nonmed_suggestion);
             PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id,patient_id,QuotaConst.QUOTA_BP_ID);
 
