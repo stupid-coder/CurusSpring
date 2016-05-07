@@ -82,7 +82,9 @@ public class BaseDao<T> extends JdbcDaoSupport {
 
     public int save(T entity, String id) {
         try {
-            if (entityClass.getDeclaredField(id).get(entity) == null) return insert(entity);
+            Field field = entityClass.getDeclaredField(id);
+            field.setAccessible(true);
+            if (field.get(entity) == null) return insert(entity);
             else return update(entity,id);
 
         } catch (Exception e) {
