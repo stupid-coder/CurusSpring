@@ -28,6 +28,14 @@ public class PatientInfoResponseData {
         this.role = RoleUtils.getRoleName(accountPatient.getRole_id());
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public String getPhone() {
         return phone;
     }
