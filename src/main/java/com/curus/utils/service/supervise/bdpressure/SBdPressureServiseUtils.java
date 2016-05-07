@@ -162,13 +162,14 @@ public class SBdPressureServiseUtils {
         Date curdate = TimeUtils.getDate();
         Long monitordays = 0L;
         Long bpmonitordays  = Math.round(Math.pow(225854.0 * Math.exp(1.0), -0.063 * sbp));
+
         if ( drugupdatedays != null ) {
             monitordays = TimeUtils.dateDiff(drugupdatedays, curdate);
             if ( monitordays.compareTo(bpmonitordays) > 0 ) monitordays = bpmonitordays;
         } else monitordays = bpmonitordays;
 
         Long noncheckdays = TimeUtils.dateDiff(bpmeasure, curdate);
-
+        System.out.println(String.format("GetMonitorFreq noncheckdays:%l\tmonitordays:%l\n",noncheckdays,monitordays));
         if ( noncheckdays.compareTo(monitordays) > 0 ) return "上次血压测量太久了,据此给出的评价和建议没有意义, 建议更新血压等监测指标后再进行评估!";
         else if ( noncheckdays >= 2L && noncheckdays.compareTo(monitordays) < 0 ) return String.format("本次评价所依据的血压值是【%l】天前测得,最好使用当天数据进行评价!",noncheckdays);
         else if ( noncheckdays == 1L ) return "根据今天测得的血压值,评估指导意见如下!";
