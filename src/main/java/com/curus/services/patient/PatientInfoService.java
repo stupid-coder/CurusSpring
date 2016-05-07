@@ -76,16 +76,20 @@ public class PatientInfoService {
             }
 
             if ( request.getRole() != null ) {
-                if ( request.getRole().compareTo(RoleConst.ROLE_COMMON) == 0 )
+
+                if ( request.getRole().compareTo(RoleConst.ROLE_COMMON) == 0 ) {// anyone can change to common
                     accountPatient.setRole_id(RoleUtils.getRoleId(request.getRole()));
-                else { // get super permission
-                    if (AccountPatientServiceUtils.selectSuper(driver,request.getPatient_id()) == null) { // no super OK
+                } else { // get super permission
+                    if (AccountPatientServiceUtils.selectSuper(driver,request.getPatient_id()) == null // no super OK
+                            || accountPatient.getRole_id().compareTo(RoleUtils.getRoleId(RoleConst.ROLE_SUPER)) == 0 ) { // is super OK
                         accountPatient.setRole_id(RoleUtils.getRoleId(request.getRole()));
                     } else {
                         errorData = new ErrorData(ErrorConst.IDX_NOPERMISSION_ERROR);
                     }
                 }
+
                 accountpatient_post = true;
+
             }
 
             if ( errorData != null ) return errorData;

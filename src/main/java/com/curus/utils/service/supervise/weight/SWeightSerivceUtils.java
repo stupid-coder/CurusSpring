@@ -170,6 +170,10 @@ public class SWeightSerivceUtils {
     }
     public static Integer AddSupervise(CurusDriver driver, Long account_id, SWeightAddRequest request) {
         SWeightPretestRequest testrequest = new SWeightPretestRequest(request);
+        SWeightPretestResponseData responseData = new SWeightPretestResponseData();
+        Pretest(driver,account_id,testrequest,responseData);
+        if ( responseData.getWtloss() < request.getWeight_loss() ) return 0;
+
         List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,request.getPatient_id(), QuotaConst.QUOTA_WEIGHT_ID, 1L);
         PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id,request.getPatient_id(),QuotaConst.QUOTA_WEIGHT_ID);
 
