@@ -9,7 +9,16 @@ public class SBdPressureEstimateSuperviseResponseData {
     private String nonmed_suggestion;
     private String position;
     private String positionindex;
+    private String position_suggestion;
     private String nonmed_status;
+
+    public String getPosition_suggestion() {
+        return position_suggestion;
+    }
+
+    public void setPosition_suggestion(String position_suggestion) {
+        this.position_suggestion = position_suggestion;
+    }
 
     public String getPositionindex() {
         return positionindex;
@@ -58,6 +67,7 @@ public class SBdPressureEstimateSuperviseResponseData {
                 ", nonmed_suggestion='" + nonmed_suggestion + '\'' +
                 ", position='" + position + '\'' +
                 ", positionindex='" + positionindex + '\'' +
+                ", position_suggestion='" + position_suggestion + '\'' +
                 ", nonmed_status='" + nonmed_status + '\'' +
                 '}';
     }

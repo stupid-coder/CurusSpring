@@ -172,7 +172,6 @@ public class SBdPressureServiseUtils {
         } else monitordays = bpmonitordays;
 
         Long noncheckdays = TimeUtils.dateDiff(bpmeasure, curdate) - 1L;
-        logger.info(String.format("GetMonitorFreq sbp:%f\tnoncheckdays:%d\tmonitordays:%d\tbpmonitordays:%d\n", sbp,noncheckdays,monitordays,bpmonitordays));
         if ( noncheckdays.compareTo(monitordays) > 0 ) return "上次血压测量太久了,据此给出的评价和建议没有意义, 建议更新血压等监测指标后再进行评估!";
         else if ( noncheckdays >= 1L && noncheckdays.compareTo(monitordays) < 0 ) return String.format("本次评价所依据的血压值是%d天前测得,最好使用当天数据进行评价!",noncheckdays);
         else if ( noncheckdays == 0L ) return "根据今天测得的血压值,评估指导意见如下!";
@@ -284,8 +283,8 @@ public class SBdPressureServiseUtils {
             Double cur_bplevel = GetBPLevel(curbdp);
             Double last_bplevel = lastbdp == null ? cur_bplevel : GetBPLevel(lastbdp);
             String nonmed_suggestion = "";
-
-            if ( CommonConst.FALSE.compareTo(CommonConst.TRUE) == 0 ) { // 使用药物
+            Integer isdrug = CommonConst.FALSE;
+            if ( isdrug.compareTo(CommonConst.TRUE) == 0 ) { // 使用药物
             } else { // 不使用药物
 
                 if (cur_bplevel == 0.0) {
@@ -323,7 +322,11 @@ public class SBdPressureServiseUtils {
             } else responseData.setPosition(SBdPressurePosition(driver,null,null));
 
             responseData.setPositionindex(cur_bplevel.toString());
-
+            responseData.setPosition_suggestion(String.format("【患者】在%s情况下血压为%f/%f mmHg。处在%s水平。%s",
+                    isdrug == CommonConst.TRUE?"用药":"未用药",
+                    curbdp.getDouble("sbloodpre"),curbdp.getDouble("dbloodpre"),
+                    cur_bplevel == 0.0 ? "理想血压" : cur_bplevel == 0.5 ? "血压偏高" : cur_bplevel == 1.0 ? "一级高血压" : cur_bplevel == 2.0 ? "二级高血压" : "三级高血压",
+                    (curbdp.getDouble("sbloodpre") > 160) && curbdp.getDouble("dbloodpre") < 90 ? "且为单纯收缩期高血压" : ""));
             JSONArray nonmed = new JSONArray();
             JSONObject weight = new JSONObject();
             WeightLossPressure(driver,account_id,patient_id,100.0,curbdp,weight);
