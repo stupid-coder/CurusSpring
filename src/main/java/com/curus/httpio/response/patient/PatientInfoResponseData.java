@@ -4,6 +4,7 @@ import com.curus.model.database.AccountPatient;
 import com.curus.model.database.Patient;
 import com.curus.model.database.Quota;
 import com.curus.utils.AppellationUtils;
+import com.curus.utils.RoleUtils;
 import com.curus.utils.service.quota.QuotaServiceUtils;
 
 /**
@@ -16,7 +17,7 @@ public class PatientInfoResponseData {
     private String name;
     private String address;
     private Double height;
-    private Long role_id;
+    private String role;
 
     public PatientInfoResponseData(Patient patient, AccountPatient accountPatient, Quota height) {
         this.phone = patient.getPhone();
@@ -24,6 +25,7 @@ public class PatientInfoResponseData {
         this.name = patient.getName();
         this.address = patient.getAddress();
         this.height = QuotaServiceUtils.getHeight(height.getRecord());
+        this.role = RoleUtils.getRoleName(accountPatient.getRole_id());
     }
 
     public String getPhone() {
@@ -73,7 +75,8 @@ public class PatientInfoResponseData {
                 ", appellation='" + appellation + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
-                ", height='" + height + '\'' +
+                ", height=" + height +
+                ", role='" + role + '\'' +
                 '}';
     }
 }

@@ -11,7 +11,7 @@ public class PatientInfoRequest {
     private String appellation;
     private String name;
     private String address;
-    private String height;
+    private Double height;
     private String role;
 
     public String getRole() {
@@ -70,11 +70,11 @@ public class PatientInfoRequest {
         this.address = address;
     }
 
-    public String getHeight() {
+    public Double getHeight() {
         return height;
     }
 
-    public void setHeight(String height) {
+    public void setHeight(Double height) {
         this.height = height;
     }
 

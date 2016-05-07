@@ -95,7 +95,8 @@ public class PatientInfoService {
             if ( accountpatient_post == true ) driver.accountPatientDao.save(accountPatient,"id");
             if ( request.getHeight() != null ) {
                 driver.quotaDao.insert(account.getId(), request.getPatient_id(), QuotaConst.QUOTA_HEIGHT_ID, null, null, String.format("{\"height\":%s}", request.getHeight()));
-            }
+            } else if ( patient_post == false && accountpatient_post == false )
+                responseData = new PatientInfoResponseData(patient,accountPatient,height);
         }
         return errorData;
     }
