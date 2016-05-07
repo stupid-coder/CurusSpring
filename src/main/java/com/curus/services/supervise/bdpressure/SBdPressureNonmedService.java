@@ -39,10 +39,6 @@ public class SBdPressureNonmedService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else if ( (errorData = ValueValidate.valueExistValidate(request.getPatient_id(),"patient_id")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getMode(),"mode")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
-        } else if ( (errorData = ValueValidate.valueExistValidate(request.getValue(),"value")) != null ) {
-            logger.warn(LogUtils.Msg(errorData,request));
         }
         return errorData;
     }

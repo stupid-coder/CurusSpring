@@ -104,14 +104,26 @@ public class SBdPressureServiseUtils {
                                               SBdPressureNonmedRequest request) {
         JSONObject jo = new JSONObject();
         JSONObject bdpressure = GetLastBdPressure(driver, account_id, request.getPatient_id());
-        Double value = Double.parseDouble(request.getValue());
-        if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_WEIGHT) == 0 ) {
-            WeightLossPressure(driver, account_id, request.getPatient_id(), value, bdpressure, jo);
-        } else if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_FOOD) == 0 ) {
-            FoodLossPressure(driver, account_id, request.getPatient_id(), value, bdpressure, jo);
-        } else if ( request.getMode().compareToIgnoreCase(QuotaConst.QUOTA_ACT) == 0 ) {
-            ActivityLossPressure(driver,account_id,request.getPatient_id(),value, bdpressure, jo);
-        }
+        Double total = 0.0;
+
+        JSONObject result = new JSONObject();
+
+        WeightLossPressure(driver,account_id,request.getPatient_id(), request.getWeight()==null?Double.MAX_VALUE:request.getWeight(), bdpressure, result);
+        jo.put(QuotaConst.QUOTA_WEIGHT,result.clone());
+        total += result.getDouble("value");
+        result.clear();
+
+        FoodLossPressure(driver,account_id,request.getPatient_id(), request.getDiet() == null?100.0:request.getDiet(), bdpressure,result);
+        jo.put(QuotaConst.QUOTA_FOOD,result.clone());
+        total += result.getDouble("value");
+        result.clear();
+
+        ActivityLossPressure(driver,account_id,request.getPatient_id(), request.getActivity() == null ? 40:request.getActivity(), bdpressure,result);
+        jo.put(QuotaConst.QUOTA_ACT,result.clone());
+        total += result.getDouble("value");
+        result.clear();
+
+        jo.put("total",Math.min(20,total));
         return jo;
     }
 

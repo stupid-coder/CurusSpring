@@ -6,8 +6,9 @@ package com.curus.httpio.request.supervise.bdpressure;
 public class SBdPressureNonmedRequest {
     private String token;
     private Long patient_id;
-    private String mode;
-    private String value;
+    private Double diet;
+    private Double weight;
+    private Double activity;
 
     public String getToken() {
         return token;
@@ -25,20 +26,28 @@ public class SBdPressureNonmedRequest {
         this.patient_id = patient_id;
     }
 
-    public String getMode() {
-        return mode;
+    public Double getDiet() {
+        return diet;
     }
 
-    public void setMode(String mode) {
-        this.mode = mode;
+    public void setDiet(Double diet) {
+        this.diet = diet;
     }
 
-    public String getValue() {
-        return value;
+    public Double getWeight() {
+        return weight;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getActivity() {
+        return activity;
+    }
+
+    public void setActivity(Double activity) {
+        this.activity = activity;
     }
 
     @Override
@@ -46,8 +55,9 @@ public class SBdPressureNonmedRequest {
         return "SBdPressureNonmedRequest{" +
                 "token='" + token + '\'' +
                 ", patient_id=" + patient_id +
-                ", mode='" + mode + '\'' +
-                ", value=" + value +
+                ", diet=" + diet +
+                ", weight=" + weight +
+                ", activity=" + activity +
                 '}';
     }
 }
