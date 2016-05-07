@@ -164,7 +164,7 @@ public class SBdPressureServiseUtils {
         }
         Date curdate = TimeUtils.getDate();
         Long monitordays = 0L;
-        Long bpmonitordays  = Math.round(Math.pow(225854.0 * Math.exp(1.0), -0.063 * sbp));
+        Long bpmonitordays  = Math.round(225854.0*Math.pow(Math.E, -0.063 * sbp));
 
         if ( drugupdatedays != null ) {
             monitordays = TimeUtils.dateDiff(drugupdatedays, curdate);
