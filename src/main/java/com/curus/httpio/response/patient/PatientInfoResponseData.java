@@ -1,5 +1,11 @@
 package com.curus.httpio.response.patient;
 
+import com.curus.model.database.AccountPatient;
+import com.curus.model.database.Patient;
+import com.curus.model.database.Quota;
+import com.curus.utils.AppellationUtils;
+import com.curus.utils.service.quota.QuotaServiceUtils;
+
 /**
  * Created by stupid-coder on 7/5/16.
  */
@@ -9,7 +15,15 @@ public class PatientInfoResponseData {
     private String appellation;
     private String name;
     private String address;
-    private String height;
+    private Double height;
+
+    public PatientInfoResponseData(Patient patient, AccountPatient accountPatient, Quota height) {
+        this.phone = patient.getPhone();
+        this.appellation = AppellationUtils.getAppellationName(accountPatient.getAppellation_id());
+        this.name = patient.getName();
+        this.address = patient.getAddress();
+        this.height = QuotaServiceUtils.getHeight(height.getRecord());
+    }
 
     public String getPhone() {
         return phone;
@@ -43,11 +57,11 @@ public class PatientInfoResponseData {
         this.address = address;
     }
 
-    public String getHeight() {
+    public Double getHeight() {
         return height;
     }
 
-    public void setHeight(String height) {
+    public void setHeight(Double height) {
         this.height = height;
     }
 

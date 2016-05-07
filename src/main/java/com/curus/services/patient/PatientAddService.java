@@ -118,7 +118,11 @@ public class PatientAddService {
         if ( validate() == null && addPatient() == null ) {
             logger.info(LogUtils.Msg("Success to Add Patient",request,responseData));
             return new ResponseBase(StatusConst.OK,responseData);
-        } else return new ResponseBase(StatusConst.ERROR,errorData);
+        } else {
+            logger.warn(LogUtils.Msg("Failure to Add Patient",request,errorData));
+            return new ResponseBase(StatusConst.ERROR,errorData);
+        }
+
     }
 
 }

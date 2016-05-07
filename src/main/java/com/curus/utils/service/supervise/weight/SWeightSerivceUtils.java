@@ -204,12 +204,12 @@ public class SWeightSerivceUtils {
     public static String BMIEvaluation(Double height, Double weight) {
         double bmi = BMI(height,weight);
         if ( bmi < 18.5 ) {
-            return String.format("根据我国成人体重判定标准，【管理对象】目前的体重过低（BMI<18.5kg/m2)，需要吃动结合使体重增加。达到健康体重尚需增重至少 %f 公斤。",18.5*height*height-weight);
+            return String.format("根据我国成人体重判定标准，【管理对象】目前的体重过低（BMI<18.5kg/m2)，需要吃动结合使体重增加。达到健康体重尚需增重至少 %.2f 公斤。",18.5*height*height-weight);
         } else if ( bmi < 24.0 ) {
             return String.format("根据我国成人体重判定标准，【管理对象】目前的体重处在正常范围内（BMI在18.5-24之间），请注意保持。");
         } else if ( bmi < 28.0 ) {
-            return String.format("根据我国成人体重判定标准，您目前的体重超重（BMI在24-28之间），需要减重 %f 公斤才能达到正常水平。减重的诀窍就是“少吃多动”。少吃主要是减少摄入总量，尤其是高能量或高油脂食物的摄入；多动主要是指时间超过40分钟的中高强度的有氧运动。",weight-24.0*height*height);
-        } else  return String.format("根据我国成人体重判定标准，您目前的体重已处在肥胖水平（BMI≥28），您需要减重 %f 公斤才能达到正常水平。减重的诀窍是“少吃多动”。少吃主要是减少摄入总量，尤其是高能量或高油脂食物的摄入；多动主要是指时间超过40分钟的中高强度的有氧运动。",weight-24*height*height);
+            return String.format("根据我国成人体重判定标准，您目前的体重超重（BMI在24-28之间），需要减重 %.2f 公斤才能达到正常水平。减重的诀窍就是“少吃多动”。少吃主要是减少摄入总量，尤其是高能量或高油脂食物的摄入；多动主要是指时间超过40分钟的中高强度的有氧运动。",weight-24.0*height*height);
+        } else  return String.format("根据我国成人体重判定标准，您目前的体重已处在肥胖水平（BMI≥28），您需要减重 %.2f 公斤才能达到正常水平。减重的诀窍是“少吃多动”。少吃主要是减少摄入总量，尤其是高能量或高油脂食物的摄入；多动主要是指时间超过40分钟的中高强度的有氧运动。",weight-24*height*height);
     }
     public static String WeightLossEvaluation(CurusDriver driver, Long account_id, Long patient_id,
                                               Double curwtloss, Double targetloss, Long days,

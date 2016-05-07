@@ -59,4 +59,13 @@ public class PatientController {
         PatientAgreeService service = new PatientAgreeService(aid,pid,driver);
         return service.process();
     }
+
+    @RequestMapping(value="/info",method= RequestMethod.GET)
+    public @ResponseBody
+    ResponseBase info(@RequestBody PatientInfoRequest request) {
+        PatientInfoService service = new PatientInfoService(request,driver);
+        return service.process();
+    }
+
+
 }

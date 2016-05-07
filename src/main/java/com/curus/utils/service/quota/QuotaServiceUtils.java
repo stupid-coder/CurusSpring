@@ -55,9 +55,12 @@ public class QuotaServiceUtils {
         return null;
     }
     static public Quota getLastSmokeQuota(CurusDriver driver, Long account_id, Long patient_id) {
-        List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_SMOKE_ID,1L);
-        if ( quotaList != null && quotaList.size() > 0 ) return quotaList.get(0);
-        return null;
+        return getLastQuota(driver,account_id,patient_id,QuotaConst.QUOTA_SMOKE_ID);
+    }
+    static public Quota getLastQuota(CurusDriver driver, Long account_id, Long patient_id, Long quota_id) {
+        List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
+        if ( quotaList != null && quotaList.size() > 0) return quotaList.get(0);
+        else return null;
     }
     static public String getKVJSON(String k, String v) {
         return String.format("{\"%s\":%s}",k,v);
