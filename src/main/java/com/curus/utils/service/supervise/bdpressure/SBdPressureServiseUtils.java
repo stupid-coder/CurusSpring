@@ -15,6 +15,8 @@ import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.List;
  * Created by stupid-coder on 7/3/16.
  */
 public class SBdPressureServiseUtils {
+    static private Log logger = LogFactory.getLog(SBdPressureServiseUtils.class);
 
     static private List<Quota> GetBdPressureQuoaList(CurusDriver driver, Long account_id,
                                            Long patient_id, Long size) {
@@ -168,8 +171,8 @@ public class SBdPressureServiseUtils {
             if ( monitordays.compareTo(bpmonitordays) > 0 ) monitordays = bpmonitordays;
         } else monitordays = bpmonitordays;
 
-        Long noncheckdays = TimeUtils.dateDiff(bpmeasure, curdate);
-        System.out.println(String.format("GetMonitorFreq noncheckdays:%l\tmonitordays:%l\n",noncheckdays,monitordays));
+        Long noncheckdays = TimeUtils.dateDiff(bpmeasure, curdate) - 1L;
+        logger.info(String.format("GetMonitorFreq noncheckdays:%l\tmonitordays:%l\n",noncheckdays,monitordays));
         if ( noncheckdays.compareTo(monitordays) > 0 ) return "上次血压测量太久了,据此给出的评价和建议没有意义, 建议更新血压等监测指标后再进行评估!";
         else if ( noncheckdays >= 2L && noncheckdays.compareTo(monitordays) < 0 ) return String.format("本次评价所依据的血压值是【%l】天前测得,最好使用当天数据进行评价!",noncheckdays);
         else if ( noncheckdays == 1L ) return "根据今天测得的血压值,评估指导意见如下!";
