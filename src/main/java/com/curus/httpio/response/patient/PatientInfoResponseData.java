@@ -16,6 +16,7 @@ public class PatientInfoResponseData {
     private String name;
     private String address;
     private Double height;
+    private Long role_id;
 
     public PatientInfoResponseData(Patient patient, AccountPatient accountPatient, Quota height) {
         this.phone = patient.getPhone();

@@ -1,27 +1,19 @@
 package com.curus.services.patient;
 
-import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.patient.PatientInfoRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientInfoResponseData;
 import com.curus.model.database.*;
-import com.curus.utils.AppellationUtils;
-import com.curus.utils.CacheUtils;
-import com.curus.utils.LogUtils;
-import com.curus.utils.TimeUtils;
-import com.curus.utils.constant.AppellationConst;
-import com.curus.utils.constant.ErrorConst;
-import com.curus.utils.constant.QuotaConst;
-import com.curus.utils.constant.StatusConst;
+import com.curus.utils.*;
+import com.curus.utils.constant.*;
 import com.curus.utils.service.account.AccountPatientServiceUtils;
 import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.protocol.ResponseDate;
 
 /**
  * Created by stupid-coder on 7/5/16.
@@ -70,24 +62,39 @@ public class PatientInfoService {
             errorData = new ErrorData(ErrorConst.IDX_PATIENTNOTEXIST_ERROR);
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
-            Boolean post = false;
-            if ( request.getName() != null ) { patient.setName(request.getName()); post = true; }
-            if ( request.getPhone() != null ) { patient.setPhone(request.getPhone()); post = true; }
-            if ( request.getAddress() != null ) {  patient.setAddress(request.getAddress()); post = true; }
-            if ( post == true ) driver.patientDao.save(patient,"id");
+            Boolean patient_post = false;
+            Boolean accountpatient_post = false;
+
+            if ( request.getName() != null ) { patient.setName(request.getName()); patient_post = true; }
+            if ( request.getPhone() != null ) { patient.setPhone(request.getPhone()); patient_post = true; }
+            if ( request.getAddress() != null ) { patient.setAddress(request.getAddress()); patient_post = true; }
+
+
 
             if ( request.getAppellation() != null ) {
-                accountPatient.setAppellation_id(AppellationUtils.getAppellationId(request.getAppellation())); post = true;
-                driver.accountPatientDao.save(accountPatient,"id");
+                accountPatient.setAppellation_id(AppellationUtils.getAppellationId(request.getAppellation())); accountpatient_post = true;
             }
 
+            if ( request.getRole() != null ) {
+                if ( request.getRole().compareTo(RoleConst.ROLE_COMMON) == 0 )
+                    accountPatient.setRole_id(RoleUtils.getRoleId(request.getRole()));
+                else { // get super permission
+                    if (AccountPatientServiceUtils.selectSuper(driver,request.getPatient_id()) == null) { // no super OK
+                        accountPatient.setRole_id(RoleUtils.getRoleId(request.getRole()));
+                    } else {
+                        errorData = new ErrorData(ErrorConst.IDX_NOPERMISSION_ERROR);
+                    }
+                }
+                accountpatient_post = true;
+            }
+
+            if ( errorData != null ) return errorData;
+
+            // update
+            if ( patient_post == true ) driver.patientDao.save(patient,"id");
+            if ( accountpatient_post == true ) driver.accountPatientDao.save(accountPatient,"id");
             if ( request.getHeight() != null ) {
                 driver.quotaDao.insert(account.getId(), request.getPatient_id(), QuotaConst.QUOTA_HEIGHT_ID, null, null, String.format("{\"height\":%s}", request.getHeight()));
-                post = true;
-            }
-
-            if ( post == false ) {
-                responseData = new PatientInfoResponseData(patient,accountPatient,height);
             }
         }
         return errorData;

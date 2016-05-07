@@ -12,6 +12,15 @@ public class PatientInfoRequest {
     private String name;
     private String address;
     private String height;
+    private String role;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getToken() {
         return token;
@@ -79,6 +88,7 @@ public class PatientInfoRequest {
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", height='" + height + '\'' +
+                ", role='" + role + '\'' +
                 '}';
     }
 }
