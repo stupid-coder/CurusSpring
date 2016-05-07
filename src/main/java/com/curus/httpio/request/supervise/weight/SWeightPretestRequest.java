@@ -14,13 +14,13 @@ public class SWeightPretestRequest {
     private String diet;
     private String activity;
 
-    public SWeightPretestRequest(SWeightAddRequest request) {
-        this.token = request.getToken();
-        this.patient_id = request.getPatient_id();
-        this.weight_loss = request.getWeight_loss();
-        this.diet = request.getDiet();
-        this.activity = request.getActivity();
-    }
+//    public SWeightPretestRequest(SWeightAddRequest request) {
+//        this.token = request.getToken();
+//        this.patient_id = request.getPatient_id();
+//        this.weight_loss = request.getWeight_loss();
+//        this.diet = request.getDiet();
+//        this.activity = request.getActivity();
+//    }
 
     public String getToken() {
         return token;
