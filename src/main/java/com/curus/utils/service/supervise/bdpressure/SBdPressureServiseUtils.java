@@ -103,7 +103,15 @@ public class SBdPressureServiseUtils {
     static public JSONObject BdPressureNonmedLoss(CurusDriver driver, Long account_id,
                                               SBdPressureNonmedRequest request) {
         JSONObject jo = new JSONObject();
-        JSONObject bdpressure = GetLastBdPressure(driver, account_id, request.getPatient_id());
+        List<JSONObject> bdpreQuotaList = GetBdPressureJSONList(driver, account_id, request.getPatient_id(), 2L);
+        if ( bdpreQuotaList == null || bdpreQuotaList.size() == 0 ) {
+            jo.put("suggestion","请先进行血压测量");
+            return jo;
+        }
+
+        JSONObject bdpressure = bdpreQuotaList.get(0);
+        JSONObject lastbdpressure = bdpreQuotaList.size() > 1 ? bdpreQuotaList.get(1) : null;
+
         Double total = 0.0;
 
         JSONObject result = new JSONObject();
@@ -123,7 +131,9 @@ public class SBdPressureServiseUtils {
         total += result.getDouble("value");
         result.clear();
 
-        jo.put("total",Math.min(20,total));
+        jo.put("suggestion", String.format("依据%s的当前血压情况，通过非药物治疗，总的降压空间为%dmmHg", PatientServiceUtils.GetPatientName(driver,request.getPatient_id()),Math.round(Math.min(20, total))));
+        jo.put("frequence",GetMeasureFreq(bdpressure,lastbdpressure,CommonConst.FALSE,Long.MAX_VALUE));
+
         return jo;
     }
 
