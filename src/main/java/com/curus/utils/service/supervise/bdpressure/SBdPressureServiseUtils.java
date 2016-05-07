@@ -135,7 +135,7 @@ public class SBdPressureServiseUtils {
         Long freq = GetMeasureFreq(bdpressure, lastbdpressure, CommonConst.FALSE, Long.MAX_VALUE);
         Long noncheckdays = TimeUtils.dateDiffToNow(bdpreQuotaList.get(0).getMeasure_date())-1L;
         logger.info(String.format("checkdays: freq:%d\tmeasure_date:%s\tnoncheckdays:%d", freq, bdpreQuotaList.get(0).getMeasure_date(), noncheckdays));
-        jo.put("frequence", TimeUtils.getDate(Math.max(freq - noncheckdays,0)));
+        jo.put("frequence", TimeUtils.getDate(Math.max(freq - noncheckdays,0)).getTime());
 
         return jo;
     }
