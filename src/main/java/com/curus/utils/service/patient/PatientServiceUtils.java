@@ -38,6 +38,10 @@ public class PatientServiceUtils {
         return driver.patientDao.select(TypeUtils.getWhereHashMap("id_number", id_number));
     }
 
+    static public String GetPatientName(CurusDriver driver, Long patient_id) {
+        return select(driver, patient_id).getName();
+    }
+
     static public void SendMessageToSuper(CurusDriver driver,
                                           Account account,
                                           Patient patient) {

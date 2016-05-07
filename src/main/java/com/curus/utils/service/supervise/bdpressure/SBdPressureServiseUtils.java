@@ -6,6 +6,7 @@ import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureAddSuperviseRequest;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureNonmedRequest;
 import com.curus.httpio.response.supervise.bdpressure.SBdPressureEstimateSuperviseResponseData;
+import com.curus.model.database.Patient;
 import com.curus.model.database.PatientSupervise;
 import com.curus.model.database.PatientSuperviseList;
 import com.curus.model.database.Quota;
@@ -13,6 +14,8 @@ import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.QuotaConst;
+import com.curus.utils.service.patient.PatientServiceUtils;
+import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
 import org.apache.commons.logging.Log;
@@ -49,6 +52,52 @@ public class SBdPressureServiseUtils {
         List<JSONObject> jsonObjectList = GetBdPressureJSONList(driver, account_id, patient_id, 1L);
         if ( jsonObjectList.size()>0 ) return jsonObjectList.get(0);
         else return null;
+    }
+
+    static public String BdPressureNonmedLossPerfect(CurusDriver driver, Long account_id, Long patient_id, JSONObject bdp) {
+
+        JSONObject nonm = new JSONObject();
+        JSONArray itemlist = new JSONArray();
+        JSONObject item = new JSONObject();
+        Double sbp = bdp.getDouble("sbloodpre");
+        Double dbp = bdp.getDouble("dbloodpre");
+        Double desc = 0.0;
+
+        Patient patient = driver.patientDao.select(TypeUtils.getWhereHashMap("id",patient_id));
+        Double weight = QuotaServiceUtils.getLastWeight(driver, account_id, patient_id);
+        Double height = QuotaServiceUtils.getLastHeight(driver, account_id, patient_id);
+        height /= 100;
+        Double standweight = patient.getGender().compareTo(CommonConst.GENDER_MALE) == 0 ? 23 * height * height : 21 * height * height;
+        item.put("mode",QuotaConst.QUOTA_WEIGHT);
+        item.put("current",weight);
+        item.put("target",standweight);
+        item.put("value",Math.round(Math.min(Math.max(-120,0), Math.round(Math.max(weight-standweight,0) * 2 * sbp / 160))));
+        desc = item.getDouble("value");
+        itemlist.add(item);
+
+        item.clear();
+        Double foodscore = SFoodServiceUtils.CalculateFoodScore(driver,account_id,patient_id);
+        item.put("mode",QuotaConst.QUOTA_FOOD);
+        item.put("current",foodscore);
+        item.put("target",100.0);
+        item.put("value",Math.round(Math.min(Math.max(sbp - 120, 0), (100.0 - foodscore) / 2 * sbp / 160)));
+        desc += item.getDouble("value");
+        itemlist.add(item);
+
+        item.clear();
+        Double activity = CalculateActivity(driver, account_id, patient_id);
+        item.put("mode", QuotaConst.QUOTA_ACT);
+        item.put("current",activity);
+        item.put("target",40.0);
+        item.put("value", Math.round(Math.min(Math.max(sbp - 120, 0), Math.max(0.0,40-activity) / 4 * sbp / 160)));
+        desc += item.getDouble("value");
+        itemlist.add(item);
+
+        desc = Math.min(desc,20);
+        nonm.put("itemlist",itemlist);
+        nonm.put("suggestion",String.format("通过强化非药物干预，估计%s收缩压还可降低%dmmHg。非药物干预即可辅助药治疗效果，减少降压药物使用及其副作用，同时还对血糖、血脂、心肺功能、形体和精神面貌大有益处！身体活动必须循序渐进，在耐受和适应的基础上可逐渐达到每周≥40千步当量的目标。%s如果生活方式已经很健康或因特殊原因很难改变生活方式，血压控制又不达标，则必须辅以或调整药物治疗。对经常大量饮酒者，控制饮酒频度和饮酒量，也有助于血压控制。上述健康生活方式的降压作用因人而异，仅供参考。"
+                ,patient.getName(),desc.intValue(), sbp/dbp >= 1.6 ? String.format("适度增加身体活动强度也是控制血压的有效手段，但%s目前血压较高，建议在加大活动强度前先把血压控制到160/100以下。",patient.getName()):""));
+        return nonm.toJSONString();
     }
 
     static public JSONObject BdPressureNonmedLoss(CurusDriver driver, Long account_id,
@@ -177,6 +226,7 @@ public class SBdPressureServiseUtils {
         else if ( noncheckdays == 0L ) return "根据今天测得的血压值,评估指导意见如下!";
         return "都没有满足的条件怎么办";
     }
+
     static public Long GetMeasureFreq(JSONObject curbdp, JSONObject lastbdp, Integer isDrug, Long drugUpdateDays) {
         if (curbdp == null) return 1L; // 没有测量值
         Double curlevel = GetBPLevel(curbdp);
@@ -208,6 +258,7 @@ public class SBdPressureServiseUtils {
         }
         return 1L;
     }
+
     static public Double GetBPLevel(JSONObject bdpJson) {
         if ( bdpJson == null ) return -1.0;
 
@@ -268,6 +319,7 @@ public class SBdPressureServiseUtils {
 
     static public SBdPressureEstimateSuperviseResponseData estimate(CurusDriver driver,
                                                                     Long account_id, Long patient_id) {
+        String patient_name = PatientServiceUtils.GetPatientName(driver, patient_id);
         SBdPressureEstimateSuperviseResponseData responseData = new SBdPressureEstimateSuperviseResponseData();
         List<Quota> bdpreQuotaList = GetBdPressureQuoaList(driver, account_id, patient_id, 2L);
 
@@ -288,28 +340,28 @@ public class SBdPressureServiseUtils {
             } else { // 不使用药物
 
                 if (cur_bplevel == 0.0) {
-                    if (last_bplevel == 0.0) nonmed_suggestion = "【管理对象】血压维持在理想水平,请注意保持,每年 至少测量和评价一次血压";
-                    else nonmed_suggestion = "【管理对象】血压降至理想水平,请保持健康生活方式; 因上次血压较高,建议半年内至少监测血压一次";
+                    if (last_bplevel == 0.0) nonmed_suggestion = String.format("%s血压维持在理想水平,请注意保持,每年 至少测量和评价一次血压",patient_name);
+                    else nonmed_suggestion = String.format("%s血压降至理想水平,请保持健康生活方式; 因上次血压较高,建议半年内至少监测血压一次",patient_name);
                 } else if (cur_bplevel == 0.5) {
                     if (last_bplevel == 0.0)
-                        nonmed_suggestion = "本次【管理对象】血压正常偏高,且比上次略有上升,需强化健康生活方式,防止发展成为高血压,建议 3 个月 内至少测量血压一次";
+                        nonmed_suggestion = String.format("本次%s血压正常偏高,且比上次略有上升,需强化健康生活方式,防止发展成为高血压,建议 3 个月 内至少测量血压一次",patient_name);
                     else if (last_bplevel == 0.5)
-                        nonmed_suggestion = "【管理对象】血压连续处在正常偏高水平,请务必注意培养健康生活方式,防止发展成为高血压,建议 3 个月内至少测量血压一次";
-                    else nonmed_suggestion = "【管理对象】血压降至正常水平,但仍然偏高,建议继续 加大生活方式干预力度,一个月内至少测量一次血压";
+                        nonmed_suggestion = String.format("%s血压连续处在正常偏高水平,请务必注意培养健康生活方式,防止发展成为高血压,建议 3 个月内至少测量血压一次",patient_name);
+                    else nonmed_suggestion = String.format("%s血压降至正常水平,但仍然偏高,建议继续 加大生活方式干预力度,一个月内至少测量一次血压",patient_name);
                 } else if (cur_bplevel == 1.0) {
                     if (last_bplevel < 1.0)
-                        nonmed_suggestion = "本次【管理对象】血压已处高血压水平,可根据生活方式改善可能带来的降压效果确定血压控制策略,也可尽早咨询医生,同时建议一个月内至少测量血压一次";
+                        nonmed_suggestion = String.format("本次%s血压已处高血压水平,可根据生活方式改善可能带来的降压效果确定血压控制策略,也可尽早咨询医生,同时建议一个月内至少测量血压一次",patient_name);
                     else if (last_bplevel == 1.0)
-                        nonmed_suggestion = "【管理对象】血压仍维持在一级高血压水平,如果非药物 (健康生活方式)治疗的降压空间有限或实施难度很大,建议尽早咨询医生启动药物治疗。之前每个月至少测量血压一次";
+                        nonmed_suggestion = String.format("%s血压仍维持在一级高血压水平,如果非药物 (健康生活方式)治疗的降压空间有限或实施难度很大,建议尽早咨询医生启动药物治疗。之前每个月至少测量血压一次",patient_name);
                     else
-                        nonmed_suggestion = "【管理对象】血压降至一级高血压水平,如果非药物( 健康生活方式)治疗的降压空间有限或实施难度很大,建议尽早咨询医生启动药物治疗。之前每 2 周至少测量血压一次";
+                        nonmed_suggestion = String.format("%s血压降至一级高血压水平,如果非药物( 健康生活方式)治疗的降压空间有限或实施难度很大,建议尽早咨询医生启动药物治疗。之前每 2 周至少测量血压一次",patient_name);
                 } else if (cur_bplevel == 2.0) {
                     if (last_bplevel <= 1.0)
-                        nonmed_suggestion = "【管理对象】血压已升至二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与医生共商血压控制 策略,之前每周至少测量血压一次";
+                        nonmed_suggestion = String.format("%s血压已升至二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与医生共商血压控制 策略,之前每周至少测量血压一次",patient_name);
                     else if (last_bplevel == 2.0)
-                        nonmed_suggestion = "【管理对象】血压仍维持在二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与医生共商血压控制策略,之前每周至少测量血压一次";
-                    else nonmed_suggestion = "【管理对象】血压虽有所下降,当仍处在二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与 医生共商血压控制策略,之前每天监测血压";
-                } else nonmed_suggestion = "本次【管理对象】血压水平高危,建议马上去看医生, 并密切监测血压";
+                        nonmed_suggestion = String.format("%s血压仍维持在二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与医生共商血压控制策略,之前每周至少测量血压一次",patient_name);
+                    else nonmed_suggestion = String.format("%s血压虽有所下降,当仍处在二级高血压水平,建议尽早看医生,同时根据生活方式改善的降压效果与 医生共商血压控制策略,之前每天监测血压",patient_name);
+                } else nonmed_suggestion = String.format("本次%s血压水平高危,建议马上去看医生, 并密切监测血压",patient_name);
             }
             responseData.setNonmed_suggestion(nonmed_suggestion);
             PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id,patient_id,QuotaConst.QUOTA_BP_ID);
@@ -322,25 +374,14 @@ public class SBdPressureServiseUtils {
             } else responseData.setPosition(SBdPressurePosition(driver,null,null));
 
             responseData.setPositionindex(cur_bplevel.toString());
-            responseData.setPosition_suggestion(String.format("【患者】在%s情况下血压为%f/%f mmHg。处在%s水平。%s",
-                    isdrug == CommonConst.TRUE?"用药":"未用药",
-                    curbdp.getDouble("sbloodpre"),curbdp.getDouble("dbloodpre"),
+            responseData.setPosition_suggestion(String.format("%s在%s情况下血压为%d/%d mmHg。处在%s水平。%s",
+                    patient_name,
+                    isdrug.compareTo(CommonConst.TRUE)==0?"用药":"未用药",
+                    curbdp.getDouble("sbloodpre").intValue(),curbdp.getDouble("dbloodpre").intValue(),
                     cur_bplevel == 0.0 ? "理想血压" : cur_bplevel == 0.5 ? "血压偏高" : cur_bplevel == 1.0 ? "一级高血压" : cur_bplevel == 2.0 ? "二级高血压" : "三级高血压",
                     (curbdp.getDouble("sbloodpre") > 160) && curbdp.getDouble("dbloodpre") < 90 ? "且为单纯收缩期高血压" : ""));
-            JSONArray nonmed = new JSONArray();
-            JSONObject weight = new JSONObject();
-            WeightLossPressure(driver,account_id,patient_id,100.0,curbdp,weight);
-            weight.put("mode", QuotaConst.QUOTA_WEIGHT); nonmed.add(weight);
 
-            JSONObject food = new JSONObject();
-            FoodLossPressure(driver,account_id,patient_id,100.0,curbdp,food);
-            food.put("mode",QuotaConst.QUOTA_FOOD); nonmed.add(food);
-
-            JSONObject activity = new JSONObject();
-            ActivityLossPressure(driver,account_id,patient_id,40.0,curbdp,activity);
-            activity.put("mode",QuotaConst.QUOTA_ACT); nonmed.add(activity);
-
-            responseData.setNonmed_status(nonmed.toJSONString());
+            responseData.setNonmed_status(BdPressureNonmedLossPerfect(driver,account_id,patient_id,curbdp));
         }
 
         return responseData;
