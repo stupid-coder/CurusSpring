@@ -121,7 +121,7 @@ public class SBdPressureServiseUtils {
             Long max_act = Math.round(Math.min(Math.max((40 - CalculateActivity(driver, account_id, patient_id))*0.8, 0), 20));
             if ( query_act < max_act.doubleValue() )  actinc = query_act.longValue();
             else actinc = max_act;
-            bploss = Math.round(Math.min(Math.min(Math.max(sbp - 120, 0), Math.max(40 - actinc, 0) / 4 * sbp / 160), 20));
+            bploss = Math.round(Math.min(Math.min(Math.max(sbp - 120, 0), 40 / 4 * sbp / 160), 20));
         }
 
         bplossResult.put("value",bploss);
