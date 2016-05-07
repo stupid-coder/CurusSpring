@@ -52,7 +52,10 @@ public class SWeightAddService {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
             logger.info(LogUtils.Msg(errorData,request));
         } else {
-            SWeightSerivceUtils.AddSupervise(driver, account.getId(), request);
+            if (SWeightSerivceUtils.AddSupervise(driver, account.getId(), request) == 0) {
+                errorData = new ErrorData(ErrorConst.IDX_FORM_ERROR);
+                logger.info(LogUtils.Msg(errorData,request));
+            }
         }
         return errorData;
     }
