@@ -71,9 +71,9 @@ public class SBdPressureServiseUtils {
         item.put("mode",QuotaConst.QUOTA_WEIGHT);
         item.put("current",weight);
         item.put("target",standweight);
-        item.put("value",Math.round(Math.min(Math.max(-120,0), Math.round(Math.max(weight-standweight,0) * 2 * sbp / 160))));
+        item.put("value",Math.round(Math.min(Math.max(sbp-120,0), Math.round(Math.max(weight-standweight,0) * 2 * sbp / 160))));
         desc = item.getDouble("value");
-        itemlist.add(item);
+        itemlist.add(item.clone());
 
         item.clear();
         Double foodscore = SFoodServiceUtils.CalculateFoodScore(driver,account_id,patient_id);
@@ -82,7 +82,7 @@ public class SBdPressureServiseUtils {
         item.put("target",100.0);
         item.put("value",Math.round(Math.min(Math.max(sbp - 120, 0), (100.0 - foodscore) / 2 * sbp / 160)));
         desc += item.getDouble("value");
-        itemlist.add(item);
+        itemlist.add(item.clone());
 
         item.clear();
         Double activity = CalculateActivity(driver, account_id, patient_id);
