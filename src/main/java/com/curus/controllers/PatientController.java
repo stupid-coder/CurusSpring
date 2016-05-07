@@ -53,17 +53,19 @@ public class PatientController {
         return service.process();
     }
 
+
+    @RequestMapping(value="/info",method= RequestMethod.POST)
+    public @ResponseBody
+    ResponseBase info(@RequestBody PatientInfoRequest request) {
+        PatientInfoService service = new PatientInfoService(request,driver);
+        return service.process();
+    }
+
+
     @RequestMapping(value="/agree",method= RequestMethod.GET)
     public @ResponseBody
     ResponseBase agree(@RequestParam Long aid, @RequestParam Long pid) {
         PatientAgreeService service = new PatientAgreeService(aid,pid,driver);
-        return service.process();
-    }
-
-    @RequestMapping(value="/info",method= RequestMethod.GET)
-    public @ResponseBody
-    ResponseBase info(@RequestBody PatientInfoRequest request) {
-        PatientInfoService service = new PatientInfoService(request,driver);
         return service.process();
     }
 

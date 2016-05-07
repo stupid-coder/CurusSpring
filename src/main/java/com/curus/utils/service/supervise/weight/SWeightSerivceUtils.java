@@ -310,6 +310,7 @@ public class SWeightSerivceUtils {
 
         Double weight = QuotaServiceUtils.getLastWeight(driver, account_id, patient_id);
         Double height = QuotaServiceUtils.getLastHeight(driver, account_id, patient_id);
+
         height /= 100;
         Double standweight = patient.getGender().compareTo(CommonConst.GENDER_MALE) == 0 ? 23 * height * height : 21 * height * height;
         return Math.max(0, (weight-standweight)/standweight)*10;
