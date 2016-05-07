@@ -103,14 +103,14 @@ public class SBdPressureServiseUtils {
     static public JSONObject BdPressureNonmedLoss(CurusDriver driver, Long account_id,
                                               SBdPressureNonmedRequest request) {
         JSONObject jo = new JSONObject();
-        List<JSONObject> bdpreQuotaList = GetBdPressureJSONList(driver, account_id, request.getPatient_id(), 2L);
+        List<Quota> bdpreQuotaList = GetBdPressureQuoaList(driver, account_id, request.getPatient_id(), 2L);
         if ( bdpreQuotaList == null || bdpreQuotaList.size() == 0 ) {
             jo.put("suggestion","请先进行血压测量");
             return jo;
         }
 
-        JSONObject bdpressure = bdpreQuotaList.get(0);
-        JSONObject lastbdpressure = bdpreQuotaList.size() > 1 ? bdpreQuotaList.get(1) : null;
+        JSONObject bdpressure = JSONObject.parseObject(bdpreQuotaList.get(0).getRecord());
+        JSONObject lastbdpressure = bdpreQuotaList.size() > 1 ? JSONObject.parseObject(bdpreQuotaList.get(1).getRecord()) : null;
 
         Double total = 0.0;
 
@@ -132,7 +132,10 @@ public class SBdPressureServiseUtils {
         result.clear();
 
         jo.put("suggestion", String.format("依据%s的当前血压情况，通过非药物治疗，总的降压空间为%dmmHg", PatientServiceUtils.GetPatientName(driver,request.getPatient_id()),Math.round(Math.min(20, total))));
-        jo.put("frequence",GetMeasureFreq(bdpressure,lastbdpressure,CommonConst.FALSE,Long.MAX_VALUE));
+        Long freq = GetMeasureFreq(bdpressure, lastbdpressure, CommonConst.FALSE, Long.MAX_VALUE);
+        Long noncheckdays = TimeUtils.dateDiffToNow(bdpreQuotaList.get(0).getMeasure_date())-1L;
+        logger.info(String.format("checkdays: freq:%d\tmeasure_date:%s\tnoncheckdays:%d", freq, bdpreQuotaList.get(0).getMeasure_date(), noncheckdays));
+        jo.put("frequence", TimeUtils.getDate(Math.max(freq - noncheckdays,0)));
 
         return jo;
     }
