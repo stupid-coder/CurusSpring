@@ -27,6 +27,8 @@ public class ImQueryInterface {
     static String appSecret = "0c31e207f766";
 
     public static String curus_accid = "curus-robot";
+    public static String curus_passwd = "curus-robot";
+    public static String curus_name = "CURUS";
 
     public static String HttpClient(
             String url,
@@ -54,50 +56,65 @@ public class ImQueryInterface {
         return EntityUtils.toString(response.getEntity(),"utf-8");
     }
 
-    public static Boolean Create(String accid, String token, String name) {
+    public static boolean CommonInterface(String post_uri, Map<String,String> entitys, String operation_msg) {
+        try {
+            String response = HttpClient(post_uri,entitys);
+            JSONObject jo = JSONObject.parseObject(response);
+            if ( "200".compareTo(jo.getString("code")) != 0 ) {
+                logger.warn(String.format("Failure to %s - %s %s", operation_msg, entitys, response));
+            } else {
+                logger.info(String.format("Success to %s - %s %s", operation_msg, entitys, response));
+                return true;
+            }
+        } catch ( Exception e ) {
+            logger.warn(String.format("%s error - %s %s",operation_msg, entitys, e));
+        }
+        return false;
+    }
+    public static boolean Create(String accid, String token, String name) {
         Map<String,String> entitys = new HashMap<String,String>();
         entitys.put("accid",accid);
         entitys.put("token",token);
-        if ( name != null && name.compareTo("") != 0) entitys.put("name",name);
-        try {
-            String response = HttpClient("https://api.netease.im/nimserver/user/create.action", entitys);
-            JSONObject jo = JSONObject.parseObject(response);
-            if ( "200".compareTo(jo.getString("code")) != 0 ) {
-                logger.warn(String.format("Failure to Create Account - %s %s", entitys, response));
-                return false;
-            } else {
-                logger.info(String.format("Success to Create Account - %s %s", entitys, response));
-                return true;
-            }
-        } catch(Exception e) {
-            logger.warn(String.format("Create IM Account error - %s %s", entitys,e));
-            return false;
-        }
+        if ( name != null ) entitys.put("name",name);
+        return CommonInterface("https://api.netease.im/nimserver/user/create.action",entitys, "Create IM Account");
     }
 
-    public static Boolean Add(String accid, String faccid) {
+    public static boolean Add(String accid, String faccid) {
         Map<String,String> entitys = new HashMap<String, String>();
         entitys.put("accid",accid);
         entitys.put("faccid",faccid);
         entitys.put("type","1");
-        try {
-            String response = HttpClient("https://api.netease.im/nimserver/friend/add.action", entitys);
-            JSONObject jo = JSONObject.parseObject(response);
-            if ( "200".compareTo(jo.getString("code")) != 0 ) {
-                logger.warn(String.format("Failure to Add Friend - %s %s", entitys, response));
-                return false;
-            } else {
-                logger.warn(String.format("Success to Add Friend - %s %s", entitys, response));
-                return true;
-            }
-        } catch (Exception e) {
-            logger.warn(String.format("Add IM Friend error - %s %s", entitys, e));
-            return false;
-        }
+        return CommonInterface("https://api.netease.im/nimserver/friend/add.action",entitys,"Add IM Friend");
     }
 
-    static {
-        Create(curus_accid,curus_accid,curus_accid);
+    public static boolean Delete(String accid, String faccid) {
+        Map<String,String> entitys = new HashMap<String, String>();
+        entitys.put("accid",accid);
+        entitys.put("faccid",faccid);
+        return CommonInterface("https://api.netease.im/nimserver/friend/delete.action", entitys, "Delete IM Friend");
+    }
+
+    public static boolean AddCurusRobot(String accid) {
+        return Add(curus_accid, accid);
+    }
+
+    public static JSONObject GetIMFriends(String accid) {
+        Map<String,String> entitys = new HashMap<String, String>();
+        entitys.put("accid",accid);
+        entitys.put("createtime",String.valueOf(TimeUtils.m2t(System.currentTimeMillis())));
+        try {
+            String response = HttpClient("https://api.netease.im/nimserver/friend/get.action",entitys);
+            JSONObject jo = JSONObject.parseObject(response);
+            if ( "200".compareTo(jo.getString("code")) != 0 ) {
+                logger.warn(String.format("Failure to Get IM Friends - %s %s", entitys, response));
+            } else {
+                logger.info(String.format("Success to Get IM Friends - %s %s", entitys, response));
+                return jo.getJSONObject("friends");
+            }
+        } catch ( Exception e ) {
+            logger.warn(String.format("Get IM Friends error - %s %s", entitys, e));
+        }
+        return null;
     }
 
 }

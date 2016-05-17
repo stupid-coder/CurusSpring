@@ -82,12 +82,8 @@ public class AccountUpdateService {
                 patient.setId_number(account.getId_number()); patient.setAddress(account.getAddress()); patient.setOther_contact(account.getOther_contact());
                 driver.patientDao.save(patient,"id");
             }
-            patient = PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF);
 
-            if ( patient != null ) {
-                ImQueryInterface.Create(patient.getId().toString(),patient.getId_number(),patient.getName());
-                ImQueryInterface.Add(ImQueryInterface.curus_accid,patient.getId().toString());
-            }
+            patient = PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF);
 
             QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_WEIGHT,null,null,
                     QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_WEIGHT, request.getWeight()));

@@ -23,6 +23,13 @@ public class AccountPatientServiceUtils {
         ));
     }
 
+    static public List<AccountPatient> selectByPatientId(CurusDriver driver,
+                                                         Long patient_id) {
+        return driver.accountPatientDao.selectAll(TypeUtils.getWhereHashMap(
+           "patient_id", patient_id
+        ));
+    }
+
     static public List<AccountPatient> selectSuper(CurusDriver driver, Long patient_id) {
         return driver.accountPatientDao.selectAll(TypeUtils.getWhereHashMap(
                 "patient_id", patient_id,
@@ -36,5 +43,4 @@ public class AccountPatientServiceUtils {
         return driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account_id,
                 "patient_id",patient_id));
     }
-
 }

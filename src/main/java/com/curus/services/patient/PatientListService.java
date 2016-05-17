@@ -7,8 +7,10 @@ import com.curus.httpio.response.ResponseBase;
 import com.curus.httpio.response.patient.PatientListResponseData;
 import com.curus.model.database.Account;
 import com.curus.model.database.AccountPatient;
+import com.curus.model.database.Patient;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
+import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
 import com.curus.utils.service.account.AccountPatientServiceUtils;
@@ -54,11 +56,14 @@ public class PatientListService {
             responseData = new PatientListResponseData();
             List<PatientListResponseData.PatientListInfo> patientList = new ArrayList<PatientListResponseData.PatientListInfo>();
             List<AccountPatient> accountPatientList = AccountPatientServiceUtils.selectValidate(driver,account.getId());
-            for ( AccountPatient accountPatient  : accountPatientList) {
-                if ( accountPatient.getPatient_id() != null )
-                    patientList.add(responseData.new PatientListInfo(PatientServiceUtils.select(driver,accountPatient.getPatient_id()),accountPatient));
 
+            for ( AccountPatient accountPatient  : accountPatientList) {
+                Patient patient = PatientServiceUtils.select(driver, accountPatient.getPatient_id());
+                if ( patient != null && (request.getIm() == null || request.getIm().compareTo(CommonConst.FALSE) == 0 || driver.accountDao.checkByIdNumber(patient.getId_number()))) {
+                    patientList.add(responseData.new PatientListInfo(patient, accountPatient));
+                }
             }
+
             responseData.setPatients(patientList);
         }
         return errorData;

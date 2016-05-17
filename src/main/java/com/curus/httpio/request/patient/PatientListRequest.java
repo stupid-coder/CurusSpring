@@ -6,6 +6,15 @@ package com.curus.httpio.request.patient;
 public class PatientListRequest {
 
     private String token;
+    private Integer im;
+
+    public Integer getIm() {
+        return im;
+    }
+
+    public void setIm(Integer im) {
+        this.im = im;
+    }
 
     public String getToken() {
         return token;
@@ -19,6 +28,7 @@ public class PatientListRequest {
     public String toString() {
         return "PatientListRequest{" +
                 "token='" + token + '\'' +
+                ", im=" + im +
                 '}';
     }
 }

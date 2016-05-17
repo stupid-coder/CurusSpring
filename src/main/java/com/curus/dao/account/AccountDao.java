@@ -38,4 +38,8 @@ public class AccountDao extends BaseDao<Account> {
         return getJdbcTemplate().update(String.format("UPDATE %s SET phone=? WHERE id=?",tableName), account.getPhone(), account.getId());
     }
 
+    public boolean checkByIdNumber(String id_number) {
+        return select(TypeUtils.getWhereHashMap("id_number",id_number)) != null;
+    }
+
 }

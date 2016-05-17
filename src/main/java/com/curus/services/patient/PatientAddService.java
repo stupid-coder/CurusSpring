@@ -106,9 +106,6 @@ public class PatientAddService {
                 QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_HEIGHT,null,null,
                         QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_HEIGHT, request.getHeight()));
 
-                accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account.getId(),
-                        "is_self",CommonConst.TRUE));
-                ImQueryInterface.Add(accountPatient.getPatient_id().toString(),patient.getId().toString());
             }
         }
         return errorData;

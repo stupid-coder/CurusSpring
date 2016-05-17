@@ -173,7 +173,7 @@ public class SWeightSerivceUtils {
         testrequest.setToken(request.getToken()); testrequest.setPatient_id(request.getPatient_id());
         testrequest.setActivity(request.getActivity()); testrequest.setDiet(request.getDiet());
         testrequest.setWeight_loss(request.getWeight_loss());
-        
+
         SWeightPretestResponseData responseData = new SWeightPretestResponseData();
         Pretest(driver,account_id,testrequest,responseData);
         if ( responseData.getWtloss() < request.getWeight_loss() ) return 0;

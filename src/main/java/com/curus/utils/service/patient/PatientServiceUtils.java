@@ -1,14 +1,12 @@
 package com.curus.utils.service.patient;
 
 import com.curus.dao.CurusDriver;
+import com.curus.im.ImQueryInterface;
 import com.curus.model.database.Account;
 import com.curus.model.database.AccountPatient;
 import com.curus.model.database.Message;
 import com.curus.model.database.Patient;
-import com.curus.utils.AppellationUtils;
-import com.curus.utils.RoleUtils;
-import com.curus.utils.TimeUtils;
-import com.curus.utils.TypeUtils;
+import com.curus.utils.*;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.MessageConst;
 import com.curus.utils.constant.QuotaConst;
@@ -70,6 +68,8 @@ public class PatientServiceUtils {
             patient = select(driver,patient.getId_number());
             role = RoleConst.ROLE_SUPER;
 
+            ImUtils.CreateIM(patient.getId_number(),patient.getName());
+
         } else { role =RoleConst.ROLE_COMMON; }
 
         if ( patient != null ) {
@@ -90,7 +90,9 @@ public class PatientServiceUtils {
             if (driver.accountPatientDao.insert(new AccountPatient(account.getId(),
                     patient.getId(),
                     is_self,
-                    role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE,
+                    //role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE, //
+                    // TOOD: 现在还没有SUPER通过添加逻辑
+                    CommonConst.TRUE,
                     CommonConst.TRUE,
                     RoleUtils.getRoleId(role),
                     AppellationUtils.getAppellationId(appellation)))>0) {
@@ -107,7 +109,13 @@ public class PatientServiceUtils {
 
         if (role.compareTo(RoleConst.ROLE_COMMON) == 0){
             // Send Message To Super
-            SendMessageToSuper(driver,account,patient);
+            // SendMessageToSuper(driver,account,patient);
+        }
+
+        if ( is_self.compareTo(CommonConst.TRUE) == 0 ) {
+            
+        } else {
+            ImUtils.AddIM(account.getId_number(),patient.getId_number());
         }
         return accountPatient;
     }
