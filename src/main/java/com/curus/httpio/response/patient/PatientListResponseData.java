@@ -20,6 +20,20 @@ public class PatientListResponseData {
         private Integer is_self;
         private Long patient_id;
         private String appellation_name;
+        private String id_number;
+
+        @Override
+        public String toString() {
+            return "PatientListInfo{" +
+                    "patient_name='" + patient_name + '\'' +
+                    ", gender=" + gender +
+                    ", role_name='" + role_name + '\'' +
+                    ", is_self=" + is_self +
+                    ", patient_id=" + patient_id +
+                    ", appellation_name='" + appellation_name + '\'' +
+                    ", id_number='" + id_number + '\'' +
+                    '}';
+        }
 
         public PatientListInfo(Patient patient, AccountPatient accountPatient) {
             this.patient_name = patient.getName();
@@ -28,6 +42,15 @@ public class PatientListResponseData {
             this.is_self = accountPatient.getIs_self();
             this.patient_id = patient.getId();
             this.appellation_name = AppellationUtils.getAppellationName(accountPatient.getAppellation_id());
+            this.id_number = patient.getId_number();
+        }
+
+        public String getId_number() {
+            return id_number;
+        }
+
+        public void setId_number(String id_number) {
+            this.id_number = id_number;
         }
 
         public String getPatient_name() {
@@ -78,17 +101,6 @@ public class PatientListResponseData {
             this.appellation_name = appellation_name;
         }
 
-        @Override
-        public String toString() {
-            return "PatientListInfo{" +
-                    "patient_name='" + patient_name + '\'' +
-                    ", gender=" + gender +
-                    ", role_name='" + role_name + '\'' +
-                    ", is_self=" + is_self +
-                    ", patient_id=" + patient_id +
-                    ", appellation_name='" + appellation_name + '\'' +
-                    '}';
-        }
     }
 
     private List<PatientListInfo> patients;
