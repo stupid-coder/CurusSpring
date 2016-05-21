@@ -82,16 +82,7 @@ public class AccountUpdateService {
                 patient.setId_number(account.getId_number()); patient.setAddress(account.getAddress()); patient.setOther_contact(account.getOther_contact());
                 driver.patientDao.save(patient,"id");
             }
-
-            patient = PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF);
-
-            QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_WEIGHT,null,null,
-                    QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_WEIGHT, request.getWeight()));
-
-            QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_HEIGHT,null,null,
-                    QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_HEIGHT, request.getHeight()));
-
-
+            PatientServiceUtils.AddPatient(driver,account, patient, null, AppellationConst.APPELLATION_SELF, request.getWeight(), request.getHeight());
         }
         return errorData;
     }

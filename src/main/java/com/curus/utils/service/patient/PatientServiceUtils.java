@@ -58,9 +58,11 @@ public class PatientServiceUtils {
                                      Account account,
                                      Patient patient,
                                      AccountPatient accountPatient,
-                                     String appellation) {
-        String role;
-        if ( patient.getId() == null || (patient = select(driver,patient.getId_number())) == null) {
+                                     String appellation,
+                                     String weight,
+                                     String height) {
+        String role  = RoleConst.ROLE_COMMON;
+        if ( patient.getId() == null ) {
             driver.patientDao.insert(new Patient(patient.getName(),patient.getGender(),
                     patient.getBirth(),patient.getId_number(),
                     patient.getPhone(),patient.getAddress(),
@@ -69,11 +71,21 @@ public class PatientServiceUtils {
             role = RoleConst.ROLE_SUPER;
 
             ImUtils.CreateIM(patient.getId_number(),patient.getName());
+        } else {
+            if ( (accountPatient != null && accountPatient.getRole_id().compareTo(RoleConst.ROLE_IDS.get(RoleConst.ROLE_SUPER)) == 0) ||
+                    AccountPatientServiceUtils.selectSuper(driver,patient.getId()) == null ) { // super user, update patient
+                role = RoleConst.ROLE_SUPER;
+                driver.patientDao.update(patient,"id");
+            }
+        }
 
-        } else { role =RoleConst.ROLE_COMMON; }
+        AddAccountPatient(driver,account,patient,accountPatient,role,appellation);
 
-        if ( patient != null ) {
-            AddAccountPatient(driver,account,patient,accountPatient,role,appellation);
+        if ( role.compareTo(RoleConst.ROLE_SUPER) == 0 ) {
+            QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_WEIGHT,null,null,
+                    QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_WEIGHT, weight));
+            QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_HEIGHT,null,null,
+                    QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_HEIGHT, height));
         }
 
         return patient;
@@ -90,8 +102,6 @@ public class PatientServiceUtils {
             if (driver.accountPatientDao.insert(new AccountPatient(account.getId(),
                     patient.getId(),
                     is_self,
-                    //role.compareTo(RoleConst.ROLE_SUPER) == 0 ? CommonConst.TRUE : CommonConst.FALSE, //
-                    // TOOD: 现在还没有SUPER通过添加逻辑
                     CommonConst.TRUE,
                     CommonConst.TRUE,
                     RoleUtils.getRoleId(role),
@@ -100,22 +110,16 @@ public class PatientServiceUtils {
                         "patient_id", patient.getId()));
                 QuotaServiceUtils.addQuotas(driver,account.getId(),patient.getId(), TimeUtils.getDate(), QuotaConst.QUOTA_INIT);
             }
-            else accountPatient = null;
-        } else if ( accountPatient.getIs_super_validate().compareTo(CommonConst.TRUE) == 0) {
+            else return null;
+
+            if ( is_self.compareTo(CommonConst.TRUE) != 0 ) {
+                ImUtils.AddIM(account.getId_number(),patient.getId_number());
+            }
+        } else {
             accountPatient.setIs_self(is_self);
             accountPatient.setRole_id(RoleUtils.getRoleId(role));
             accountPatient.setAppellation_id(AppellationUtils.getAppellationId(appellation));
-        }
-
-        if (role.compareTo(RoleConst.ROLE_COMMON) == 0){
-            // Send Message To Super
-            // SendMessageToSuper(driver,account,patient);
-        }
-
-        if ( is_self.compareTo(CommonConst.TRUE) == 0 ) {
-            
-        } else {
-            ImUtils.AddIM(account.getId_number(),patient.getId_number());
+            driver.accountPatientDao.update(accountPatient, "id");
         }
         return accountPatient;
     }

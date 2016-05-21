@@ -56,16 +56,17 @@ public class PatientListService {
             responseData = new PatientListResponseData();
             List<PatientListResponseData.PatientListInfo> patientList = new ArrayList<PatientListResponseData.PatientListInfo>();
             List<AccountPatient> accountPatientList = AccountPatientServiceUtils.selectValidate(driver,account.getId());
-
             for ( AccountPatient accountPatient  : accountPatientList) {
                 Patient patient = PatientServiceUtils.select(driver, accountPatient.getPatient_id());
-                if ( patient != null && (request.getIm() == null || request.getIm().compareTo(CommonConst.FALSE) == 0 || driver.accountDao.checkByIdNumber(patient.getId_number()))) {
+                if ( patient != null ) {
                     patientList.add(responseData.new PatientListInfo(patient, accountPatient));
                 }
             }
-
             responseData.setPatients(patientList);
         }
+
+        if ( errorData == null )
+            request.setToken(account.toString()); // for log
         return errorData;
     }
 
@@ -73,7 +74,10 @@ public class PatientListService {
         if ( validate() == null && listPatient() == null) {
             logger.info(LogUtils.Msg("Success to List Patient",request,responseData));
             return new ResponseBase(StatusConst.OK,responseData);
-        } else return new ResponseBase(StatusConst.ERROR,errorData);
+        } else {
+            logger.warn(LogUtils.Msg("Failure to List Patient",request,errorData));
+            return new ResponseBase(StatusConst.ERROR,errorData);
+        }
     }
 
 }

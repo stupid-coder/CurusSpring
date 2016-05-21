@@ -1,10 +1,9 @@
-package com.curus.httpio.request.patient;
+package com.curus.httpio.request.im;
 
 /**
- * Created by stupid-coder on 28/1/16.
+ * Created by stupid-coder on 5/21/16.
  */
-public class PatientListRequest {
-
+public class ImListRequest {
     private String token;
 
     public String getToken() {
@@ -17,7 +16,7 @@ public class PatientListRequest {
 
     @Override
     public String toString() {
-        return "PatientListRequest{" +
+        return "ImListRequest{" +
                 "token='" + token + '\'' +
                 '}';
     }

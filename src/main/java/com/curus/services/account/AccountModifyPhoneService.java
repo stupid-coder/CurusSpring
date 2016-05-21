@@ -5,10 +5,12 @@ import com.curus.httpio.request.account.AccountModifyPhoneRequest;
 import com.curus.httpio.response.ErrorData;
 import com.curus.httpio.response.ResponseBase;
 import com.curus.model.database.Account;
+import com.curus.model.database.Patient;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
+import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.validate.CodeValidate;
 import com.curus.utils.validate.PhoneValidate;
 import com.curus.utils.validate.ValueValidate;
@@ -52,6 +54,9 @@ public class AccountModifyPhoneService {
         } else {
             account.setPhone(request.getPhone());
             driver.accountDao.updatePhone(account);
+            Patient patient= PatientServiceUtils.select(driver,account.getId_number());
+            patient.setPhone(request.getPhone());
+            driver.patientDao.update(patient,"id");
         }
         return errorData;
     }

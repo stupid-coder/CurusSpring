@@ -98,14 +98,8 @@ public class PatientAddService {
                         patient.setPhone(request.getPhone());
                     }
                 }
-                patient = PatientServiceUtils.AddPatient(driver, account, patient, accountPatient, request.getAppellation());
+                patient = PatientServiceUtils.AddPatient(driver, account, patient, accountPatient, request.getAppellation(), request.getWeight(), request.getHeight());
                 responseData.setPatient_id(patient.getId());
-                QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_WEIGHT,null,null,
-                        QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_WEIGHT, request.getWeight()));
-
-                QuotaServiceUtils.addQuota(driver,account.getId(),patient.getId(),QuotaConst.QUOTA_HEIGHT,null,null,
-                        QuotaServiceUtils.getKVJSON(QuotaConst.QUOTA_HEIGHT, request.getHeight()));
-
             }
         }
         return errorData;
