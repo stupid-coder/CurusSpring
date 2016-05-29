@@ -43,4 +43,10 @@ public class AccountPatientServiceUtils {
         return driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account_id,
                 "patient_id",patient_id));
     }
+
+    static public Boolean checkSuper(CurusDriver driver, Long account_id, Long patient_id) {
+        AccountPatient accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id",account_id,
+                "patient_id",patient_id,"role_id",RoleUtils.getRoleId(RoleConst.ROLE_SUPER)));
+        return accountPatient != null;
+    }
 }

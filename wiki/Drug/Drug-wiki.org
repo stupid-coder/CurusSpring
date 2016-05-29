@@ -1,0 +1,52 @@
+#+TITLE: 用药管理接口
+#+AUTHOR: stupid_coder@163.com
+#+DATE: Sat Feb 20 15:32:37 2016
+
+* 描述
+  用药管理接口用于管理病人使用药物的情况。
+* 接口常量说明
+  具体一些字典常量写在设计文档中。请查阅。
+* 接口说明
+  生理指标接口提供两个基本接口：获取和添加接口。
+** 获取用药情况
+   获取接口URI：http://ip:port/hostname/drug/list
+
+*** 请求结构体
+   #+CAPTION: 获取生理指标接口
+   | 字段名     | 类型            | 说明                                         |
+   |------------+-----------------+----------------------------------------------|
+   | token      | String          | 用户标示                                     |
+   | patient_id | String          | 获取生理指标的管理对象ID                     |
+
+** 查询药物信息
+   添加结构URI: http://ip:port/hostname/drug/search
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名       | 类型   | 说明             |
+    |--------------+--------+------------------|
+    | gov_id       | String | 药物的国药准字， |
+    | product_name | String | 药物名称         |
+    | manu_name    | String | 生产单位         |
+
+** 药物说明书获取
+   获取URI: http://ip:port/hostname/drug/direction
+
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名  | 类型   | 说明   |
+    |---------+--------+--------|
+    | drug_id | String | 药物ID |
+
+** 药物使用请款保存
+   保存URI：http://ip:port/hostname/drug/update
+
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名      | 类型   | 说明                                       |
+    |-------------+--------+--------------------------------------------|
+    | token       | String | TOKEN                                      |
+    | drug_id     | String | 药物ID                                     |
+    | patient_id  | String |                                            |
+    | use_policy  | String | 用药策略，为一个自定义的json串，由前端确定 |
+    | change_time | Long   | 更新时间戳                                 |
+

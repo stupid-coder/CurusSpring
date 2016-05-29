@@ -3,9 +3,13 @@ package com.curus.dao;
 
 import com.curus.dao.account.AccountDao;
 import com.curus.dao.account.AccountPatientDao;
+import com.curus.dao.drug.DrugCompDao;
+import com.curus.dao.drug.DrugCompRelationDao;
+import com.curus.dao.drug.DrugInfoDao;
 import com.curus.dao.message.MessageDao;
 import com.curus.dao.patient.PatientDao;
 import com.curus.dao.patient.PatientIssueDao;
+import com.curus.dao.patient.PatientUseDrugDao;
 import com.curus.dao.quota.QuotaDao;
 import com.curus.dao.supervise.PatientSuperviseDao;
 import com.curus.dao.supervise.PatientSuperviseListDao;
@@ -19,8 +23,14 @@ import javax.sql.DataSource;
 
 public class CurusDriver {
 
-    public static CurusDriver getCurusDriver() {
-        return (CurusDriver) SpringContextUtils.getBean("curusDriver");
+    private static CurusDriver instance_;
+
+    private CurusDriver() {}
+
+    public static synchronized CurusDriver getCurusDriver() {
+        if ( instance_ == null )
+            instance_ = (CurusDriver) SpringContextUtils.getBean("curusDriver");
+        return instance_;
     }
 
     public AccountDao accountDao;
@@ -31,6 +41,10 @@ public class CurusDriver {
     public QuotaDao quotaDao;
     public PatientSuperviseDao patientSuperviseDao;
     public PatientSuperviseListDao patientSuperviseListDao;
+    public PatientUseDrugDao patientUseDrugDao;
+    public DrugCompDao drugCompDao;
+    public DrugInfoDao drugInfoDao;
+    public DrugCompRelationDao drugCompRelationDao;
 
     public CurusDriver(DataSource ds) {
         this.accountDao = new AccountDao();
@@ -56,5 +70,14 @@ public class CurusDriver {
 
         this.patientSuperviseListDao = new PatientSuperviseListDao();
         this.patientSuperviseListDao.setDataSource(ds);
+
+        this.patientUseDrugDao = new PatientUseDrugDao(ds);
+
+        this.drugInfoDao = new DrugInfoDao(ds);
+
+        this.drugCompDao = new DrugCompDao(ds);
+
+        this.drugCompRelationDao = new DrugCompRelationDao(ds);
+
     }
 }

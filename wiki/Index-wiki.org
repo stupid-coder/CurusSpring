@@ -10,6 +10,7 @@
     + [[https://github.com/stupid-coder/CurusSpring/wiki/supervise-weight-interface][体重管理]] :: 体重管理相关接口
     + [[https://github.com/stupid-coder/CurusSpring/wiki/supervise-smoke-interface][吸烟管理]] :: 吸烟管理相关接口
     + [[https://github.com/stupid-coder/CurusSpring/wiki/superivse-bdpressure-interface][血压管理]] :: 血压管理相关接口
+  + [[https://github.com/stupid-coder/CurusSpring/wiki/drug-interface][用药管理接口]] :: 药物管理相关接口
 ** Links
   + [[https://github.com/palfan/ncd_api][原有服务API]]
   

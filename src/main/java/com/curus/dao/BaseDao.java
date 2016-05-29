@@ -108,6 +108,21 @@ public class BaseDao<T> extends JdbcDaoSupport {
         else return rs;
     }
 
+    public List<T> selectRlike(String key, String value) {
+        RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
+        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s where %s like '%%%s%%'",tableName,key,value), rowMapper);
+        if ( rs.isEmpty() ) return null;
+        else return rs;
+    }
+
+    public List<T> selectRlike(String key, String value, Long limit) {
+        if ( limit <= 0L ) return null;
+        RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
+        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s where %s like '%%%s%%' limit %s",tableName,key,value,limit), rowMapper);
+        if ( rs.isEmpty() ) return null;
+        else return rs;
+    }
+
     public int delete(Map<String,Object> where) {
         JdbcArgsOut jdbcArgsOut = new JdbcArgsOut();
         try {
