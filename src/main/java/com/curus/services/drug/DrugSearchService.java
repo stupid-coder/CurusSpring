@@ -49,9 +49,9 @@ public class DrugSearchService {
     private ErrorData search() {
         Map<String,Object> where = new HashMap<String, Object>();
 
-        if (request.getGov_id() != null) where.put("gov_id",request.getGov_id());
-        if (request.getManu_name() != null) where.put("manu_name",request.getManu_name());
-        if (request.getProduct_name() != null) where.put("product_name",request.getProduct_name());
+        if (request.getGov_id() != null && request.getGov_id().length() != 0 ) where.put("gov_id",request.getGov_id());
+        if (request.getManu_name() != null && request.getManu_name().length() != 0 ) where.put("manu_name",request.getManu_name());
+        if (request.getProduct_name() != null && request.getProduct_name().length() != 0 ) where.put("product_name",request.getProduct_name());
 
         List<DrugInfo> drugInfoList = driver.drugInfoDao.selectRlike(where,limit);
 
