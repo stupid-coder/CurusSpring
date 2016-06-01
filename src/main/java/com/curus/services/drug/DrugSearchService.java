@@ -53,9 +53,14 @@ public class DrugSearchService {
         if (request.getManu_name() != null) where.put("manu_name",request.getManu_name());
         if (request.getProduct_name() != null) where.put("product_name",request.getProduct_name());
 
-        List<DrugInfo> drugInfoList = driver.drugInfoDao.selectRlike(where,20L);
+        List<DrugInfo> drugInfoList = driver.drugInfoDao.selectRlike(where,limit);
 
         responseData = new JSONArray();
+
+        if (drugInfoList==null) {
+            return errorData;
+        }
+
         for ( DrugInfo drugInfo : drugInfoList ) {
             JSONObject drug = new JSONObject();
             drug.put("drug_id",drugInfo.getDrug_id());

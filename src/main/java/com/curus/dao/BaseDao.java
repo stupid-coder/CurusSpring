@@ -113,7 +113,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
         List<Object> args = new ArrayList<Object>();
         String whereSql = buildRlikeWhereSql(where,args);
         RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
-        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s limit %s",tableName,whereSql,limit), rowMapper);
+        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s limit %s",tableName,whereSql,limit), rowMapper, args.toArray());
         if ( rs.isEmpty() ) return null;
         else return rs;
     }
@@ -203,7 +203,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
             return "";
         }
         for ( Map.Entry<String,Object> entry : where.entrySet() ) {
-            w.add(String.format(" %s like \'?\' ",entry.getKey()));
+            w.add(String.format(" %s like ? ",entry.getKey()));
             args.add(entry.getValue());
         }
         return String.format(" WHERE %s", StringUtils.join(w, "AND"));
