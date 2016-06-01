@@ -108,17 +108,12 @@ public class BaseDao<T> extends JdbcDaoSupport {
         else return rs;
     }
 
-    public List<T> selectRlike(String key, String value) {
-        RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
-        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s where %s like '%%%s%%'",tableName,key,value), rowMapper);
-        if ( rs.isEmpty() ) return null;
-        else return rs;
-    }
-
-    public List<T> selectRlike(String key, String value, Long limit) {
+    public List<T> selectRlike(Map<String,Object> where, Long limit) {
         if ( limit <= 0L ) return null;
+        List<Object> args = new ArrayList<Object>();
+        String whereSql = buildRlikeWhereSql(where,args);
         RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
-        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s where %s like '%%%s%%' limit %s",tableName,key,value,limit), rowMapper);
+        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s limit %s",tableName,whereSql,limit), rowMapper);
         if ( rs.isEmpty() ) return null;
         else return rs;
     }
@@ -197,6 +192,18 @@ public class BaseDao<T> extends JdbcDaoSupport {
         }
         for ( Map.Entry<String,Object> entry : where.entrySet() ) {
             w.add(String.format(" %s = ? ",entry.getKey()));
+            args.add(entry.getValue());
+        }
+        return String.format(" WHERE %s", StringUtils.join(w, "AND"));
+    }
+
+    protected String buildRlikeWhereSql(Map<String,Object> where, List<Object> args) {
+        List<String> w = new ArrayList<String>();
+        if ( where == null || where.size() == 0) {
+            return "";
+        }
+        for ( Map.Entry<String,Object> entry : where.entrySet() ) {
+            w.add(String.format(" %s like \'?\' ",entry.getKey()));
             args.add(entry.getValue());
         }
         return String.format(" WHERE %s", StringUtils.join(w, "AND"));

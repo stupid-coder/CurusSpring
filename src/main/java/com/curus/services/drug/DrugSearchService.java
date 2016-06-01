@@ -15,7 +15,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by stupid-coder on 5/29/16.
@@ -45,21 +47,13 @@ public class DrugSearchService {
     }
 
     private ErrorData search() {
-        List<DrugInfo> drugInfoList = new ArrayList<DrugInfo>();
-        if ( request.getGov_id() != null ) {
-            List<DrugInfo> govDrugInfoList = driver.drugInfoDao.selectRlike("gov_id",request.getGov_id(),limit-drugInfoList.size());
-            if ( govDrugInfoList != null ) drugInfoList.addAll(govDrugInfoList);
-        }
+        Map<String,Object> where = new HashMap<String, Object>();
 
-        if ( drugInfoList.size() < 20 && request.getManu_name() != null ) {
-            List<DrugInfo> productNameDrugInfoList = driver.drugInfoDao.selectRlike("product_name",request.getProduct_name(),limit-drugInfoList.size());
-            if (    productNameDrugInfoList != null ) drugInfoList.addAll(productNameDrugInfoList);
-        }
+        if (request.getGov_id() != null) where.put("gov_id",request.getGov_id());
+        if (request.getManu_name() != null) where.put("manu_name",request.getManu_name());
+        if (request.getProduct_name() != null) where.put("product_name",request.getProduct_name());
 
-        if ( drugInfoList.size() < 20 && request.getManu_name() != null ) {
-            List<DrugInfo> manuNameDrugInfoList = driver.drugInfoDao.selectRlike("manu_name",request.getManu_name(),limit-drugInfoList.size());
-            if ( manuNameDrugInfoList != null ) drugInfoList.addAll(manuNameDrugInfoList);
-        }
+        List<DrugInfo> drugInfoList = driver.drugInfoDao.selectRlike(where,20L);
 
         responseData = new JSONArray();
         for ( DrugInfo drugInfo : drugInfoList ) {
