@@ -1,15 +1,9 @@
 package com.curus.controllers;
 
 import com.curus.dao.CurusDriver;
-import com.curus.httpio.request.drug.DrugDirectionsGetRequest;
-import com.curus.httpio.request.drug.DrugSearchRequest;
-import com.curus.httpio.request.drug.PatientUseDrugListRequest;
-import com.curus.httpio.request.drug.PatientUseDrugUpdateRequest;
+import com.curus.httpio.request.drug.*;
 import com.curus.httpio.response.ResponseBase;
-import com.curus.services.drug.DrugDirectionGetService;
-import com.curus.services.drug.DrugSearchService;
-import com.curus.services.drug.PatientUseDrugListService;
-import com.curus.services.drug.PatientUseDrugUpdateService;
+import com.curus.services.drug.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +26,6 @@ public class DrugController  {
         return service.process();
     }
 
-    @RequestMapping(value="/update",method= RequestMethod.POST, consumes = "application/json")
-    public @ResponseBody ResponseBase update(@RequestBody PatientUseDrugUpdateRequest request) {
-        PatientUseDrugUpdateService service = new PatientUseDrugUpdateService(request,driver);
-        return service.process();
-    }
-
     @RequestMapping(value="/search",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody ResponseBase update(@RequestBody DrugSearchRequest request) {
         DrugSearchService service = new DrugSearchService(request,driver);
@@ -49,4 +37,17 @@ public class DrugController  {
         DrugDirectionGetService service = new DrugDirectionGetService(request,driver);
         return service.process();
     }
+
+    @RequestMapping(value="/patient/update",method= RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody ResponseBase update(@RequestBody PatientUseDrugUpdateRequest request) {
+        PatientUseDrugUpdateService service = new PatientUseDrugUpdateService(request,driver);
+        return service.process();
+    }
+
+    @RequestMapping(value="/patient/delete",method= RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody ResponseBase delete(@RequestBody PatientUseDrugDeleteRequest request) {
+        PatientUseDrugDeleteService service = new PatientUseDrugDeleteService(request,driver);
+        return service.process();
+    }
+
 }
