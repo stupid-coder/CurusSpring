@@ -37,8 +37,8 @@
     |---------+--------+--------|
     | drug_id | String | 药物ID |
 
-** 药物使用请款保存
-   保存URI：http://ip:port/hostname/drug/update
+** 药物使用情况保存
+   保存URI：http://ip:port/hostname/drug/patient/update
 
 *** 请求结构体
     #+CAPTION: 请求结构体
@@ -50,3 +50,13 @@
     | use_policy  | String | 用药策略，为一个自定义的json串，由前端确定 |
     | change_time | Long   | 更新时间戳                                 |
 
+** 药物使用情况删除
+   删除URI：http://ip:port/hostname/drug/patient/delete
+
+*** 请求结构体
+    #+CAPTION: 请求结构体
+    | 字段名      | 类型   | 说明                                       |
+    |-------------+--------+--------------------------------------------|
+    | token       | String | TOKEN                                      |
+    | drug_id     | String | 药物ID                                     |
+    | patient_id  | String |                                            |
