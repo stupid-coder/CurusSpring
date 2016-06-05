@@ -13,6 +13,7 @@ import com.curus.utils.LogUtils;
 import com.curus.utils.QuotaUtils;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.QuotaConst;
+import com.curus.utils.service.supervise.bdsugar.SBdSugarServiceUtils;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
 import com.curus.utils.service.supervise.smoke.SSmokeServiseUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
@@ -111,37 +112,50 @@ public class QuotaServiceUtils {
         Long quota_id = QuotaUtils.getQuotaIds(cate);
         Long subcate_id = QuotaUtils.getSubQuotaIds(subcate);
         List<Quota> quotaList = null;
-        if ( quota_id.compareTo(QuotaConst.QUOTA_ACT_ID) == 0 ) {
-            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
-            if (quotaList != null && quotaList.size() != 0 ) {
+        if (quota_id.compareTo(QuotaConst.QUOTA_ACT_ID) == 0) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, 1L);
+            if (quotaList != null && quotaList.size() != 0) {
                 JSONObject act = JSONObject.parseObject(quotaList.get(0).getRecord());
                 response.put("score", SWeightSerivceUtils.CalculateActivityEnergy(act));
-                act.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
-                response.put("value",act);
+                act.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+                response.put("value", act);
             }
-        } else if ( quota_id.compareTo(QuotaConst.QUOTA_FOOD_ID) == 0 ) {
-            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
-            if ( quotaList != null && quotaList.size() > 0) {
+        } else if (quota_id.compareTo(QuotaConst.QUOTA_FOOD_ID) == 0) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, 1L);
+            if (quotaList != null && quotaList.size() > 0) {
                 JSONObject food = JSONObject.parseObject(quotaList.get(0).getRecord());
                 response.put("score", SFoodServiceUtils.CalculateFoodScore(food));
                 response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
                 response.put("value", food);
             }
-        } else if (quota_id.compareTo(QuotaConst.QUOTA_DIET_ID) == 0 ) {
-            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
-            if ( quotaList != null && quotaList.size() > 0) {
+        } else if (quota_id.compareTo(QuotaConst.QUOTA_DIET_ID) == 0) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, 1L);
+            if (quotaList != null && quotaList.size() > 0) {
                 JSONObject diet = JSONObject.parseObject(quotaList.get(0).getRecord());
                 response.put("score", SWeightSerivceUtils.CalculateDietEnergy(diet));
                 response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
                 response.put("value", diet);
             }
-        } else if (quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0 ) {
-            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
-            if ( quotaList != null && quotaList.size() > 0) {
+        } else if (quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0) {
+            quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, 1L);
+            if (quotaList != null && quotaList.size() > 0) {
                 JSONObject smoke = JSONObject.parseObject(quotaList.get(0).getRecord());
-                response.put("measure_date",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
-                response.put("value", smoke);//quotaList.get(0).getRecord());
+                response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+                response.put("value", smoke);
             }
+        } else if ( quota_id.compareTo(QuotaConst.QUOTA_BS_ID) == 0 ) {
+            response.put("value",new JSONObject());
+            JSONObject valueObject = response.getJSONObject("value");
+
+            quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
+            for ( Quota q : quotaList ) {
+                if (!valueObject.containsKey(q.getSub_cat())) valueObject.put(q.getSub_cat().toString(),new JSONArray());
+                JSONArray subcat_array = valueObject.getJSONArray(q.getSub_cat().toString());
+                JSONObject item = JSONObject.parseObject(q.getRecord());
+                item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
+                subcat_array.add(item);
+            }
+
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
             response.put("value",new JSONArray());
             JSONArray valuelist = response.getJSONArray("value");
@@ -182,14 +196,25 @@ public class QuotaServiceUtils {
             ret ++;
         }
 
-        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_BS_ID,1L);
+        quotaList = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
         if (quotaList != null && quotaList.size() > 0) {
-            JSONObject quotaBS = JSONObject.parseObject(quotaList.get(0).getRecord());
-            JSONObject responseItem = new JSONObject();
-            responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
-            responseItem.put("value",quotaBS);
-            response.put(QuotaConst.QUOTA_BS,responseItem);
-            ret ++;
+            JSONArray quotaArray = new JSONArray();
+            for ( Quota item : quotaList ) {
+                JSONObject quotaBS = JSONObject.parseObject(item.getRecord());
+                JSONObject responseItem = new JSONObject();
+                responseItem.put("measure_date", TimeUtils.date2String(item.getMeasure_date()));
+                responseItem.put("value", quotaBS);
+                responseItem.put("level", SBdSugarServiceUtils.BdSugarLevel(quotaBS.getString("moment"),quotaBS.getDouble("sugarvalue")));
+
+                Long lastmonitor_diff_now =  TimeUtils.dateDiffToNow(item.getMeasure_date());
+                Long monitor_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,quotaBS.getString("moment"));
+                if ( lastmonitor_diff_now.compareTo(monitor_interval) < 0 ) responseItem.put("old",0);
+                else if ( lastmonitor_diff_now.compareTo(monitor_interval * 2L) >=0 ) responseItem.put("old", 2);
+                else responseItem.put("old",1);
+                quotaArray.add(responseItem);
+                ret++;
+            }
+            response.put(QuotaConst.QUOTA_BS, quotaArray);
         }
 
         quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);

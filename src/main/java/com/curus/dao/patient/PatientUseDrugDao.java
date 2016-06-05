@@ -1,8 +1,13 @@
 package com.curus.dao.patient;
 
 import com.curus.dao.BaseDao;
+import com.curus.model.database.Patient;
 import com.curus.model.database.PatientUseDrug;
+import com.curus.model.database.Quota;
+import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -27,5 +32,12 @@ public class PatientUseDrugDao extends BaseDao<PatientUseDrug> {
         return select(TypeUtils.getWhereHashMap("patient_id",patient_id,
                 "drug_id",drug_id,
                 "last",latest));
+    }
+
+    public List<PatientUseDrug> selectByMeasureDateLastDays(Long account_id,
+                                                            Long patient_id,
+                                                            Long lastestdays) {
+        RowMapper<PatientUseDrug> rowMapper = BeanPropertyRowMapper.newInstance(PatientUseDrug.class);
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE patient_id = ? AND change_time >= ? ORDER by change_time DESC", tableName), rowMapper, patient_id, TimeUtils.getDate(lastestdays * -1L));
     }
 }

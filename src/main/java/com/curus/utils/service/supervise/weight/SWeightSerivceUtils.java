@@ -220,6 +220,16 @@ public class SWeightSerivceUtils {
             return String.format("根据我国成人体重判定标准，您目前的体重超重（BMI在24-28之间），需要减重 %.2f 公斤才能达到正常水平。减重的诀窍就是“少吃多动”。少吃主要是减少摄入总量，尤其是高能量或高油脂食物的摄入；多动主要是指时间超过40分钟的中高强度的有氧运动。",weight-24.0*height*height);
         } else  return String.format("根据我国成人体重判定标准，您目前的体重已处在肥胖水平（BMI≥28），您需要减重 %.2f 公斤才能达到正常水平。减重的诀窍是“少吃多动”。少吃主要是减少摄入总量，尤其是高能量或高油脂食物的摄入；多动主要是指时间超过40分钟的中高强度的有氧运动。",weight-24*height*height);
     }
+    public static Double GetBMI(CurusDriver driver, Long account_id, Long patient_id) {
+        return SWeightSerivceUtils.BMI(QuotaServiceUtils.getLastWeight(driver,account_id,patient_id),
+                QuotaServiceUtils.getLastHeight(driver,account_id,patient_id));
+    }
+    public static Double GetActEnergy(CurusDriver driver, Long account_id, Long patient_id) {
+        List<Quota> activity_quota = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
+        if ( activity_quota != null && activity_quota.size() == 1 ) {
+            return SWeightSerivceUtils.CalculateActivityEnergy(JSONObject.parseObject(activity_quota.get(0).getRecord()));
+        } return null;
+    }
     public static String WeightLossEvaluation(CurusDriver driver, Long account_id, Long patient_id,
                                               Double curwtloss, Double targetloss, Long days,
                                               PatientSupervise patientSupervise) {

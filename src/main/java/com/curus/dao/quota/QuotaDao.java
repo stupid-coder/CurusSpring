@@ -4,6 +4,7 @@ import com.curus.dao.BaseDao;
 import com.curus.model.database.Quota;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.TypeUtils;
+import com.curus.utils.constant.QuotaConst;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -48,7 +49,15 @@ public class QuotaDao extends BaseDao<Quota> {
                 rowMapper,account_id,patient_id,quota_id);
     }
 
-
+    public List<Quota> selectLastestBSQuota(Long account_id, Long patient_id) {
+        List<Quota> quotaListResult = new ArrayList<Quota>();
+        RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
+        for ( Long sub_cat = 1L; sub_cat <=  QuotaConst.SUB_QUOTA_IDS.size(); ++ sub_cat) {
+            List<Quota> quotaList = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE patient_id=? AND quota_cat_id=? AND sub_cat = ? ORDER BY measure_date DESC LIMIT 1", tableName), rowMapper, patient_id, QuotaConst.QUOTA_BS_ID, sub_cat);
+            if ( quotaList != null && quotaList.size() == 1 ) quotaListResult.addAll(quotaList);
+        }
+        return quotaListResult;
+    }
 
     public int insert(Long account_id, Long patient_id, Long quota_id, Long subquota_id, Date date, String value) {
         Quota quota = new Quota(account_id,patient_id,date,quota_id, value);
