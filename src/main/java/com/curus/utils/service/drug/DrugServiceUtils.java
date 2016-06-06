@@ -3,9 +3,10 @@ package com.curus.utils.service.drug;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
-import com.curus.model.database.DrugComp;
-import com.curus.model.database.DrugCompRelation;
-import com.curus.model.database.DrugInfo;
+import com.curus.dao.drug.DrugCompRelationDao;
+import com.curus.model.database.*;
+import com.curus.utils.TypeUtils;
+import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.DrugConst;
 
 
@@ -81,5 +82,23 @@ public class DrugServiceUtils {
         directions.put("禁忌病情",drugInfo.getTaboo());
         directions.put("副作用/不良反应",drugInfo.getSide_effect());
         return directions;
+    }
+
+    public static List<PatientUseDrug> GetPatientUseDrug(CurusDriver driver,
+                                                         Long patient_id) {
+        return driver.patientUseDrugDao.selectAll(patient_id, CommonConst.TRUE);
+    }
+    public static boolean DrugType(CurusDriver driver,
+                               List<PatientUseDrug> patientUseDrugList,
+                               Integer comp_type) {
+        for ( PatientUseDrug patientUseDrug : patientUseDrugList ) {
+            List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(patientUseDrug.getDrug_id());
+            for (DrugCompRelation drugCompRelation : drugCompRelationList) {
+                DrugComp drugComp = driver.drugCompDao.select(TypeUtils.getWhereHashMap("comp_id",drugCompRelation.getComp_id()));
+                if ( drugComp == null ) continue;
+                if ( comp_type.compareTo(drugComp.getComp_type()) == 0 ) return true;
+            }
+        }
+        return false;
     }
 }

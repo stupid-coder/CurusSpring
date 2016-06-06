@@ -29,8 +29,18 @@ public class QuotaUtils {
     static public Long getSubQuotaIds(String subquota) {
         if ( subquota == null ) return null;
         else {
+            if (QuotaConst.SUB_QUOTA_IDS.containsKey(subquota)) {
+                return QuotaConst.SUB_QUOTA_IDS.get(subquota);
+            }
+        }
+        return null;
+    }
+
+    static public String getSubQuotaName(Long subcat_id) {
+        if ( subcat_id == null ) return null;
+        else {
             for ( Map.Entry<String,Long> entry : QuotaConst.SUB_QUOTA_IDS.entrySet()) {
-                if ( subquota.compareTo(entry.getKey()) == 0 ) return entry.getValue();
+                if ( subcat_id.compareTo(entry.getValue()) == 0 ) return entry.getKey();
             }
         }
         return null;

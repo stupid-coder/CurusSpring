@@ -149,8 +149,10 @@ public class QuotaServiceUtils {
 
             quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
             for ( Quota q : quotaList ) {
-                if (!valueObject.containsKey(q.getSub_cat())) valueObject.put(q.getSub_cat().toString(),new JSONArray());
-                JSONArray subcat_array = valueObject.getJSONArray(q.getSub_cat().toString());
+                String sub_cat = QuotaUtils.getSubQuotaName(q.getSub_cat());
+                if ( sub_cat == null ) continue;
+                if (!valueObject.containsKey(sub_cat)) valueObject.put(sub_cat,new JSONArray());
+                JSONArray subcat_array = valueObject.getJSONArray(sub_cat);
                 JSONObject item = JSONObject.parseObject(q.getRecord());
                 item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
                 subcat_array.add(item);
@@ -196,25 +198,29 @@ public class QuotaServiceUtils {
             ret ++;
         }
 
-        quotaList = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
-        if (quotaList != null && quotaList.size() > 0) {
-            JSONArray quotaArray = new JSONArray();
-            for ( Quota item : quotaList ) {
+        {
+            JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
+            JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,null);
+            JSONArray quota_object = new JSONArray();
+            for ( String sub_cat :bs_quotas.keySet() ) {
+                Quota item = bs_quotas.getObject(sub_cat,Quota.class);
                 JSONObject quotaBS = JSONObject.parseObject(item.getRecord());
                 JSONObject responseItem = new JSONObject();
+                Long interval = all_interval.getLong(quotaBS.getString("moment"));
+
                 responseItem.put("measure_date", TimeUtils.date2String(item.getMeasure_date()));
                 responseItem.put("value", quotaBS);
                 responseItem.put("level", SBdSugarServiceUtils.BdSugarLevel(quotaBS.getString("moment"),quotaBS.getDouble("sugarvalue")));
 
                 Long lastmonitor_diff_now =  TimeUtils.dateDiffToNow(item.getMeasure_date());
-                Long monitor_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,quotaBS.getString("moment"));
-                if ( lastmonitor_diff_now.compareTo(monitor_interval) < 0 ) responseItem.put("old",0);
-                else if ( lastmonitor_diff_now.compareTo(monitor_interval * 2L) >=0 ) responseItem.put("old", 2);
+
+                if ( lastmonitor_diff_now.compareTo(interval) < 0 ) responseItem.put("old",0);
+                else if ( lastmonitor_diff_now.compareTo(interval * 2L) >=0 ) responseItem.put("old", 2);
                 else responseItem.put("old",1);
-                quotaArray.add(responseItem);
+                quota_object.add(responseItem);
                 ret++;
             }
-            response.put(QuotaConst.QUOTA_BS, quotaArray);
+            response.put(QuotaConst.QUOTA_BS, quota_object);
         }
 
         quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
