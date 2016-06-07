@@ -15,6 +15,8 @@ import com.curus.utils.service.drug.DrugServiceUtils;
 import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +42,108 @@ public class SBdSugarServiceUtils {
         return lastDays;
     }
 
+    public static void MonitorIntervalSuggestionMomentByValue(JSONObject interval,
+                                                       JSONObject suggestion,
+                                                       String moment,
+                                                       JSONObject moment_degree,
+                                                       boolean BMI_ACT_NO,
+                                                       List<String> low_degree)
+    {
+
+        String moment_context = GetMoment(moment);
+        String moment_suggestion = null;
+        Double ref_degree = moment_degree.getDouble("ref_degree");
+        Double ref_bs = moment_degree.getDouble("ref_bs");
+        Long default_interval = interval.getLong(moment);
+        if ( ref_degree >= 1.0 ) {
+            if (ref_bs < 7.8) {
+                moment_suggestion = String.format("%s血糖正常，必要时再按照提示对%s血糖进行监测。",moment_context,moment_context);
+                default_interval = Math.min(365L, 4 * default_interval);
+            } else if ( ref_bs < 11.1 ) {
+                if ( BMI_ACT_NO )
+                    moment_suggestion = String.format("%s血糖偏高（糖耐量减低），但尚未达到糖尿病水平。减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少能量摄入，增加%s的运动量，并按提示监测%s血糖！",
+                            moment_context,moment_context,moment_context);
+                else moment_suggestion = String.format("%s血糖偏高（糖耐量减低），但尚未达到糖尿病水平。已有较大的非药物干预力度，请继续保持，并按提示监测%s血糖。",moment_context,moment_context);
+                default_interval = Math.min(180L, 2 * default_interval);
+            } else {
+                if ( BMI_ACT_NO )
+                    moment_suggestion = String.format("%s血糖已达糖尿病水平。减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少能量摄入，增加%s的运动量，并按提示监测%s血糖，如持续升高建议及早就医！",
+                            moment_context,moment_context,moment_context);
+                else
+                    moment_suggestion = String.format("%s血糖已达糖尿病水平。单纯非药物干预似乎很难使%s的血糖达标，建议尽早就医，并按提示监测%s血糖。",moment_context,moment_context,moment_context);
+                default_interval = Math.min(30L,default_interval/2L);
+            }
+        } else {
+            low_degree.add(moment_context);
+        }
+
+        if ( moment_suggestion != null ) {
+            interval.put(moment,default_interval);
+            suggestion.put(moment,moment_suggestion);
+        }
+    }
+
+    public static String GetSuggestion(String moment, Double level, boolean BMI_ACT_NO) {
+        if ( moment.compareTo("wfq") == 0 ) {
+            if ( level == -2.0 ) return "午餐前出现了低血糖！建议规律早午餐或适当提前午餐时间或在午餐前吃些水果或零食，平时做好应对低血糖的准备，并按提示监测午餐前血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
+            else if ( level <= 0.0 ) return "本次午餐前血糖正常，无需特殊处理，可按提示监测午餐前血糖。";
+            else if ( BMI_ACT_NO ) return "本次午餐前血糖高于正常。减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测午餐前血糖，如持续升高建议及早就医！";
+            else return "本次午餐前血糖高于正常。单纯非药物干预似乎很难使午餐前血糖达标，建议尽早就医，并按提示监测午餐前血糖。";
+        } else if ( moment.compareTo("wcq") == 0 ) {
+            if ( level == -2.0 ) return "晚餐前出现了低血糖！建议规律午晚餐或适当提前晚餐时间或在晚餐前吃些水果或零食，平时做好应对低血糖的准备，并按提示监测晚餐前血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
+            else if ( level <= 0.0 ) return "本次晚餐前血糖正常，无需特殊处理，可按提示监测晚餐前血糖。";
+            else if ( BMI_ACT_NO ) return "本次晚餐前血糖高于正常。减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测晚餐前血糖，如持续升高建议及早就医！";
+            else return "本次晚餐前血糖高于正常。单纯非药物干预似乎很难使晚餐前血糖达标，建议尽早就医，并按提示监测晚餐前血糖。";
+        } else if ( moment.compareTo("sq") == 0 ) {
+            if ( level == -2.0 ) return "睡前出现了低血糖！建议规律晚餐或适当延迟晚餐时间或在睡前吃些水果或零食，平时做好应对低血糖的准备，并按提示监测睡前血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
+            else if ( level <= 0.0 ) return "本次睡前血糖正常，无需特殊处理，可按提示监测睡前血糖。";
+            else if ( BMI_ACT_NO ) return "本次睡前血糖高于正常。减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测睡前血糖，如持续升高建议及早就医！";
+            else return "单纯非药物干预似乎很难使睡前血糖达标，建议尽早就医，并按提示监测睡前血糖。";
+        } else if ( moment.compareTo("yj") == 0 ) {
+            if ( level == -2.0) return "夜间出现了低血糖！建议规律晚餐或适当延迟晚餐时间或在睡前吃些水果或零食，平时做好应对低血糖的准备，并按提示监测夜间血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
+            else return "本次夜间血糖不低，无需特殊处理，可按提示监测夜间血糖。";
+        } else if ( moment.compareTo("ydh") == 0 ) {
+            if ( level == -2.0 ) return "运动后出现了低血糖！建议避免餐前空腹进行长时间或过于激烈的运动，或在运动前适当吃些富含能量的甜点或零食，出门随身携带能够快速补充糖分的小零食，察觉有心慌或出虚汗时尽早食用，并按提示监测运动后血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
+            else if ( level <= 0.0 ) return "本次运动后血糖正常，无需特殊处理，可按提示监测运动后血糖。";
+            else return "本次运动后血糖高于正常，请注意监测早晨空腹甚至是午晚餐餐前血糖水平，以便判断是否及如何处理。";
+        }
+        return "GetSuggetionNone";
+    }
+    public static void MonitorIntervalSuggestionMomentByLevel(JSONObject interval,
+                                                              JSONObject suggestion,
+                                                              String moment,
+                                                              JSONObject moment_degree,
+                                                              boolean BMI_ACT_NO,
+                                                              List<String> low_degree)
+    {
+        String moment_context = GetMoment(moment);
+        String moment_suggestion = null;
+        Double ref_degree = moment_degree.getDouble("ref_degree");
+        Double ref_bs = moment_degree.getDouble("ref_bs");
+        Double ref_level = BdSugarLevel(moment,ref_bs);
+        Long default_interval = interval.getLong(moment);
+
+        if ( ref_degree >= 1.0 ) {
+            if ( ref_level == -2.0 ) {
+                moment_suggestion = GetSuggestion(moment,ref_level,BMI_ACT_NO);
+                default_interval = 7L;
+            } else if ( ref_level <= 0.0 ) {
+                moment_suggestion = GetSuggestion(moment,ref_level,BMI_ACT_NO);
+                default_interval = 4*default_interval;
+            } else {
+                moment_suggestion = GetSuggestion(moment,ref_level,BMI_ACT_NO);
+                default_interval = Math.min(30L,default_interval/2L);
+            }
+
+            interval.put(moment,default_interval);
+            suggestion.put(moment,moment_suggestion);
+
+        } else {
+            low_degree.add(moment_context);
+        }
+    }
+
+
     public static JSONObject MonitorInterval(CurusDriver driver,
                                        Long account_id,
                                        Long patient_id,
@@ -54,7 +158,9 @@ public class SBdSugarServiceUtils {
         if ( patientUseDrugList != null ) {
             interval.put("kf",30L);
         }
-        if ( DrugServiceUtils.DrugType(driver, patientUseDrugList, DrugUtils.GetCompTypeId("胰岛素")) ) {
+
+        boolean UseYDS = DrugServiceUtils.DrugType(driver, patientUseDrugList, DrugUtils.GetCompTypeId("胰岛素"));
+        if ( UseYDS ) {
             interval.put("kf", 1L);
             for ( Map.Entry<String,Long> entry : QuotaConst.SUB_QUOTA_IDS.entrySet() ) {
                 interval.put(entry.getKey(),Math.min(interval.getLong(entry.getKey()),30L));
@@ -65,8 +171,99 @@ public class SBdSugarServiceUtils {
             return interval;
         }
 
+        String patientName = PatientServiceUtils.GetPatientName(driver,patient_id);
+        interval.put("suggestion",new JSONObject());
+        JSONObject suggestion = interval.getJSONObject("suggestion");
+
+        Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
+        Double act_energy = SWeightSerivceUtils.GetActEnergy(driver,account_id,patient_id);
+        boolean BMI_ACT_NO = ( BMI >= 24.0 || act_energy < 50.0);
+        if (patientUseDrugList == null) { // 未用药
 
 
+            List<String> low_degree = new ArrayList<String>();
+            { // kf
+                String moment = "kf";
+                String moment_suggestion = null;
+                JSONObject moment_degree = ref_bs_degree.getJSONObject(moment);
+                Double ref_degree = moment_degree.getDouble("ref_degree");
+                Double ref_bs = moment_degree.getDouble("ref_bs");
+                Double ref_level = SBdSugarServiceUtils.BdSugarLevel(moment,ref_bs);
+                Long default_interval = interval.getLong(moment);
+                if ( ref_degree >= 1.0 ) {
+                    if ( ref_level ==  -2.0 ) {
+                        moment_suggestion = "早晨出现了低血糖！建议规律早餐或适当提前早餐时间或在晨起后吃些水果或零食，平时做好应对低血糖的准备，并按提示监测空腹血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
+                        default_interval = 7L;
+                    } else if (ref_level <= 0.0 ) {
+                        moment_suggestion = "空腹血糖处在正常水平，请保持健康的生活方式，按提示监测空腹血糖。";
+                        interval.put("kf",Math.min(365L,default_interval));
+                    } else if (ref_level == 0.5 ) {
+                        moment_suggestion = "空腹血糖偏高（空腹血糖受损），建议强化健康生活方式，并按提示监测空腹血糖。";
+                        if ( BMI_ACT_NO )
+                            moment_suggestion = String.format("%s通过减重、控制饮食或增加身体活动，%s仍有很大空间可使血糖恢复正常或延迟进展为糖尿病！研究显示，超重肥胖者减重5%或强化生活方式干预可使糖尿病的发病率减少50%；低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。", moment_suggestion, patientName);
+                        default_interval = Math.min(90L,default_interval*2);
+                    } else if (ref_level == 1.0) {
+                        moment_suggestion = "空腹血糖达糖尿病水平！请按提示监测空腹血糖。";
+                        if ( BMI_ACT_NO )
+                            moment_suggestion = moment_suggestion+"空腹血糖长期得不到控制会导致心脑眼肾等脏器并发症。目前"+patientName+"在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！研究显示，超重肥胖者减重5%或强化生活方式干预可使糖尿病的发病率减少50%；低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。";
+                        else
+                            moment_suggestion = moment_suggestion+"目前"+patientName+"已有较好饮食控制及身体活动强度，单纯非药物治疗很难使血糖降至正常水平，建议咨询医师看是否需要尽快启动药物治疗。";
+                        default_interval = 30L;
+                    } else if (ref_level == 1.5) {
+                        if ( BMI_ACT_NO )
+                            moment_suggestion = "空腹血糖已进展至糖尿病较高水平，长期得不到控制会导致心脑眼肾等脏器并发症。目前"+patientName+"在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！同时按提示监测空腹血糖变化。研究显示，低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。";
+                        else
+                            moment_suggestion =  "虽经努力，空腹血糖水平仍然较高，且非药物干预的效果已接近极限，建议尽早就诊接受药物治疗，并按提示监测空腹血糖。";
+                        default_interval = 15L;
+                    } else if (ref_level >= 2.0) {
+                        if ( BMI_ACT_NO )
+                            moment_suggestion = "空腹血糖水平过高！通过严格的非药物干预"+patientName+"虽仍有较大的降糖空间，但仍建议在强化饮食控制和身体活动的情况下尽快就医，并按提示监测空腹血糖变化。";
+                        else
+                            moment_suggestion = "空腹血糖非常严峻，单纯非药物干预不可能使血糖得到控制。建议尽早看医生接受药物治疗，之前每周至少测量一次空腹血糖！";
+                        default_interval = 7L;
+                    }
+                    interval.put(moment,default_interval);
+                    suggestion.put(moment,moment_suggestion);
+                } else {
+                    low_degree.add(GetMoment(moment));
+                }
+            }
+
+            MonitorIntervalSuggestionMomentByValue(interval,suggestion,"zch",ref_bs_degree.getJSONObject("zch"),BMI_ACT_NO,low_degree);
+            MonitorIntervalSuggestionMomentByLevel(interval,suggestion,"wfq",ref_bs_degree.getJSONObject("wfq"),BMI_ACT_NO,low_degree);
+            MonitorIntervalSuggestionMomentByValue(interval,suggestion,"wfh",ref_bs_degree.getJSONObject("wfh"),BMI_ACT_NO,low_degree);
+            MonitorIntervalSuggestionMomentByLevel(interval,suggestion,"wcq",ref_bs_degree.getJSONObject("wcq"),BMI_ACT_NO,low_degree);
+            MonitorIntervalSuggestionMomentByValue(interval,suggestion,"wch",ref_bs_degree.getJSONObject("wch"),BMI_ACT_NO,low_degree);
+            MonitorIntervalSuggestionMomentByLevel(interval,suggestion,"sq",ref_bs_degree.getJSONObject("sq"),BMI_ACT_NO,low_degree);
+
+            {
+                String moment = "yj";
+                String moment_suggestion = null;
+                JSONObject degree = ref_bs_degree.getJSONObject(moment);
+                Double ref_degree = degree.getDouble("ref_degree");
+                Double ref_bs = degree.getDouble("ref_bs");
+                Double ref_level = BdSugarLevel(moment,ref_bs);
+                Long default_interval = interval.getLong(moment);
+
+                if ( ref_degree >= 1.0 ) {
+                    if ( ref_level == -2 ) {
+                        default_interval = 7L;
+                        moment_suggestion = GetSuggestion(moment,ref_level,BMI_ACT_NO);
+                    } else {
+                        default_interval = 4 * default_interval;
+                        moment_suggestion = GetSuggestion(moment,ref_level,BMI_ACT_NO);
+                    }
+                    interval.put(moment,default_interval);
+                    suggestion.put(moment,moment_suggestion);
+                } else {
+                    low_degree.add(GetMoment(moment));
+                }
+            }
+
+            MonitorIntervalSuggestionMomentByLevel(interval,suggestion,"ydh",ref_bs_degree.getJSONObject("ydh"),BMI_ACT_NO,low_degree);
+
+        } else { // 用药
+        }
         return interval;
     }
 
@@ -83,11 +280,11 @@ public class SBdSugarServiceUtils {
     public static String GetMoment(String key)
     {
         if ( key.compareTo("kf") == 0) return "早餐前空腹";
-        if ( key.compareTo("zch") == 0) return "早餐后2H";
+        if ( key.compareTo("zch") == 0) return "早餐后2小时";
         if ( key.compareTo("wfq") == 0) return "午餐前";
-        if ( key.compareTo("wfh") == 0) return "午饭后";
+        if ( key.compareTo("wfh") == 0) return "午饭后2小时";
         if ( key.compareTo("wcq") == 0) return "晚餐前";
-        if ( key.compareTo("wch") == 0) return "晚餐后";
+        if ( key.compareTo("wch") == 0) return "晚餐后2小时";
         if ( key.compareTo("sq") == 0) return "睡前";
         if ( key.compareTo("yj") == 0) return "夜间";
         if ( key.compareTo("ydq") == 0) return "运动前";
@@ -361,8 +558,8 @@ public class SBdSugarServiceUtils {
     }
 
     public static JSONObject GetRefAndDegreeTotal(CurusDriver driver,
-                                               Long account_id,
-                                               Long patient_id) {
+                                                  Long account_id,
+                                                  Long patient_id) {
         JSONObject interval = MonitorInterval(driver,account_id,patient_id,null);
 
         JSONObject degree = new JSONObject();
