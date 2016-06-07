@@ -191,11 +191,11 @@ public class QuotaServiceUtils {
                 Quota item = bs_quotas.getObject(sub_cat,Quota.class);
                 JSONObject quotaBS = JSONObject.parseObject(item.getRecord());
                 JSONObject responseItem = new JSONObject();
-                Long interval = all_interval.getLong(quotaBS.getString("moment"));
+                Long interval = all_interval.getLong(sub_cat);
 
                 responseItem.put("measure_date", TimeUtils.date2String(item.getMeasure_date()));
                 responseItem.put("value", quotaBS);
-                responseItem.put("level", SBdSugarServiceUtils.BdSugarLevel(quotaBS.getString("moment"),quotaBS.getDouble("sugarvalue")));
+                responseItem.put("level", SBdSugarServiceUtils.BdSugarLevel(sub_cat,quotaBS.getDouble("sugarvalue")));
 
                 Long lastmonitor_diff_now =  TimeUtils.dateDiffToNow(item.getMeasure_date());
 
