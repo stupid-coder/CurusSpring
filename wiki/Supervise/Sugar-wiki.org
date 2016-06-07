@@ -1,0 +1,39 @@
+#+TITLE: 血糖体重管理接口
+#+AUTHOR: stupid_coder@163.com
+#+DATE: Sat Feb 20 15:32:37 2016
+
+* 描述
+
+* 体重管理
+** 评估指导接口
+   接口URI：http://ip:port/curus/supervise/sugar/estimate
+*** 请求结构体
+    #+CAPTION: 评估指导请求结构体
+    | 字段名     | 类型   | 说明               |
+    |------------+--------+--------------------|
+    | token      | Stirng | 用户标示           |
+    | patient_id | String | 评估指导管理对象ID |
+** 获取血糖非药物治疗
+   接口URI：http://ip:port/curus/supervise/sugar/nonmed
+*** 请求结构体
+  #+CAPTION: 获取减重目标请求结构体
+  | 字段名     | 类型          | 说明                     |
+  |------------+---------------+--------------------------|
+  | token      | String        | 用户标示                 |
+  | patient_id | String        | 获取生理指标的管理对象ID |
+  | diet       | Option.Double | 输入的增加饮食的分数     |
+  | activity   | Option.Double | 输入的增加的运动量       |
+
+  PS：如果diet和activity都不带，则返回默认的值。
+
+** 计划添加接口
+   接口URI：http://ip:port/curus/supervise/sugar/add
+*** 请求结构体
+  #+CAPTION: 请求结构体
+  | 字段名     | 类型   | 说明                                                          |
+  |------------+--------+---------------------------------------------------------------|
+  | token      | String | 用户标示                                                      |
+  | patient_id | String | 获取生理指标的管理对象ID                                      |
+  | poligy     | String | 用户的降血糖计划：{"diet":"10","activity":"20"}               |
+
+  该接口用于在项目管理中，决定是否开启血糖管理
