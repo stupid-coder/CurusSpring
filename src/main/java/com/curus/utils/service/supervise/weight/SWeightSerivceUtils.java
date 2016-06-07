@@ -228,7 +228,7 @@ public class SWeightSerivceUtils {
         List<Quota> activity_quota = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
         if ( activity_quota != null && activity_quota.size() == 1 ) {
             return SWeightSerivceUtils.CalculateActivityEnergy(JSONObject.parseObject(activity_quota.get(0).getRecord()));
-        } return null;
+        } return 40.0;
     }
     public static String WeightLossEvaluation(CurusDriver driver, Long account_id, Long patient_id,
                                               Double curwtloss, Double targetloss, Long days,

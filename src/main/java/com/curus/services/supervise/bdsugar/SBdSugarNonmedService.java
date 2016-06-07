@@ -47,7 +47,7 @@ public class SBdSugarNonmedService {
         return errorData;
     }
 
-    private ResponseBase process() {
+    public ResponseBase process() {
         if ( validate() == null && nonmed() == null ) {
             logger.info(LogUtils.Msg("Success to Service Nonmed",request,responseData));
             return new ResponseBase(StatusConst.OK, responseData);

@@ -144,31 +144,15 @@ public class QuotaServiceUtils {
                 response.put("value", smoke);
             }
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_BS_ID) == 0 ) {
-            response.put("value",new JSONObject());
-            JSONObject valueObject = response.getJSONObject("value");
-
             quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
             for ( Quota q : quotaList ) {
                 String sub_cat = QuotaUtils.getSubQuotaName(q.getSub_cat());
                 if ( sub_cat == null ) continue;
-                if (!valueObject.containsKey(sub_cat)) valueObject.put(sub_cat,new JSONArray());
-                JSONArray subcat_array = valueObject.getJSONArray(sub_cat);
+                if (!response.containsKey(sub_cat)) response.put(sub_cat,new JSONArray());
+                JSONArray subcat_array = response.getJSONArray(sub_cat);
                 JSONObject item = JSONObject.parseObject(q.getRecord());
                 item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
                 subcat_array.add(item);
-            }
-
-        } else if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
-            response.put("value",new JSONArray());
-            JSONArray valuelist = response.getJSONArray("value");
-            if ( days <= 0L )
-                quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,days*-1+1);
-            else
-                quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
-            for ( Quota q : quotaList ) {
-                JSONObject item = JSONObject.parseObject(q.getRecord());
-                item.put("measure_date", TimeUtils.date2Long(q.getMeasure_date()));
-                valuelist.add(item);
             }
         }
         return quotaList != null ? quotaList.size() : 0;
@@ -198,9 +182,10 @@ public class QuotaServiceUtils {
             ret ++;
         }
 
-        {
+        { // BS
             JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
-            JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,null);
+            JSONObject ref = SBdSugarServiceUtils.GetRefAndDegreeTotal(driver,account_id,patient_id);
+            JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,ref);
             JSONArray quota_object = new JSONArray();
             for ( String sub_cat :bs_quotas.keySet() ) {
                 Quota item = bs_quotas.getObject(sub_cat,Quota.class);

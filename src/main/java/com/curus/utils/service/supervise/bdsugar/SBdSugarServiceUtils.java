@@ -8,7 +8,6 @@ import com.curus.model.database.Quota;
 import com.curus.utils.QuotaUtils;
 import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.BdSugarConst;
-import com.curus.utils.constant.DrugConst;
 import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.DrugUtils;
 import com.curus.utils.service.drug.DrugServiceUtils;
@@ -159,7 +158,8 @@ public class SBdSugarServiceUtils {
             interval.put("kf",30L);
         }
 
-        boolean UseYDS = DrugServiceUtils.DrugType(driver, patientUseDrugList, DrugUtils.GetCompTypeId("胰岛素"));
+        boolean UseYDS = patientUseDrugList == null ? false :
+                DrugServiceUtils.DrugType(driver, patientUseDrugList, DrugUtils.GetCompTypeId("胰岛素"));
         if ( UseYDS ) {
             interval.put("kf", 1L);
             for ( Map.Entry<String,Long> entry : QuotaConst.SUB_QUOTA_IDS.entrySet() ) {
@@ -167,7 +167,7 @@ public class SBdSugarServiceUtils {
             }
         }
 
-        if (ref_bs_degree == null) {
+        if (ref_bs_degree == null || !ref_bs_degree.containsKey("kf") ) {
             return interval;
         }
 
@@ -261,7 +261,7 @@ public class SBdSugarServiceUtils {
             }
 
             MonitorIntervalSuggestionMomentByLevel(interval,suggestion,"ydh",ref_bs_degree.getJSONObject("ydh"),BMI_ACT_NO,low_degree);
-
+            suggestion.put("low_degree",String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degree));
         } else { // 用药
         }
         return interval;
@@ -298,49 +298,49 @@ public class SBdSugarServiceUtils {
                                               JSONObject lastest_in_duration,
                                               JSONObject suggestion,
                                               JSONObject degree) {
-        Long value = QuotaConst.SUB_QUOTA_IDS.get(key);
         JSONObject kfbs = new JSONObject();
         String kf_suggestion;
         if ( !lastest_in_duration.containsKey(key) ) { // ref_duration 内无记录
             if ( lastest_quotas.containsKey(key) ) {
                 Quota quota = lastest_quotas.getObject(key,Quota.class);
                 if (TimeUtils.dateDiffToNow(quota.getMeasure_date()) > interval) {
-                    suggestion.put(key,String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！",GetMoment(key),interval));
+                    suggestion.put(key,String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！",interval,GetMoment(key)));
                     return false;
                 } else {
                     Double ref_bs = JSONObject.parseObject(quota.getRecord()).getDouble("sugarvalue");
                     kfbs.put("ref_bs",ref_bs);
                     if ( ref_bs <= 2.8 ) {
                         kfbs.put("ref_degree",1.0);
-                        kf_suggestion = String.format("%s%s低血糖(可参考度：中)",quota.getMeasure_date().toString(),GetMoment(key));
+                        kf_suggestion = String.format("%s%s低血糖(可参考度：中)",TimeUtils.DateFormat(quota.getMeasure_date()),GetMoment(key));
                     } else if ( ref_bs < 11.1 ) {
                         kfbs.put("ref_degree",0.5);
-                        kf_suggestion = String.format("近期无%s血糖记录，暂用%s的血糖值替代(可参考度：低)",GetMoment(key),quota.getMeasure_date().toString());
+                        kf_suggestion = String.format("近期无%s血糖记录，暂用%s的血糖值替代(可参考度：低)",GetMoment(key),TimeUtils.DateFormat(quota.getMeasure_date()));
                     } else {
                         kfbs.put("ref_degree",1.0);
-                        kf_suggestion = String.format("近期无%s血糖记录，暂用%s的血糖值替代(可参考度：中)",GetMoment(key),quota.getMeasure_date().toString());
+                        kf_suggestion = String.format("近期无%s血糖记录，暂用%s的血糖值替代(可参考度：中)",GetMoment(key),TimeUtils.DateFormat(quota.getMeasure_date()));
                     }
                 }
             } else {
-                suggestion.put(key, String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！", interval.getLong(key),GetMoment(key)));
+                suggestion.put(key, String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！", interval,GetMoment(key)));
                 return false;
             }
         } else if ( lastest_in_duration.getJSONArray(key).size() == 1 ){ // ref_duration 1 条记录
             JSONObject lastest_quota = lastest_in_duration.getJSONArray(key).getJSONObject(0);
             Double ref_bs = lastest_quota.getDouble("sugarvalue");
             kfbs.put("ref_bs",ref_bs);
+            String date_string = TimeUtils.DateFormat(TimeUtils.parseDate(lastest_quota.getLong("measure_date")));
             if ( ref_bs <= 2.8 ) {
                 kfbs.put("ref_degree",3.0);
-                kf_suggestion = String.format("%s%s低血糖(可参考度：很高)",lastest_quota.getDate("measure_date").toString(),GetMoment(key));
+                kf_suggestion = String.format("%s%s低血糖(可参考度：很高)",date_string,GetMoment(key));
             } else if ( ref_bs < 11.1 ) {
                 kfbs.put("ref_degree",1.0);
-                kf_suggestion = String.format("%s%s血糖%f(可参考度：中)",lastest_quota.getDate("measure_date").toString(),GetMoment(key),ref_bs);
+                kf_suggestion = String.format("%s%s血糖%.2f(可参考度：中)",date_string,GetMoment(key),ref_bs);
             } else if ( ref_bs < 13.9 ) {
                 kfbs.put("ref_degree",2.0);
-                kf_suggestion = String.format("%s%s血糖%f(可参考度：高)",lastest_quota.getDate("measure_date").toString(),GetMoment(key),ref_bs);
+                kf_suggestion = String.format("%s%s血糖%.2f(可参考度：高)",date_string,GetMoment(key),ref_bs);
             } else {
                 kfbs.put("ref_degree",3.0);
-                kf_suggestion = String.format("%s%s血糖%f(可参考度：很高)",lastest_quota.getDate("measure_date").toString(),GetMoment(key),ref_bs);
+                kf_suggestion = String.format("%s%s血糖%.2f(可参考度：很高)",date_string,GetMoment(key),ref_bs);
             }
         } else if ( lastest_in_duration.getJSONArray(key).size() == 2 ) { // ref_duration 2 条记录
             Double lastest_bs = lastest_in_duration.getJSONArray(key).getJSONObject(0).getDouble("sugarvalue");
@@ -348,16 +348,16 @@ public class SBdSugarServiceUtils {
             kfbs.put("ref_bs",ref_bs);
             if ( lastest_bs < 11.1 ) {
                 kfbs.put("ref_degree",2.0);
-                kf_suggestion = String.format("最近两次%s血糖平均值%f(可参考度：高)",GetMoment(key),ref_bs);
+                kf_suggestion = String.format("最近两次%s血糖平均值%.2f(可参考度：高)",GetMoment(key),ref_bs);
             } else {
                 kfbs.put("ref_degree",3.0);
-                kf_suggestion = String.format("最近两次%s血糖平均值%f(可参考度：很高)",GetMoment(key),ref_bs);
+                kf_suggestion = String.format("最近两次%s血糖平均值%.2f(可参考度：很高)",GetMoment(key),ref_bs);
             }
         } else {
             Double ref_bs = GetAvgSugarValue(lastest_in_duration.getJSONArray(key));
             kfbs.put("ref_bs",ref_bs);
             kfbs.put("ref_degree",3.0);
-            kf_suggestion = String.format("最近三次%s血糖平均值%f(可参考度：很高)",GetMoment(key),ref_bs);
+            kf_suggestion = String.format("最近三次%s血糖平均值%.2f(可参考度：很高)",GetMoment(key),ref_bs);
         }
 
         suggestion.put(key,kf_suggestion);
@@ -380,15 +380,15 @@ public class SBdSugarServiceUtils {
             if ( lastest_quotas.containsKey(key) ) {
                 Quota item = lastest_quotas.getObject(key,Quota.class);
                 Double lastest_bs = JSONObject.parseObject(item.getRecord()).getDouble("sugarvalue");
-
+                String date_string = TimeUtils.DateFormat(item.getMeasure_date());
                 if ( lastest_bs < 16.6 ) {
                     zchbs.put("ref_degree",0.5);
                     ref_bs = lastest_bs;
-                    zch_suggestion = String.format("近期无%s血糖，暂用%s的%s血糖%f替代(可参考度：低)",GetMoment(key),item.getMeasure_date().toString(),GetMoment(key),ref_bs);
+                    zch_suggestion = String.format("近期无%s血糖，暂用%s的%s血糖%.2f替代(可参考度：低)",GetMoment(key),date_string,GetMoment(key),ref_bs);
                 } else {
                     zchbs.put("ref_degree",1.0);
                     ref_bs = lastest_bs;
-                    zch_suggestion = String.format("近期无%s血糖，暂用%s的%s血糖%f替代(可参考度：中)",GetMoment(key),item.getMeasure_date().toString(),GetMoment(key),ref_bs);
+                    zch_suggestion = String.format("近期无%s血糖，暂用%s的%s血糖%.2f替代(可参考度：中)",GetMoment(key),date_string,GetMoment(key),ref_bs);
                 }
             }
 
@@ -401,30 +401,32 @@ public class SBdSugarServiceUtils {
         } else if ( lastest_in_duration.getJSONArray(key).size() == 1 ) { // ref_duration 1条记录
             JSONObject lastest_quota = lastest_in_duration.getJSONArray(key).getJSONObject(0);
             ref_bs = lastest_quota.getDouble("sugarvalue");
+            String date_string = TimeUtils.DateFormat(TimeUtils.parseDate(lastest_quota.getLong("measure_date")));
             if ( ref_bs < 16.6 ) {
                 zchbs.put("ref_degree",1.0);
-                zch_suggestion = String.format("%s%s血糖%f(可参考度：中)",lastest_quota.getDate("measure_date"),GetMoment(key),ref_bs);
+                zch_suggestion = String.format("%s%s血糖%.2f(可参考度：中)",date_string,GetMoment(key),ref_bs);
             } else {
                 zchbs.put("ref_degree",2.0);
-                zch_suggestion = String.format("%s%s血糖%f(可参考度：高)",lastest_quota.getDate("measure_date"),GetMoment(key),ref_bs);
+                zch_suggestion = String.format("%s%s血糖%.2f(可参考度：高)",date_string,GetMoment(key),ref_bs);
             }
         } else if (lastest_in_duration.getJSONArray(key).size() == 2 ) {
             JSONObject lastest_quota = lastest_in_duration.getJSONArray(key).getJSONObject(0);
             ref_bs = GetAvgSugarValue(lastest_in_duration.getJSONArray(key));
             if (lastest_quota.getDouble("sugarvalue") < 16.6) {
                 zchbs.put("ref_degree",2.0);
-                zch_suggestion = String.format("最近两次%s血糖平均值%f(可参考度：高)",GetMoment(key),ref_bs);
+                zch_suggestion = String.format("最近两次%s血糖平均值%.2f(可参考度：高)",GetMoment(key),ref_bs);
             } else {
                 zchbs.put("ref_degree",3.0);
-                zch_suggestion = String.format("最近两次%s血糖平均值%f(可参考度：很高)",GetMoment(key),ref_bs);
+                zch_suggestion = String.format("最近两次%s血糖平均值%.2f(可参考度：很高)",GetMoment(key),ref_bs);
             }
         } else {
             ref_bs = GetAvgSugarValue(lastest_in_duration.getJSONArray(key));
             zchbs.put("ref_degree",3.0);
-            zch_suggestion = String.format("最近三次%s血糖平均值%f",GetMoment(key),ref_bs);
+            zch_suggestion = String.format("最近三次%s血糖平均值%.2f",GetMoment(key),ref_bs);
         }
         degree.put(key,zchbs);
-        suggestion.put(key,zch_suggestion);
+        if ( zch_suggestion != null )
+            suggestion.put(key,zch_suggestion);
         return true;
     }
 
@@ -443,23 +445,23 @@ public class SBdSugarServiceUtils {
             if ( lastest_quotas.containsKey(key) ) {
                 Quota item = lastest_quotas.getObject(key,Quota.class);
                 Double lastest_bs = JSONObject.parseObject(item.getRecord()).getDouble("sugarvalue");
-
+                String date_string = TimeUtils.DateFormat(item.getMeasure_date());
                 if ( lastest_bs <= 2.8 ) {
                     qbs.put("ref_degree",1.0);
                     ref_bs = lastest_bs;
-                    zch_suggestion = String.format("%s%s低血糖(可参考度：中)",item.getMeasure_date().toString(),GetMoment(key));
+                    zch_suggestion = String.format("%s%s低血糖(可参考度：中)",date_string,GetMoment(key));
                 } else if ( lastest_bs < 11.1 && degree.getJSONObject("kf").getDouble("ref_degree") <= 1.0 ) {
                     qbs.put("ref_degree",0.5);
                     ref_bs = lastest_bs;
-                    zch_suggestion = String.format("近期无%s血糖记录，暂用%s的%s血糖%f替代(可参考度：低)",GetMoment(key),item.getMeasure_date().toString(),GetMoment(key),ref_bs);
+                    zch_suggestion = String.format("近期无%s血糖记录，暂用%s的%s血糖%.2f替代(可参考度：低)",GetMoment(key),date_string,GetMoment(key),ref_bs);
                 } else if ( lastest_bs < 11.1 && degree.getJSONObject("kf").getDouble("ref_degree") > 1.0 ) {
                     ref_bs = kfbs;
                     qbs.put("ref_degree",0.5);
-                    zch_suggestion = String.format("近期无%s血糖记录，暂用%s%s血糖%f替代(可参考度：低)",GetMoment(key),item.getMeasure_date().toString(),GetMoment("kf"),ref_bs);
+                    zch_suggestion = String.format("近期无%s血糖记录，暂用%s%s血糖%.2f替代(可参考度：低)",GetMoment(key),date_string,GetMoment("kf"),ref_bs);
                 } else {
                     ref_bs = lastest_bs;
                     qbs.put("ref_degree",1.0);
-                    zch_suggestion = String.format("近期无%s记录，暂用%s%s血糖%f替代(可参考度：中)",GetMoment(key),item.getMeasure_date().toString(),GetMoment(key),ref_bs);
+                    zch_suggestion = String.format("近期无%s记录，暂用%s%s血糖%.2f替代(可参考度：中)",GetMoment(key),date_string,GetMoment(key),ref_bs);
 
                 }
             }
@@ -472,36 +474,38 @@ public class SBdSugarServiceUtils {
         } else if ( lastest_in_duration.getJSONArray(key).size() == 1 ) { // ref_duration 1条记录
             JSONObject lastest_quota = lastest_in_duration.getJSONArray(key).getJSONObject(0);
             ref_bs = lastest_quota.getDouble("sugarvalue");
+            String date_string = TimeUtils.DateFormat(TimeUtils.parseDate(lastest_quota.getLong("measure_date")));
             if ( ref_bs <= 2.8 ) {
                 qbs.put("ref_degree",3.0);
-                zch_suggestion = String.format("%s%s血糖低血糖(可参考度：很高)",lastest_quota.getDate("measure_date"),GetMoment(key));
+                zch_suggestion = String.format("%s%s血糖低血糖(可参考度：很高)",date_string,GetMoment(key));
             } else if ( ref_bs < 11.1 ){
                 qbs.put("ref_degree", 1.0);
-                zch_suggestion = String.format("%s%s血糖%f(可参考度：中)",lastest_quota.getDate("measure_date"),GetMoment(key),ref_bs);
+                zch_suggestion = String.format("%s%s血糖%.2f(可参考度：中)",date_string,GetMoment(key),ref_bs);
             } else if ( ref_bs < 13.9 ){
                 qbs.put("ref_degree", 2.0);
-                zch_suggestion = String.format("%s%s血糖%f(可参考度：高)", lastest_quota.getDate("measure_date"), GetMoment(key), ref_bs);
+                zch_suggestion = String.format("%s%s血糖%.2f(可参考度：高)",date_string, GetMoment(key), ref_bs);
             } else {
                 qbs.put("ref_degree",3.0);
-                zch_suggestion = String.format("%s%s血糖%f(可参考度：很高)",lastest_quota.getDate("measure_date"),GetMoment(key),ref_bs);
+                zch_suggestion = String.format("%s%s血糖%.2f(可参考度：很高)",date_string,GetMoment(key),ref_bs);
             }
         } else if (lastest_in_duration.getJSONArray(key).size() == 2 ) {
             JSONObject lastest_quota = lastest_in_duration.getJSONArray(key).getJSONObject(0);
             ref_bs = GetAvgSugarValue(lastest_in_duration.getJSONArray(key));
             if (lastest_quota.getDouble("sugarvalue") < 11.1) {
                 qbs.put("ref_degree",2.0);
-                zch_suggestion = String.format("最近两次%s血糖平均值%f(可参考度：高)",GetMoment(key),ref_bs);
+                zch_suggestion = String.format("最近两次%s血糖平均值%.2f(可参考度：高)",GetMoment(key),ref_bs);
             } else {
                 qbs.put("ref_degree",3.0);
-                zch_suggestion = String.format("最近两次%s血糖平均值%f(可参考度：很高)",GetMoment(key),ref_bs);
+                zch_suggestion = String.format("最近两次%s血糖平均值%.2f(可参考度：很高)",GetMoment(key),ref_bs);
             }
         } else {
             ref_bs = GetAvgSugarValue(lastest_in_duration.getJSONArray(key));
             qbs.put("ref_degree",3.0);
-            zch_suggestion = String.format("最近三次%s血糖平均值%f",GetMoment(key),ref_bs);
+            zch_suggestion = String.format("最近三次%s血糖平均值%.2f",GetMoment(key),ref_bs);
         }
         degree.put(key,qbs);
-        suggestion.put(key,zch_suggestion);
+        if ( zch_suggestion != null )
+            suggestion.put(key,zch_suggestion);
         return true;
     }
 
@@ -546,7 +550,7 @@ public class SBdSugarServiceUtils {
             else if ( ref_alc_todate <= 0.0 ) suggestion = String.format("最近的A1c是一个月前所查，系统将不再据此做出评价。");
             else if ( ref_alc_value > 0.0 && ref_alc_degree > 0.0 ) {
                 ref_alc = JSONObject.parseObject(alcQuota.getRecord()).getDouble("alc");
-                suggestion = String.format("%s的糖化血红蛋白%f（可参考度：%s）",
+                suggestion = String.format("%s的糖化血红蛋白%.2f（可参考度：%s）",
                         monitor_date,ref_alc,TrustedLevel(ref_alc_degree));
             }
         }
@@ -556,6 +560,8 @@ public class SBdSugarServiceUtils {
         degree.put("alc",item);
         if (suggestion != null) degree.getJSONObject("suggestion").put("alc",suggestion);
     }
+
+
 
     public static JSONObject GetRefAndDegreeTotal(CurusDriver driver,
                                                   Long account_id,
@@ -567,27 +573,31 @@ public class SBdSugarServiceUtils {
         Long ref_duration = Math.min(7L,change_days);
         JSONObject quotas = new JSONObject();
         QuotaServiceUtils.listQuotas(driver,ref_duration,account_id,patient_id,QuotaConst.QUOTA_BS,null,quotas);
+        JSONObject BSquotas = quotas.containsKey("list")?quotas.getJSONObject("list"):quotas;
+
         JSONObject lastestQuotaList = driver.quotaDao.selectLastestBSQuota(account_id,patient_id);
 
         degree.put("suggestion",new JSONObject());
         JSONObject suggestion = degree.getJSONObject("suggestion");
-        suggestion.put("header", String.format("%s 当前血糖水平(可参考度)如下：", PatientServiceUtils.GetPatientName(driver, patient_id)));
+        suggestion.put("patient_name", PatientServiceUtils.GetPatientName(driver, patient_id));
 
 
-        if (!GetRefBSAndDegreeKF(interval.getLong("kf"),"kf",lastestQuotaList,quotas,suggestion,degree))
+        if (!GetRefBSAndDegreeKF(interval.getLong("kf"),"kf",lastestQuotaList,BSquotas,suggestion,degree))
             return degree;
-        GetRefBSAndDegreeH(interval.getLong("zch"), "zch", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeQ(interval.getLong("wfq"), "wfq", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeH(interval.getLong("wfh"), "wfh", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeQ(interval.getLong("wcq"), "wcq", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeH(interval.getLong("wch"), "wch", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeQ(interval.getLong("sq"), "sq", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeQ(interval.getLong("yj"), "yj", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeH(interval.getLong("ydq"), "ydq", lastestQuotaList, quotas, suggestion, degree);
-        GetRefBSAndDegreeQ(interval.getLong("ydh"), "ydh", lastestQuotaList, quotas, suggestion, degree);
+        GetRefBSAndDegreeH(interval.getLong("zch"), "zch", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeQ(interval.getLong("wfq"), "wfq", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeH(interval.getLong("wfh"), "wfh", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeQ(interval.getLong("wcq"), "wcq", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeH(interval.getLong("wch"), "wch", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeQ(interval.getLong("sq"), "sq", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeQ(interval.getLong("yj"), "yj", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeH(interval.getLong("ydq"), "ydq", lastestQuotaList, BSquotas, suggestion, degree);
+        GetRefBSAndDegreeQ(interval.getLong("ydh"), "ydh", lastestQuotaList, BSquotas, suggestion, degree);
 
         //ALC
         GetRefAndDegreeALC(driver,account_id,patient_id,change_days,degree);
+
+        suggestion.put("last","其他时点的血糖，在没有有效的结果之前暂按正常或参考空腹血糖水平处理。");
         return degree;
     }
 
@@ -611,7 +621,11 @@ public class SBdSugarServiceUtils {
 
         Double activity_decrease = activity;
         Double diet_decrease = diet;
-        Double ref_sugar = 100.0;
+        JSONObject ref_degree = GetRefAndDegreeTotal(driver,account_id,patient_id);
+        Double ref_sugar = ref_degree.containsKey("kf") == true ?
+                ref_degree.getJSONObject("kf").getDouble("ref_bs") : null;
+
+        if ( ref_sugar == null ) return;
 
         if ( diet == null ) {
 

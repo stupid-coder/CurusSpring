@@ -8,6 +8,7 @@ import com.curus.model.database.Account;
 import com.curus.model.database.PatientUseDrug;
 import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
+import com.curus.utils.TimeUtils;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
@@ -59,7 +60,7 @@ public class PatientUseDrugUpdateService {
             PatientUseDrug newPatientUseDrug = new PatientUseDrug(request.getPatient_id(),
                     request.getDrug_id(),
                     request.getUse_policy(),
-                    request.getChange_time(),
+                    TimeUtils.parseDate(request.getChange_time()),
                     CommonConst.TRUE);
 
             driver.patientUseDrugDao.insert(newPatientUseDrug);

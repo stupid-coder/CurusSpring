@@ -1,11 +1,14 @@
 package com.curus.controllers;
 
+import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
 import com.curus.httpio.request.supervise.SuperviseGetRequest;
 import com.curus.httpio.request.supervise.SuperviseListRequest;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureAddSuperviseRequest;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureEstimateSuperviseRequest;
 import com.curus.httpio.request.supervise.bdpressure.SBdPressureNonmedRequest;
+import com.curus.httpio.request.supervise.bdsugar.SBdSugarEstimateRequest;
+import com.curus.httpio.request.supervise.bdsugar.SBdSugarNonmedRequest;
 import com.curus.httpio.request.supervise.smoke.SSmokeAddRequest;
 import com.curus.httpio.request.supervise.smoke.SSmokeAddSuperviseRequest;
 import com.curus.httpio.request.supervise.smoke.SSmokeEstimateSuperviseRequest;
@@ -20,6 +23,9 @@ import com.curus.services.supervise.SuperviseListService;
 import com.curus.services.supervise.bdpressure.SBdPressureAddSuperviseService;
 import com.curus.services.supervise.bdpressure.SBdPressureEstimateSuperviseService;
 import com.curus.services.supervise.bdpressure.SBdPressureNonmedService;
+import com.curus.services.supervise.bdsugar.SBdSugarAddService;
+import com.curus.services.supervise.bdsugar.SBdSugarEstimateService;
+import com.curus.services.supervise.bdsugar.SBdSugarNonmedService;
 import com.curus.services.supervise.smoke.SSmokeAddService;
 import com.curus.services.supervise.smoke.SSmokeAddSuperviseServise;
 import com.curus.services.supervise.smoke.SSmokeEstimateSuperviseService;
@@ -117,8 +123,33 @@ public class SuperviceController {
 
     @RequestMapping(value="/bdpressure/nonmed",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseBase BdPressureAdd(@RequestBody SBdPressureNonmedRequest request) {
+    ResponseBase BdPressureNonmed(@RequestBody SBdPressureNonmedRequest request) {
         SBdPressureNonmedService service = new SBdPressureNonmedService(request,driver);
         return service.process();
     }
+
+    @RequestMapping(value="/bdsugar/nonmed",method=RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody
+    ResponseBase BdSugarNonmed(@RequestBody SBdSugarNonmedRequest request) {
+        SBdSugarNonmedService service = new SBdSugarNonmedService(request,driver);
+        return service.process();
+    }
+
+    @RequestMapping(value="/bdsugar/estimate",method=RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody
+    ResponseBase BdSugarEstimate(@RequestBody SBdSugarEstimateRequest request) {
+        SBdSugarEstimateService service = new SBdSugarEstimateService(request,driver);
+        return service.process();
+    }
+
+    @RequestMapping(value="/bdsugar/add",method=RequestMethod.POST, consumes = "application/json")
+    public @ResponseBody
+    ResponseBase BdSugarAdd(@RequestBody JSONObject request) {
+        SBdSugarAddService service = new SBdSugarAddService(request,driver);
+        return service.process();
+    }
+
+
+
+
 }

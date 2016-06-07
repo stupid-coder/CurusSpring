@@ -12,7 +12,7 @@ public class PatientUseDrugUpdateRequest implements Serializable {
     private Long patient_id;
     private String drug_id;
     private String use_policy;
-    private Date change_time;
+    private String change_time;
 
     public String getUse_policy() {
         return use_policy;
@@ -22,11 +22,11 @@ public class PatientUseDrugUpdateRequest implements Serializable {
         this.use_policy = use_policy;
     }
 
-    public Date getChange_time() {
+    public String getChange_time() {
         return change_time;
     }
 
-    public void setChange_time(Date change_time) {
+    public void setChange_time(String change_time) {
         this.change_time = change_time;
     }
 
