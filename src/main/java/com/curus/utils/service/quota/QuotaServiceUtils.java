@@ -187,7 +187,7 @@ public class QuotaServiceUtils {
             response.put(QuotaConst.QUOTA_BP,responseItem);
             ret ++;
         }
-
+        if ( false )
         { // BS
             JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
             JSONObject ref = SBdSugarServiceUtils.GetRefAndDegreeTotal(driver,account_id,patient_id);
