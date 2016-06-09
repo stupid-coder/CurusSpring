@@ -191,8 +191,7 @@ public class QuotaServiceUtils {
         Long start_time = TimeUtils.getTimestamp().getTime();
         { // BS
             JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
-            JSONObject ref = SBdSugarServiceUtils.GetRefAndDegreeTotal(driver,account_id,patient_id);
-            JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,ref);
+            JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,null);
             JSONArray quota_object = new JSONArray();
             for ( String sub_cat :bs_quotas.keySet() ) {
                 Quota item = bs_quotas.getObject(sub_cat,Quota.class);
