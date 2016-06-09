@@ -191,7 +191,9 @@ public class QuotaServiceUtils {
         Long start_time = TimeUtils.getTimestamp().getTime();
         { // BS
             JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
+            logger.info("selectLastesBSQuota" + (TimeUtils.getTimestamp().getTime()-start_time));
             JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,null);
+            logger.info("interval" + (TimeUtils.getTimestamp().getTime()-start_time));
             JSONArray quota_object = new JSONArray();
             for ( String sub_cat :bs_quotas.keySet() ) {
                 Quota item = bs_quotas.getObject(sub_cat,Quota.class);
@@ -214,7 +216,7 @@ public class QuotaServiceUtils {
             response.put(QuotaConst.QUOTA_BS, quota_object);
         }
         Long end_time = TimeUtils.getTimestamp().getTime();
-        logger.info("运行时间："+(end_time - start_time));
+        logger.info("total："+(end_time - start_time));
         quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
         if (quotaList != null && quotaList.size() > 0) {
             JSONObject quotaAct = JSONObject.parseObject(quotaList.get(0).getRecord());
