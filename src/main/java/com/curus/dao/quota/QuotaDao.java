@@ -55,7 +55,7 @@ public class QuotaDao extends BaseDao<Quota> {
         JSONObject bsquota = new JSONObject();
         RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
         for ( Long sub_cat = 1L; sub_cat <=  QuotaConst.SUB_QUOTA_IDS.size(); ++ sub_cat) {
-            List<Quota> quotaList = getJdbcTemplate().query(String.format("SELECT measure_date,record FROM %s WHERE account_id = ? AND patient_id=? AND quota_cat_id=? AND sub_cat = ? ORDER BY measure_date DESC LIMIT 1", tableName), rowMapper, account_id, patient_id, QuotaConst.QUOTA_BS_ID, sub_cat);
+            List<Quota> quotaList = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE account_id = ? AND patient_id=? AND quota_cat_id=? AND sub_cat = ? ORDER BY measure_date DESC LIMIT 1", tableName), rowMapper, account_id, patient_id, QuotaConst.QUOTA_BS_ID, sub_cat);
             logger.info("quotaList size:"+quotaList.size());
             if ( quotaList != null && quotaList.size() == 1 ) bsquota.put(QuotaUtils.getSubQuotaName(sub_cat),quotaList.get(0));
         }
