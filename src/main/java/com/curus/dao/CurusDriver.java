@@ -28,9 +28,12 @@ public class CurusDriver {
     private CurusDriver() {}
 
     public static synchronized CurusDriver getCurusDriver() {
+        return (CurusDriver) SpringContextUtils.getBean("curusDriver");
+        /*
         if ( instance_ == null )
             instance_ = (CurusDriver) SpringContextUtils.getBean("curusDriver");
         return instance_;
+        */
     }
 
     public AccountDao accountDao;
