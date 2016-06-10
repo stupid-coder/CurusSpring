@@ -8,10 +8,15 @@ import com.curus.model.database.*;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.DrugConst;
+import com.curus.utils.service.DrugUtils;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.*;
 
 
 /**
@@ -78,7 +83,7 @@ public class DrugServiceUtils {
         directions.put("成份",DrugCompStr(DrugComp(driver, drugInfo)));
         directions.put("生产单位",drugInfo.getManu_name());
         directions.put("化学名",drugInfo.getChemical_name());
-        directions.put("适应症",drugInfo.getFor_illness());
+        directions.put("适应症",drugInfo.getAim());
         directions.put("禁忌病情",drugInfo.getTaboo());
         directions.put("副作用/不良反应",drugInfo.getSide_effect());
         return directions;
@@ -88,9 +93,13 @@ public class DrugServiceUtils {
                                                          Long patient_id) {
         return driver.patientUseDrugDao.selectAll(patient_id, CommonConst.TRUE);
     }
+
     public static boolean DrugType(CurusDriver driver,
-                               List<PatientUseDrug> patientUseDrugList,
-                               Integer comp_type) {
+                                   List<PatientUseDrug> patientUseDrugList,
+                                   String comp) {
+        Integer comp_type = DrugUtils.GetCompTypeId(comp);
+        if ( comp_type == null ) return false;
+
         for ( PatientUseDrug patientUseDrug : patientUseDrugList ) {
             List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(patientUseDrug.getDrug_id());
             for (DrugCompRelation drugCompRelation : drugCompRelationList) {
@@ -101,4 +110,63 @@ public class DrugServiceUtils {
         }
         return false;
     }
+
+    public static boolean CompType(Collection<DrugComp> drugCompList,
+                                   String comp) {
+
+        if ( drugCompList == null || drugCompList.size() == 0 ) return false;
+
+        Integer comp_type = DrugUtils.GetCompTypeId(comp);
+        for ( DrugComp drugComp : drugCompList ) {
+            if ( drugComp.getComp_type().compareTo(comp_type) == 0 ) return true;
+        }
+
+        return false;
+    }
+
+    public static boolean CompType(CurusDriver driver,
+                                   Long patient_id,
+                                   String comp) {
+        Map<String,DrugComp> drugCompMap = new HashMap<String, DrugComp>();
+        GetUseDrugAndDrugComp(driver,patient_id,null,null,drugCompMap);
+        return CompType(drugCompMap.values(),comp);
+    }
+
+    public static void GetUseDrugAndDrugComp(CurusDriver driver,
+                                             Long patient_id,
+                                             List<DrugInfo> drugInfoList,
+                                             Map<String, Map<String, Double>> drugCompRelationMap,
+                                             Map<String, DrugComp> drugCompMap) {
+
+        List<PatientUseDrug> patientUseDrugList = driver.patientUseDrugDao.selectAll(patient_id,CommonConst.TRUE);
+        if ( patientUseDrugList == null || patientUseDrugList.size() == 0 ) return;
+
+        for ( PatientUseDrug patientUseDrug : patientUseDrugList ) {
+            DrugInfo drugInfo = driver.drugInfoDao.select(patientUseDrug.getDrug_id());
+
+            if ( drugInfo != null ) drugInfoList.add(drugInfo);
+
+            List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(drugInfo.getDrug_id());
+
+            if ( drugCompRelationList == null || drugCompRelationList.size() == 0 ) continue;
+            else {
+                for ( DrugCompRelation drugCompRelation : drugCompRelationList ) {
+                    if ( drugCompRelationMap != null ) {
+                        if (drugCompRelationMap.containsKey(drugCompRelation.getDrug_id()) == false) {
+                            drugCompRelationMap.put(drugCompRelation.getDrug_id(), new HashMap<String, Double>());
+                        }
+                        Map<String, Double> relationMap = drugCompRelationMap.get(drugCompRelation.getDrug_id());
+                        relationMap.put(drugCompRelation.getComp_id(), drugCompRelation.getComp_dosis());
+                    }
+
+                    DrugComp drugComp = driver.drugCompDao.selectByCompId(drugCompRelation.getComp_id());
+
+                    if ( drugComp != null && drugCompMap != null ) {
+                        drugCompMap.put(drugComp.getComp_id(),drugComp);
+                    }
+                }
+            }
+        }
+    }
+
 }

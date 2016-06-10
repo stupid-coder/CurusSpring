@@ -44,14 +44,14 @@ public class DrugInfo implements Serializable {
     // 副作用/不良反应
     private String side_effect;
     // 适应症
-    private String for_illness;
+    private String aim;
 
-    public String getFor_illness() {
-        return for_illness;
+    public String getAim() {
+        return aim;
     }
 
-    public void setFor_illness(String for_illness) {
-        this.for_illness = for_illness;
+    public void setAim(String aim) {
+        this.aim = aim;
     }
 
     public String getSide_effect() {
@@ -202,7 +202,7 @@ public class DrugInfo implements Serializable {
                 ", manu_name='" + manu_name + '\'' +
                 ", form=" + form +
                 ", tech=" + tech +
-                ", spec=" + spec +
+                ", spec='" + spec + '\'' +
                 ", use=" + use +
                 ", process=" + process +
                 ", min_once=" + min_once +
@@ -211,7 +211,7 @@ public class DrugInfo implements Serializable {
                 ", max_day=" + max_day +
                 ", taboo='" + taboo + '\'' +
                 ", side_effect='" + side_effect + '\'' +
-                ", for_illness='" + for_illness + '\'' +
+                ", aim='" + aim + '\'' +
                 '}';
     }
 }

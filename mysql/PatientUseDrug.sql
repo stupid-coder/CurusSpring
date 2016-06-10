@@ -13,3 +13,5 @@ CREATE TABLE `PatientUseDrug` (
   `last` TINYINT(1) NOT NULL DEFAULT TRUE,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE INDEX PatientUseDrugIndex ON PatientUseDrug(patient_id,drug_id);

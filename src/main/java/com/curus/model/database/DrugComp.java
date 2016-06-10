@@ -20,6 +20,16 @@ public class DrugComp implements Serializable {
     // 成分分类
     private Integer comp_type;
 
+    private Integer comp_process;
+
+    public Integer getComp_process() {
+        return comp_process;
+    }
+
+    public void setComp_process(Integer comp_process) {
+        this.comp_process = comp_process;
+    }
+
     public Integer getComp_type() {
         return comp_type;
     }
@@ -68,6 +78,7 @@ public class DrugComp implements Serializable {
                 ", comp_ename='" + comp_ename + '\'' +
                 ", comp_aim='" + comp_aim + '\'' +
                 ", comp_type=" + comp_type +
+                ", comp_process=" + comp_process +
                 '}';
     }
 }

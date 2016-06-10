@@ -40,4 +40,5 @@ public class PatientUseDrugDao extends BaseDao<PatientUseDrug> {
         RowMapper<PatientUseDrug> rowMapper = BeanPropertyRowMapper.newInstance(PatientUseDrug.class);
         return getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE patient_id = ? AND change_time >= ? ORDER by change_time DESC", tableName), rowMapper, patient_id, TimeUtils.getDate(lastestdays * -1L));
     }
+
 }

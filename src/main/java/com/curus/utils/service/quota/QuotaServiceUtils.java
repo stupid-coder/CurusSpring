@@ -6,13 +6,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
 import com.curus.httpio.response.TsValueData;
 import com.curus.model.database.PatientSupervise;
+import com.curus.model.database.PatientUseDrug;
 import com.curus.model.database.Quota;
 import com.curus.model.record.QuotaHeightRecord;
 import com.curus.model.record.QuotaWeightRecord;
 import com.curus.utils.LogUtils;
 import com.curus.utils.QuotaUtils;
 import com.curus.utils.TimeUtils;
+import com.curus.utils.constant.DrugConst;
+import com.curus.utils.constant.InternalDataConst;
 import com.curus.utils.constant.QuotaConst;
+import com.curus.utils.service.drug.DrugServiceUtils;
 import com.curus.utils.service.supervise.bdsugar.SBdSugarServiceUtils;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
 import com.curus.utils.service.supervise.smoke.SSmokeServiseUtils;
@@ -188,35 +192,34 @@ public class QuotaServiceUtils {
             ret ++;
         }
 
-        Long start_time = TimeUtils.getTimestamp().getTime();
         { // BS
             JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
-            logger.info("selectLastesBSQuota" + (TimeUtils.getTimestamp().getTime()-start_time));
-            JSONObject all_interval = SBdSugarServiceUtils.MonitorInterval(driver,account_id,patient_id,null);
-            logger.info("interval" + (TimeUtils.getTimestamp().getTime()-start_time));
-            JSONArray quota_object = new JSONArray();
-            for ( String sub_cat :bs_quotas.keySet() ) {
-                Quota item = bs_quotas.getObject(sub_cat,Quota.class);
-                JSONObject quotaBS = JSONObject.parseObject(item.getRecord());
-                JSONObject responseItem = new JSONObject();
-                Long interval = all_interval.getLong(sub_cat);
+            if ( bs_quotas.size() != 0 ) {
+                JSONObject monitor_interval = SBdSugarServiceUtils.GetMonitorInterval(driver, account_id, patient_id, null);
 
-                responseItem.put("measure_date", TimeUtils.date2String(item.getMeasure_date()));
-                responseItem.put("value", quotaBS);
-                responseItem.put("score", SBdSugarServiceUtils.BdSugarLevel(sub_cat,quotaBS.getDouble("sugarvalue")));
+                JSONArray quota_object = new JSONArray();
+                for (String sub_cat : bs_quotas.keySet()) {
+                    Quota item = bs_quotas.getObject(sub_cat, Quota.class);
+                    JSONObject quotaBS = JSONObject.parseObject(item.getRecord());
+                    JSONObject responseItem = new JSONObject();
+                    Long interval = monitor_interval.getLong(sub_cat);
 
-                Long lastmonitor_diff_now =  TimeUtils.dateDiffToNow(item.getMeasure_date());
+                    responseItem.put("measure_date", TimeUtils.date2String(item.getMeasure_date()));
+                    responseItem.put("value", quotaBS);
+                    responseItem.put("score", SBdSugarServiceUtils.BdSugarLevel(sub_cat, quotaBS.getDouble("sugarvalue")));
 
-                if ( lastmonitor_diff_now.compareTo(interval) < 0 ) responseItem.put("old",0);
-                else if ( lastmonitor_diff_now.compareTo(interval * 2L) >=0 ) responseItem.put("old", 2);
-                else responseItem.put("old",1);
-                quota_object.add(responseItem);
-                ret++;
+                    Long lastmonitor_diff_now = TimeUtils.dateDiffToNow(item.getMeasure_date());
+
+                    if (lastmonitor_diff_now.compareTo(interval) < 0) responseItem.put("old", 0);
+                    else if (lastmonitor_diff_now.compareTo(interval * 2L) >= 0) responseItem.put("old", 2);
+                    else responseItem.put("old", 1);
+                    quota_object.add(responseItem);
+                    ret++;
+                }
+                response.put(QuotaConst.QUOTA_BS, quota_object);
             }
-            response.put(QuotaConst.QUOTA_BS, quota_object);
         }
-        Long end_time = TimeUtils.getTimestamp().getTime();
-        logger.info("total："+(end_time - start_time));
+
         quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
         if (quotaList != null && quotaList.size() > 0) {
             JSONObject quotaAct = JSONObject.parseObject(quotaList.get(0).getRecord());

@@ -10,6 +10,7 @@ import com.curus.utils.CacheUtils;
 import com.curus.utils.LogUtils;
 import com.curus.utils.constant.ErrorConst;
 import com.curus.utils.constant.StatusConst;
+import com.curus.utils.service.drug.DrugServiceUtils;
 import com.curus.utils.service.supervise.bdsugar.SBdSugarServiceUtils;
 import com.curus.utils.validate.ValueValidate;
 import org.apache.commons.logging.Log;
@@ -33,7 +34,7 @@ public class SBdSugarEstimateService {
     }
 
     private ErrorData validate() {
-
+        DrugServiceUtils.GetUseDrugAndDrugComp(driver,29L,null,null,null);
         if ( (errorData = ValueValidate.valueExistValidate(request.getToken(),"token")) != null ||
                 (errorData = ValueValidate.valueExistValidate(request.getPatient_id(),"patient_id")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
@@ -46,16 +47,7 @@ public class SBdSugarEstimateService {
         if ( account == null ) {
             errorData = new ErrorData(ErrorConst.IDX_TOKENEXPIRED_ERROR);
         } else {
-            JSONObject ref_suggestion = SBdSugarServiceUtils.GetRefAndDegreeTotal(driver,account.getId(),request.getPatient_id());
-            JSONObject level_suggestion = null;
-            if ( ref_suggestion.containsKey("alc") ) {
-                level_suggestion = SBdSugarServiceUtils.MonitorInterval(driver,account.getId(),request.getPatient_id(),ref_suggestion);
-            }
-
-            responseData = new JSONObject();
-            responseData.put("ref_suggetion",ref_suggestion);
-            if ( level_suggestion != null )
-                responseData.put("level_suggestion",level_suggestion);
+            responseData = SBdSugarServiceUtils.estimate(driver,account.getId(),request.getPatient_id());
         }
         if ( errorData != null )
             logger.warn(LogUtils.Msg(errorData,request));

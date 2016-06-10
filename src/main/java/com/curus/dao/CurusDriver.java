@@ -45,6 +45,7 @@ public class CurusDriver {
     public DrugCompDao drugCompDao;
     public DrugInfoDao drugInfoDao;
     public DrugCompRelationDao drugCompRelationDao;
+    public InternalDataDao internalDataDao;
 
     public CurusDriver(DataSource ds) {
         this.accountDao = new AccountDao();
@@ -79,5 +80,6 @@ public class CurusDriver {
 
         this.drugCompRelationDao = new DrugCompRelationDao(ds);
 
+        this.internalDataDao = new InternalDataDao(ds);
     }
 }
