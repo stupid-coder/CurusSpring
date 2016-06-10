@@ -79,7 +79,7 @@ public class SBdSugarServiceUtils {
         String suggestion = null;
         Long default_interval = monitor_interval.getLong(moment);
 
-            if ( level ==  -2.0 ) {
+            if ( level <=  -2.0 ) {
                 suggestion = "早晨出现了低血糖！建议规律早餐或适当提前早餐时间或在晨起后吃些水果或零食，平时做好应对低血糖的准备，并按提示监测空腹血糖，如再次发生低血糖或出现低血糖症状，建议尽早看医生。";
                 default_interval = 7L;
             } else if (level <= 0.0 ) {
@@ -279,6 +279,7 @@ public class SBdSugarServiceUtils {
 
                 }
             }
+            suggestions.add("用药还在开发");
         }
 
         return suggestions;
