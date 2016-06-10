@@ -34,7 +34,6 @@ public class SBdSugarEstimateService {
     }
 
     private ErrorData validate() {
-        DrugServiceUtils.GetUseDrugAndDrugComp(driver,29L,null,null,null);
         if ( (errorData = ValueValidate.valueExistValidate(request.getToken(),"token")) != null ||
                 (errorData = ValueValidate.valueExistValidate(request.getPatient_id(),"patient_id")) != null ) {
             logger.warn(LogUtils.Msg(errorData,request));
