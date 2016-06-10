@@ -56,6 +56,7 @@ public class SBdSugarServiceUtils {
                 }
                 moniter_interval.put(entry.getKey(),default_interval);
             }
+            UpdateMoniterInterval(driver,patient_id,moniter_interval);
         } else {
             moniter_interval = JSONObject.parseObject(interval_data.getData());
             moniter_interval.put("id",interval_data.getId());
@@ -627,6 +628,7 @@ public class SBdSugarServiceUtils {
 
         JSONObject reference_suggestion = new JSONObject();
         JSONObject reference_value_degree = GetReferenceValueAndDegree(driver,account_id,patient_id,patient_name,lastChanges,moniter_interval,reference_suggestion);
+        UpdateMoniterInterval(driver,patient_id,moniter_interval);
 
         Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
         Double PA =  SWeightSerivceUtils.GetActEnergy(driver, account_id, patient_id);

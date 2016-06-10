@@ -23,7 +23,7 @@ public class InternalDataDao extends BaseDao<InternalData> {
     public InternalData select(Long patient_id, Integer cate) {
         RowMapper<InternalData> rowMapper = BeanPropertyRowMapper.newInstance(InternalData.class);
 
-        List<InternalData> internalDataList = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE pateint_id = ? AND cate = ?", tableName),
+        List<InternalData> internalDataList = getJdbcTemplate().query(String.format("SELECT * FROM %s WHERE patient_id = ? AND cate = ?", tableName),
                 rowMapper, patient_id, cate);
         if ( internalDataList.size() == 0 ) {
             return null;
