@@ -4,9 +4,9 @@
 
 * 描述
 
-* 体重管理
+* 血糖管理
 ** 评估指导接口
-   接口URI：http://ip:port/curus/supervise/sugar/estimate
+   接口URI：http://ip:port/curus/supervise/bdsugar/estimate
 *** 请求结构体
     #+CAPTION: 评估指导请求结构体
     | 字段名     | 类型   | 说明               |
@@ -14,7 +14,7 @@
     | token      | Stirng | 用户标示           |
     | patient_id | String | 评估指导管理对象ID |
 ** 获取血糖非药物治疗
-   接口URI：http://ip:port/curus/supervise/sugar/nonmed
+   接口URI：http://ip:port/curus/supervise/bdsugar/nonmed
 *** 请求结构体
   #+CAPTION: 获取减重目标请求结构体
   | 字段名     | 类型          | 说明                     |
@@ -27,7 +27,7 @@
   PS：如果diet和activity都不带，则返回默认的值。
 
 ** 计划添加接口
-   接口URI：http://ip:port/curus/supervise/sugar/add
+   接口URI：http://ip:port/curus/supervise/bdsugar/add
 *** 请求结构体
   #+CAPTION: 请求结构体
   | 字段名     | 类型   | 说明                                                          |

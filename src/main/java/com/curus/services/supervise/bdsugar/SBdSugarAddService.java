@@ -37,8 +37,8 @@ public class SBdSugarAddService {
             errorData = new ErrorData(ErrorConst.IDX_FORM_ERROR,"token");
         } else if ( !request.containsKey("patient_id") ) {
             errorData = new ErrorData(ErrorConst.IDX_FORM_ERROR,"patient_id");
-        } else if ( !request.containsKey("policy") ) {
-            errorData = new ErrorData(ErrorConst.IDX_FORM_ERROR,"policy");
+        } else if ( !request.containsKey("diet") && !request.containsKey("activity") ) {
+            errorData = new ErrorData(ErrorConst.IDX_FORM_ERROR,"diet-activity");
         }
 
         if ( errorData != null )
@@ -57,7 +57,12 @@ public class SBdSugarAddService {
             supervise.setPatient_id(request.getLong("patient_id"));
             supervise.setQuota_cat_id(QuotaConst.QUOTA_BS_ID);
             supervise.setCreate_time(TimeUtils.getTimestamp());
-            supervise.setPolicy(request.getString("policy"));
+
+            JSONObject policy = new JSONObject();
+            if ( request.containsKey("activity") ) policy.put("activity",request.getDouble("activity"));
+            if ( request.containsKey("diet") ) policy.put("diet",request.getDouble("diet"));
+
+            supervise.setPolicy(policy.toJSONString());
             supervise.setLast(CommonConst.TRUE);
             driver.patientSuperviseDao.insert(supervise);
         }
@@ -65,7 +70,7 @@ public class SBdSugarAddService {
     }
 
     public ResponseBase process() {
-        if ( validate() != null && add() != null ) {
+        if ( validate() == null && add() == null ) {
             logger.info(LogUtils.Msg("Success to add Supervise",request,null));
             return new ResponseBase(StatusConst.OK,null);
         } else {

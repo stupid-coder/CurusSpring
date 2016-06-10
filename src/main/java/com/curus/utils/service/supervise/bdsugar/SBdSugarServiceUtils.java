@@ -119,7 +119,7 @@ public class SBdSugarServiceUtils {
     public static String GetRefLevelSuggestionWithValueWithoutDrug(String patientName,
                                                                    String moment,
                                                                    Double value,
-                                                                   Double degree,
+                                                                   Double level,
                                                                    boolean BMI_ACT_NO,
                                                                    JSONObject monitor_interval)
     {
@@ -186,17 +186,35 @@ public class SBdSugarServiceUtils {
     {
 
         String suggestion = null;
-        Double ref_level = BdSugarLevel(moment,value);
         Long default_interval = moniter_interval.getLong(moment);
-        if ( ref_level == -2.0 ) {
-            suggestion = GetSuggestionByLevel(moment, ref_level, BMI_ACT_NO);
+        if ( level == -2.0 ) {
+            suggestion = GetSuggestionByLevel(moment, level, BMI_ACT_NO);
             default_interval = 7L;
-        } else if ( ref_level <= 0.0 ) {
-            suggestion = GetSuggestionByLevel(moment, ref_level, BMI_ACT_NO);
+        } else if ( level <= 0.0 ) {
+            suggestion = GetSuggestionByLevel(moment, level, BMI_ACT_NO);
             default_interval = 4*default_interval;
         } else {
-            suggestion = GetSuggestionByLevel(moment, ref_level, BMI_ACT_NO);
+            suggestion = GetSuggestionByLevel(moment, level, BMI_ACT_NO);
             default_interval = Math.min(30L,default_interval/2L);
+        }
+        moniter_interval.put(moment,default_interval);
+        return suggestion;
+    }
+
+    public static String GetRefLevelSuggestionWithLevelWithoutDrugYJ(String patientName,
+                                                                      String moment,
+                                                                      Double value,
+                                                                      Double level,
+                                                                      boolean BMI_ACT_NO,
+                                                                      JSONObject moniter_interval) {
+        String suggestion = null;
+        Long default_interval = moniter_interval.getLong(moment);
+        if ( level == -2.0 ) {
+            suggestion = GetSuggestionByLevel(moment,level, BMI_ACT_NO);
+            default_interval = 7L;
+        } else {
+            suggestion = GetSuggestionByLevel(moment,level, BMI_ACT_NO);
+            default_interval = 4 * default_interval;
         }
         moniter_interval.put(moment,default_interval);
         return suggestion;
@@ -228,9 +246,14 @@ public class SBdSugarServiceUtils {
                 suggestion = GetRefLevelSuggestionWithValueWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
             } else if ( moment.compareTo("sq")  == 0 ) {
                 suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+            } else if ( moment.compareTo("yj") == 0 ) {
+                suggestion = GetRefLevelSuggestionWithLevelWithoutDrugYJ(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+            } else if ( moment.compareTo("ydh") == 0 ) {
+                suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
             }
         } else {
-            low_degrees.add(context);
+            if ( moment.compareTo("ydq") != 0 && moment.compareTo("ydh") != 0)
+                low_degrees.add(context);
         }
         moniter_interval.put(moment,default_interval);
         return suggestion;
@@ -630,6 +653,8 @@ public class SBdSugarServiceUtils {
             List<Quota> a1cQuotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, QuotaConst.QUOTA_A1C_ID, 1L);
             //ALC
             GetReferenceValueAndDegreeA1C(a1cQuotaList, last_change_days, suggestions, reference_value_degree);
+
+            suggestions.add("其他时点的血糖，在没有有效的结果之前暂按正常或参考空腹血糖水平处理。");
         }
 
         return  reference_value_degree;
