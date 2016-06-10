@@ -159,7 +159,7 @@ public class QuotaServiceUtils {
                 subcat_array.add(item);
             }
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) != 0 ) {
-            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,1L);
+            quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,quota_id,days);
             if ( quotaList != null && quotaList.size() > 0 ) {
                 response.put("value", JSONObject.parseObject(quotaList.get(0).getRecord()));
                 response.put("measure",TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
