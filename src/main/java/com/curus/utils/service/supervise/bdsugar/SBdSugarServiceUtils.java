@@ -579,7 +579,7 @@ public class SBdSugarServiceUtils {
                     monitor_date,TimeUtils.getDate(change_days*-1),TimeUtils.getDate(90L-change_days));
             else if ( ref_a1c_todate <= 0.0 ) suggestion = String.format("最近的A1c是一个月前所查，系统将不再据此做出评价。");
             else if ( ref_a1c_value > 0.0 && ref_a1c_degree > 0.0 ) {
-                ref_a1c = JSONObject.parseObject(a1cQuota.getRecord()).getDouble("alc");
+                ref_a1c = JSONObject.parseObject(a1cQuota.getRecord()).getDouble("a1c");
                 suggestion = String.format("%s的糖化血红蛋白%.2f（可参考度：%s）",
                         monitor_date,ref_a1c,TrustedLevel(ref_a1c_degree));
             }
