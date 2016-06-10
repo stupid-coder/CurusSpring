@@ -144,7 +144,9 @@ public class DrugServiceUtils {
         for ( PatientUseDrug patientUseDrug : patientUseDrugList ) {
             DrugInfo drugInfo = driver.drugInfoDao.select(patientUseDrug.getDrug_id());
 
-            if ( drugInfo != null ) drugInfoList.add(drugInfo);
+            if ( drugInfo == null ) continue;
+            if ( drugInfoList != null ) drugInfoList.add(drugInfo);
+
 
             List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(drugInfo.getDrug_id());
 
