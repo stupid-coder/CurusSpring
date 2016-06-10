@@ -132,9 +132,23 @@ public class DrugServiceUtils {
         return CompType(drugCompMap.values(),comp);
     }
 
+    public static DrugInfo CompType(Map<String,DrugInfo> drugInfoMap,
+                                    Map<String,DrugComp> drugCompMap,
+                                    String comp) {
+        Integer comp_type = DrugUtils.GetCompTypeId(comp);
+
+        for ( Map.Entry<String,DrugComp> entry : drugCompMap.entrySet() ) {
+            if ( entry.getValue().getComp_type().compareTo(comp_type) == 0 ) {
+                if ( drugInfoMap.containsKey(entry.getValue()) ) return drugInfoMap.get(entry.getKey());
+            }
+        }
+
+        return null;
+    }
+
     public static void GetUseDrugAndDrugComp(CurusDriver driver,
                                              Long patient_id,
-                                             List<DrugInfo> drugInfoList,
+                                             Map<String, DrugInfo> drugInfoList,
                                              Map<String, Map<String, Double>> drugCompRelationMap,
                                              Map<String, DrugComp> drugCompMap) {
 
@@ -145,7 +159,7 @@ public class DrugServiceUtils {
             DrugInfo drugInfo = driver.drugInfoDao.select(patientUseDrug.getDrug_id());
 
             if ( drugInfo == null ) continue;
-            if ( drugInfoList != null ) drugInfoList.add(drugInfo);
+            if ( drugInfoList != null ) drugInfoList.put(drugInfo.getDrug_id(), drugInfo);
 
 
             List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(drugInfo.getDrug_id());
@@ -164,7 +178,7 @@ public class DrugServiceUtils {
                     DrugComp drugComp = driver.drugCompDao.selectByCompId(drugCompRelation.getComp_id());
 
                     if ( drugComp != null && drugCompMap != null ) {
-                        drugCompMap.put(drugComp.getComp_id(),drugComp);
+                        drugCompMap.put(drugCompRelation.getDrug_id(),drugComp);
                     }
                 }
             }

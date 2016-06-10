@@ -32,11 +32,12 @@ public class InternalDataDao extends BaseDao<InternalData> {
         }
     }
 
-    public void save(Long patient,Integer cate, JSONObject internal_data) {
+    public void save(Long patient_id,Integer cate, JSONObject internal_data) {
         InternalData internalData = new InternalData();
         internalData.setCate(cate);
         internalData.setData(internal_data.toJSONString());
         if ( internal_data.containsKey("id") ) internalData.setId(internal_data.getLong("id"));
+        else internalData.setPatient_id(patient_id);
         save(internalData,"id");
     }
 

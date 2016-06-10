@@ -236,26 +236,50 @@ public class SBdSugarServiceUtils {
         return suggestion;
     }
 
-    public static JSONObject GetRefLevelSuggestion(String patientName,
+    public static List<String> GetRefLevelSuggestion(String patientName,
                                                    JSONObject reference,
                                                    boolean BMI_PA_NO,
-                                                   List<DrugInfo> patientUseDrugList,
+                                                   Map<String,DrugInfo> patientUseDrugMap,
+                                                   Map<String,Map<String,Double>> compRelateMap,
+                                                   Map<String,DrugComp> drugCompMap,
                                                    JSONObject moniter_intervals) {
-        JSONObject suggestions = new JSONObject();
+        List<String> suggestions = new ArrayList<String>();
+        //JSONObject suggestions = new JSONObject();
         JSONObject values = reference.getJSONObject("values");
         JSONObject degrees = reference.getJSONObject("degrees");
         List<String> low_degrees = new ArrayList<String>();
-        if ( patientUseDrugList == null || patientUseDrugList.size() == 0 ) { // no drug
-            for ( String key : values.keySet() ) {
-                Double value = values.getDouble(key);
-                Double level = BdSugarLevel(key,value);
-                Double degree = degrees.getDouble(key);
-                suggestions.put(key, GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals));
+        if ( patientUseDrugMap == null || patientUseDrugMap.size() == 0 ) { // no drug
+            for ( String key : QuotaConst.SUB_QUOTA_IDS.keySet() ) {
+                if ( values.containsKey(key) ) {
+                    Double value = values.getDouble(key);
+                    Double level = BdSugarLevel(key, value);
+                    Double degree = degrees.getDouble(key);
+                    suggestions.add(GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals));
+                }
             }
-            suggestions.put("low_degree",String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
-        } else { // withdrug
+            suggestions.add(String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
 
+        } else { // withdrug
+            boolean USEYDS = drugCompMap == null ? false : DrugServiceUtils.CompType(drugCompMap.values(),"胰岛素");
+            boolean AIM_DECREASE_SUGAR = drugCompMap == null ? false : DrugServiceUtils.CompType(drugCompMap.values(),"α-糖苷酶抑制剂");
+
+            JSONObject levels = new JSONObject();
+            for ( String key : values.keySet() ) {
+                levels.put(key,BdSugarLevel(key, values.getDouble(key)));
+            }
+            JSONArray suggestions_use_drug = new JSONArray();
+            if ( USEYDS ) {
+
+            } else {
+                if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") <= -1.0 ) {
+                    suggestions_use_drug.add("出现了早晨空腹低血糖。");
+                    if ( AIM_DECREASE_SUGAR ) suggestions_use_drug.add(String.format("特殊用药提醒： %s目前正在使用α-糖苷酶抑制剂（%s)，它可抑制蔗糖和淀粉类食物的吸收，因此用传统食物缓解低血糖的效果较差。建议家中常备葡萄糖或蜂蜜，其缓解低血糖的效果更佳。",
+                                    patientName, DrugServiceUtils.CompType(patientUseDrugMap, drugCompMap, "α-糖苷酶抑制剂").getProduct_name()));
+
+                }
+            }
         }
+
         return suggestions;
     }
 
@@ -288,7 +312,7 @@ public class SBdSugarServiceUtils {
                                               Long monitor_interval,
                                               JSONObject values_lastest,
                                               JSONObject values_in_ref_duration,
-                                              JSONObject suggestions,
+                                              List<String> suggestions,
                                               JSONObject references) {
         String moment = "kf";
         String moment_context = GetMomentContext(moment);
@@ -300,7 +324,7 @@ public class SBdSugarServiceUtils {
                 Quota quota = values_lastest.getObject(moment,Quota.class);
                 if ( TimeUtils.dateDiffToNow(quota.getMeasure_date()) > monitor_interval ) {
                     suggestion = String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！",monitor_interval,moment_context);
-                    suggestions.put(moment,suggestion);
+                    suggestions.add(suggestion);
                     return false;
                 } else {
                     ref_value = JSONObject.parseObject(quota.getRecord()).getDouble("sugarvalue");
@@ -316,7 +340,7 @@ public class SBdSugarServiceUtils {
                     }
                 }
             } else {
-                suggestions.put(moment, String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！", monitor_interval,moment_context));
+                suggestions.add(String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！", monitor_interval, moment_context));
                 return false;
             }
         } else if ( values_in_ref_duration.getJSONArray(moment).size() == 1 ){ // ref_duration 1 条记录
@@ -353,7 +377,7 @@ public class SBdSugarServiceUtils {
         }
 
         if ( suggestions != null )
-            suggestions.put(moment,suggestion);
+            suggestions.add(suggestion);
 
         references.getJSONObject("values").put(moment,ref_value);
         references.getJSONObject("degrees").put(moment,ref_degree);
@@ -365,7 +389,7 @@ public class SBdSugarServiceUtils {
                                              String key,
                                              JSONObject lastest_quotas,
                                              JSONObject lastest_in_duration,
-                                             JSONObject suggestions,
+                                             List<String> suggestions,
                                              JSONObject references)
     {
         String moment_context = GetMomentContext(key);
@@ -424,7 +448,7 @@ public class SBdSugarServiceUtils {
         references.getJSONObject("degrees").put(key,ref_degree);
 
         if ( suggestion != null )
-            suggestions.put(key,suggestion);
+            suggestions.add(suggestion);
 
         return true;
     }
@@ -434,7 +458,7 @@ public class SBdSugarServiceUtils {
                                              String key,
                                              JSONObject lastest_quotas,
                                              JSONObject lastest_in_duration,
-                                             JSONObject suggestions,
+                                             List<String> suggestions,
                                              JSONObject references)
     {
 
@@ -512,7 +536,7 @@ public class SBdSugarServiceUtils {
         references.getJSONObject("values").put(key,ref_value);
         references.getJSONObject("degrees").put(key,ref_degree);
         if ( suggestion != null )
-            suggestions.put(key,suggestion);
+            suggestions.add(suggestion);
         return true;
     }
 
@@ -524,7 +548,7 @@ public class SBdSugarServiceUtils {
         else return "很低";
     }
 
-    public static void GetReferenceValueAndDegreeA1C(List<Quota> a1cQuotaList, Long change_days, JSONObject suggestions, JSONObject reference) {
+    public static void GetReferenceValueAndDegreeA1C(List<Quota> a1cQuotaList, Long change_days, List<String> suggestions, JSONObject reference) {
 
         Double ref_a1c_degree = null;
         Double ref_a1c = null;
@@ -562,7 +586,7 @@ public class SBdSugarServiceUtils {
         reference.getJSONObject("values").put("a1c",ref_a1c);
         reference.getJSONObject("degrees").put("a1c",ref_a1c_degree);
 
-        if (suggestion != null)  suggestions.put("a1c",suggestion);
+        if (suggestion != null)  suggestions.add(suggestion);
     }
 
 
@@ -573,7 +597,7 @@ public class SBdSugarServiceUtils {
                                                         String patientName,
                                                         Long last_change_days,
                                                         JSONObject moniter_interval,
-                                                        JSONObject suggestions) {
+                                                        List<String> suggestions) {
 
         JSONObject values_in_ref_duration = new JSONObject();
         QuotaServiceUtils.listQuotas(driver,Math.min(7L,last_change_days),account_id,patient_id,QuotaConst.QUOTA_BS,null,values_in_ref_duration);
@@ -614,11 +638,11 @@ public class SBdSugarServiceUtils {
                                       Long patient_id) {
         JSONObject responseData = new JSONObject();
 
-        List<DrugInfo> drugInfoList = new ArrayList<DrugInfo>();
+        Map<String,DrugInfo> drugInfoMap = new HashMap<String, DrugInfo>();
         Map<String,Map<String,Double>> drugCompRelationMap = new HashMap<String, Map<String,Double>>();
         Map<String,DrugComp> drugCompMap = new HashMap<String, DrugComp>();
 
-        DrugServiceUtils.GetUseDrugAndDrugComp(driver,patient_id,drugInfoList,drugCompRelationMap,drugCompMap);
+        DrugServiceUtils.GetUseDrugAndDrugComp(driver,patient_id,drugInfoMap,drugCompRelationMap,drugCompMap);
 
         JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,drugCompMap.values());
 
@@ -626,14 +650,14 @@ public class SBdSugarServiceUtils {
 
         Long lastChanges = GetQuotaChangeDays(driver,account_id,patient_id);
 
-        JSONObject reference_suggestion = new JSONObject();
+        List<String> reference_suggestion = new ArrayList<String>();
         JSONObject reference_value_degree = GetReferenceValueAndDegree(driver,account_id,patient_id,patient_name,lastChanges,moniter_interval,reference_suggestion);
         UpdateMoniterInterval(driver,patient_id,moniter_interval);
 
         Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
         Double PA =  SWeightSerivceUtils.GetActEnergy(driver, account_id, patient_id);
 
-        JSONObject level_suggestion = GetRefLevelSuggestion(patient_name,reference_value_degree,(BMI<22||PA>60),drugInfoList,moniter_interval);
+        List<String> level_suggestion = GetRefLevelSuggestion(patient_name,reference_value_degree,(BMI<22||PA>60),drugInfoMap, drugCompRelationMap,drugCompMap,moniter_interval);
 
         responseData.put("level-suggestion",level_suggestion);
         responseData.put("reference-suggestion",reference_suggestion);
