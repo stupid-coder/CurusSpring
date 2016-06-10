@@ -254,7 +254,8 @@ public class SBdSugarServiceUtils {
                     Double value = values.getDouble(key);
                     Double level = BdSugarLevel(key, value);
                     Double degree = degrees.getDouble(key);
-                    suggestions.add(GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals));
+                    String suggestion = GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals);
+                    if (suggestion != null) suggestions.add(suggestion);
                 }
             }
             suggestions.add(String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
@@ -352,7 +353,7 @@ public class SBdSugarServiceUtils {
                 suggestion = String.format("%s%s低血糖(可参考度：很高)",date_string,moment_context);
             } else if ( ref_value < 11.1 ) {
                 ref_degree = 1.0;
-                suggestion = String.format("%s%s血糖%.2f(可参考度：中)",date_string,monitor_interval,ref_value);
+                suggestion = String.format("%s%s血糖%.2f(可参考度：中)",date_string,moment_context,ref_value);
             } else if ( ref_value < 13.9 ) {
                 ref_degree = 2.0;
                 suggestion = String.format("%s%s血糖%.2f(可参考度：高)",date_string,moment_context,ref_value);
@@ -468,8 +469,8 @@ public class SBdSugarServiceUtils {
         Double ref_degree = null;
 
         if ( !lastest_in_duration.containsKey(key) ) { // 无记录
-            Double kf_value = references.getJSONObject("values").getDouble(key);
-            Double kf_degree = references.getJSONObject("degrees").getDouble(key);
+            Double kf_value = references.getJSONObject("values").getDouble("kf");
+            Double kf_degree = references.getJSONObject("degrees").getDouble("kf");
 
             if ( lastest_quotas.containsKey(key) ) {
                 Quota item = lastest_quotas.getObject(key,Quota.class);
@@ -555,7 +556,7 @@ public class SBdSugarServiceUtils {
         Double ref_a1c_value = null;
         Double ref_a1c_todate = null;
         String suggestion = null;
-        if ( a1cQuotaList == null ) {
+        if ( a1cQuotaList == null || a1cQuotaList.size() == 0) {
             ref_a1c = 5.0;
             ref_a1c_degree = 0.2;
         } else {
@@ -571,7 +572,7 @@ public class SBdSugarServiceUtils {
                 else ref_a1c_degree = 0.2;
             }
         }
-        if ( a1cQuotaList != null ) {
+        if ( a1cQuotaList != null && a1cQuotaList.size() > 0) {
             Quota a1cQuota = a1cQuotaList.get(0);
             String monitor_date = a1cQuota.getMeasure_date().toString();
             if ( ref_a1c_value <= 0.0 ) suggestion = String.format("A1c可反映过去2-3个月血糖控制的平均水平，因此如需判断现行治疗方案是否合适，需在稳定治疗2-3个月以后在进行A1c检测。本次A1c的检测日期%s距最近的治疗方案调整日期%s太近，甚至是在之前，这对进一步调整治疗方案没有参考意义。建议在%s前后再查一次A1c。",
@@ -613,7 +614,7 @@ public class SBdSugarServiceUtils {
                 return reference_value_degree;
         }
 
-        if ( patientName != null ) {
+        if ( suggestions != null ) {
             GetRefBSAndDegreeH(patientName, moniter_interval.getLong("zch"), "zch", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
             GetRefBSAndDegreeQ(patientName, moniter_interval.getLong("wfq"), "wfq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
             GetRefBSAndDegreeH(patientName, moniter_interval.getLong("wfh"), "wfh", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
@@ -685,7 +686,8 @@ public class SBdSugarServiceUtils {
         Double activity_decrease = activity;
         Double diet_decrease = diet;
         JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,null);
-        JSONObject reference = GetReferenceValueAndDegree(driver,account_id,patient_id,null,null,moniter_interval,null);
+        Long change_lastday = GetQuotaChangeDays(driver,account_id,patient_id);
+        JSONObject reference = GetReferenceValueAndDegree(driver,account_id,patient_id,null,change_lastday,moniter_interval,null);
         Double ref_sugar = reference.getJSONObject("values").containsKey("kf") == true ?
                 reference.getJSONObject("values").getDouble("kf") : null;
 
@@ -693,7 +695,8 @@ public class SBdSugarServiceUtils {
 
         if ( diet == null ) {
 
-            diet_decrease = Math.max((SWeightSerivceUtils.GetBMI(driver,account_id,patient_id)-22)*0.05,0.0);
+            Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
+            diet_decrease = Math.max((BMI-22)*0.05,0.0);
         }
 
         if ( activity_decrease == null ) {
