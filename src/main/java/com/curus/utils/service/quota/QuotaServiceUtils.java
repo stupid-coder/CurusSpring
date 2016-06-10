@@ -253,6 +253,27 @@ public class QuotaServiceUtils {
             ret ++;
         }
 
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_A1C_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaA1C = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date",TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",quotaA1C);
+            response.put(QuotaConst.QUOTA_A1C,responseItem);
+            ret++;
+        }
+
+        quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_BF_ID,1L);
+        if (quotaList != null && quotaList.size() > 0) {
+            JSONObject quotaBF = JSONObject.parseObject(quotaList.get(0).getRecord());
+            JSONObject responseItem = new JSONObject();
+            responseItem.put("measure_date",TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
+            responseItem.put("value",quotaBF);
+            response.put(QuotaConst.QUOTA_BF,responseItem);
+            ret++;
+        }
+
+
         PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id, patient_id, QuotaConst.QUOTA_SMOKE_ID);
         if (patientSupervise != null) {
             JSONObject responseItem = new JSONObject();
@@ -260,6 +281,7 @@ public class QuotaServiceUtils {
             response.put(QuotaConst.QUOTA_SMOKE,responseItem);
             ret ++;
         }
+
         return ret;
     }
 }
