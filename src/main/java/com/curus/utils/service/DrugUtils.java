@@ -10,6 +10,7 @@ import java.util.Map;
 public class DrugUtils {
 
     static public Integer GetCompTypeId(String name) {
+        if ( name == null ) return null;
         for ( Map.Entry<Integer,String> entry : DrugConst.COMP_TYPE.entrySet() ) {
             if ( entry.getValue().compareTo(name) == 0 ) return entry.getKey();
         }
@@ -17,6 +18,7 @@ public class DrugUtils {
     }
 
     static public Integer GetCompAimId(String name) {
+        if ( name == null ) return null;
         for ( Map.Entry<Integer,String> entry : DrugConst.COMP_AIM.entrySet() ) {
             if ( entry.getValue().compareTo(name) == 0 ) return entry.getKey();
         }
