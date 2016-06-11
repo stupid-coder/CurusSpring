@@ -15,4 +15,11 @@ public class DrugUtils {
         }
         return null;
     }
+
+    static public Integer GetCompAimId(String name) {
+        for ( Map.Entry<Integer,String> entry : DrugConst.COMP_AIM.entrySet() ) {
+            if ( entry.getValue().compareTo(name) == 0 ) return entry.getKey();
+        }
+        return null;
+    }
 }

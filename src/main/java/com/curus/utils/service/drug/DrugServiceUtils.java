@@ -1,5 +1,6 @@
 package com.curus.utils.service.drug;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.curus.dao.CurusDriver;
@@ -8,6 +9,7 @@ import com.curus.model.database.*;
 import com.curus.utils.TypeUtils;
 import com.curus.utils.constant.CommonConst;
 import com.curus.utils.constant.DrugConst;
+import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.DrugUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -89,68 +91,94 @@ public class DrugServiceUtils {
         return directions;
     }
 
-    public static List<PatientUseDrug> GetPatientUseDrug(CurusDriver driver,
-                                                         Long patient_id) {
-        return driver.patientUseDrugDao.selectAll(patient_id, CommonConst.TRUE);
-    }
+    public static DrugInfo CompAim(Map<String,DrugInfo> drugInfoMap,
+                                   Map<String,DrugComp> drugCompMap,
+                                   String aim) {
+        if ( drugCompMap == null || drugCompMap.size() == 0 ) return null;
 
-    public static boolean DrugType(CurusDriver driver,
-                                   List<PatientUseDrug> patientUseDrugList,
-                                   String comp) {
-        Integer comp_type = DrugUtils.GetCompTypeId(comp);
-        if ( comp_type == null ) return false;
-
-        for ( PatientUseDrug patientUseDrug : patientUseDrugList ) {
-            List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(patientUseDrug.getDrug_id());
-            for (DrugCompRelation drugCompRelation : drugCompRelationList) {
-                DrugComp drugComp = driver.drugCompDao.select(TypeUtils.getWhereHashMap("comp_id",drugCompRelation.getComp_id()));
-                if ( drugComp == null ) continue;
-                if ( comp_type.compareTo(drugComp.getComp_type()) == 0 ) return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean CompType(Collection<DrugComp> drugCompList,
-                                   String comp) {
-
-        if ( drugCompList == null || drugCompList.size() == 0 ) return false;
-
-        Integer comp_type = DrugUtils.GetCompTypeId(comp);
-        for ( DrugComp drugComp : drugCompList ) {
-            if ( drugComp.getComp_type().compareTo(comp_type) == 0 ) return true;
+        Integer comp_aim = DrugUtils.GetCompAimId(aim);
+        for ( Map.Entry<String,DrugComp> entry : drugCompMap.entrySet() ) {
+            if ( entry.getValue().getComp_type().compareTo(comp_aim) == 0 ) return drugInfoMap.get(entry.getKey());
         }
 
-        return false;
-    }
-
-    public static boolean CompType(CurusDriver driver,
-                                   Long patient_id,
-                                   String comp) {
-        Map<String,DrugComp> drugCompMap = new HashMap<String, DrugComp>();
-        GetUseDrugAndDrugComp(driver,patient_id,null,null,drugCompMap);
-        return CompType(drugCompMap.values(),comp);
+        return null;
     }
 
     public static DrugInfo CompType(Map<String,DrugInfo> drugInfoMap,
                                     Map<String,DrugComp> drugCompMap,
-                                    String comp) {
-        Integer comp_type = DrugUtils.GetCompTypeId(comp);
+                                    String type) {
+        Integer comp_type = DrugUtils.GetCompTypeId(type);
 
         for ( Map.Entry<String,DrugComp> entry : drugCompMap.entrySet() ) {
             if ( entry.getValue().getComp_type().compareTo(comp_type) == 0 ) {
                 if ( drugInfoMap.containsKey(entry.getValue()) ) return drugInfoMap.get(entry.getKey());
             }
         }
+        return null;
+    }
 
+    public static String CompType(CurusDriver driver, Long patient_id, String type) {
+        Integer comp_type = DrugUtils.GetCompTypeId(type);
+        if ( comp_type == null ) return null;
+
+        List<PatientUseDrug> patientUseDrugList = driver.patientUseDrugDao.selectAll(patient_id, CommonConst.TRUE);
+
+        if ( patientUseDrugList == null ) return null;
+
+        for ( PatientUseDrug patientUseDrug : patientUseDrugList ) {
+            List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(patientUseDrug.getDrug_id());
+            for (DrugCompRelation drugCompRelation : drugCompRelationList) {
+                DrugComp drugComp = driver.drugCompDao.select(TypeUtils.getWhereHashMap("comp_id",drugCompRelation.getComp_id()));
+                if ( drugComp == null ) continue;
+                if ( comp_type.compareTo(drugComp.getComp_type()) == 0 ) return drugCompRelation.getDrug_id();
+            }
+        }
+        return null;
+    }
+
+    public static DrugInfo DrugTechCompProcessType(Map<String,DrugInfo> drugInfoMap,
+                                                   Map<String,DrugComp> drugCompMap,
+                                                   Integer process,
+                                                   String type) {
+        Integer comp_type = DrugUtils.GetCompTypeId(type);
+
+        for ( Map.Entry<String,DrugComp> entry : drugCompMap.entrySet() ) {
+            if ( entry.getValue().getComp_type().compareTo(comp_type) == 0 ) {
+                DrugInfo drugInfo = drugInfoMap.get(entry.getKey());
+                Integer comp_process = entry.getValue().getComp_process();
+                if ( drugInfo.getTech() == 0 ) { // 普通
+                    if ( comp_process.compareTo(process) == 0 ) return drugInfo;
+                } else if ( drugInfo.getTech() == 1 ) { // 缓释
+                    if ( comp_process + 1 == process) return drugInfo;
+                } else if ( drugInfo.getTech() == 2 ) { // 控释
+                    return drugInfo;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static DrugInfo DrugTechCompProcessTypeTime(Map<String,PatientUseDrug> patientUseDrugMap,
+                                                       Map<String,DrugInfo> drugInfoMap,
+                                                       Map<String,DrugComp> drugComMap,
+                                                       Integer process,
+                                                       String type,
+                                                       Integer timeBegin,
+                                                       Integer timeEnd) {
+        DrugInfo drugInfo = DrugTechCompProcessType(drugInfoMap,drugComMap,process,type);
+        if ( drugInfo != null ) {
+            PatientUseDrug patientUseDrug = patientUseDrugMap.get(drugInfo.getDrug_id());
+            JSONObject policy = JSONObject.parseObject(patientUseDrug.getUse_policy());
+        }
         return null;
     }
 
     public static void GetUseDrugAndDrugComp(CurusDriver driver,
                                              Long patient_id,
-                                             Map<String, DrugInfo> drugInfoList,
+                                             Map<String, DrugInfo> drugInfoMap,
                                              Map<String, Map<String, Double>> drugCompRelationMap,
-                                             Map<String, DrugComp> drugCompMap) {
+                                             Map<String, DrugComp> drugCompMap,
+                                             Map<String, PatientUseDrug> patientUseDrugMap) {
 
         List<PatientUseDrug> patientUseDrugList = driver.patientUseDrugDao.selectAll(patient_id,CommonConst.TRUE);
         if ( patientUseDrugList == null || patientUseDrugList.size() == 0 ) return;
@@ -159,8 +187,9 @@ public class DrugServiceUtils {
             DrugInfo drugInfo = driver.drugInfoDao.select(patientUseDrug.getDrug_id());
 
             if ( drugInfo == null ) continue;
-            if ( drugInfoList != null ) drugInfoList.put(drugInfo.getDrug_id(), drugInfo);
+            if ( drugInfoMap != null ) drugInfoMap.put(drugInfo.getDrug_id(), drugInfo);
 
+            patientUseDrugMap.put(patientUseDrug.getDrug_id(),patientUseDrug);
 
             List<DrugCompRelation> drugCompRelationList = driver.drugCompRelationDao.selectByDrugId(drugInfo.getDrug_id());
 
@@ -185,4 +214,71 @@ public class DrugServiceUtils {
         }
     }
 
+
+    public Set<String> CompType(Set<String> drugSet,
+                                 Map<String,DrugComp> drugCompMap,
+                                 String type) {
+        Integer comp_type = DrugUtils.GetCompTypeId(type);
+        if ( comp_type == null ) return null;
+        Set<String> newDrugSet = new HashSet<String>();
+
+        if ( drugSet == null ) { //init
+            for ( Map.Entry<String,DrugComp> entry : drugCompMap.entrySet() ) {
+                if ( entry.getValue().getComp_type().compareTo(comp_type) == 0 )
+                    newDrugSet.add(entry.getKey());
+            }
+        } else {
+
+            for ( String drug_id : drugSet ) {
+                DrugComp drugComp = drugCompMap.get(drug_id);
+                if ( drugComp.getComp_type().compareTo(comp_type) == 0 )
+                    newDrugSet.add(drug_id);
+            }
+        }
+        return newDrugSet;
+    }
+
+
+    public Set<String> CompAim(Set<String> drugSet,
+                               Map<String,DrugComp> drugCompMap,
+                               String aim) {
+        Integer comp_aim = DrugUtils.GetCompAimId(aim);
+        Set<String> newDrugSet = new HashSet<String>();
+        if ( drugSet == null ) {
+            for ( Map.Entry<String,DrugComp> entry : drugCompMap.entrySet() ) {
+                if ( Integer.parseInt(entry.getValue().getComp_aim()) == comp_aim ) {
+                    newDrugSet.add(entry.getKey());
+                }
+            }
+        } else {
+            for ( String drug_id : drugSet ) {
+                DrugComp drugComp = drugCompMap.get(drug_id);
+                if ( Integer.parseInt(drugComp.getComp_aim()) == comp_aim ) {
+                    newDrugSet.add(drug_id);
+                }
+            }
+        }
+        return  newDrugSet;
+    }
+
+    public Set<String> DrugTime(Set<String> drugSet,
+                                Map<String,PatientUseDrug> patientUseDrugMap,
+                                String begin, String end) {
+        Integer drugBegin = QuotaConst.SUB_QUOTA_IDS.get(begin).intValue();
+        Integer drugEnd = QuotaConst.SUB_QUOTA_IDS.get(end).intValue();
+
+        Set<String> newDrugSet = new HashSet<String>();
+
+        if ( drugSet == null ) {
+            for ( Map.Entry<String,PatientUseDrug> entry : patientUseDrugMap.entrySet() ) {
+                PatientUseDrug patientUseDrug = entry.getValue();
+                JSONObject use_policy = JSONObject.parseObject(patientUseDrug.getUse_policy());
+            }
+        } else {
+            for ( String drug_id : drugSet ) {
+                PatientUseDrug drugComp = patientUseDrugMap.get(drug_id);
+            }
+        }
+        return  newDrugSet;
+    }
 }

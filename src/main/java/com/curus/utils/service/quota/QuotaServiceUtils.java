@@ -199,7 +199,11 @@ public class QuotaServiceUtils {
         { // BS
             JSONObject bs_quotas = driver.quotaDao.selectLastestBSQuota(account_id, patient_id);
             if ( bs_quotas.size() != 0 ) {
-                JSONObject monitor_interval = SBdSugarServiceUtils.GetMonitorInterval(driver, account_id, patient_id, null);
+                JSONObject monitor_interval = SBdSugarServiceUtils.GetMonitorInterval(driver, account_id, patient_id,null);
+                if ( monitor_interval == null ) {
+                    monitor_interval = SBdSugarServiceUtils.GetMonitorInterval(driver,account_id,patient_id,
+                            DrugServiceUtils.CompType(driver,patient_id,"胰岛素")!=null);
+                }
 
                 JSONArray quota_object = new JSONArray();
                 for (String sub_cat : bs_quotas.keySet()) {

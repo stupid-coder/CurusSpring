@@ -41,12 +41,13 @@ public class SBdSugarServiceUtils {
         return lastDays;
     }
 
-    public static JSONObject GetMonitorInterval(CurusDriver driver, Long account_id, Long patient_id, Collection<DrugComp> drugComps) {
+    public static JSONObject GetMonitorInterval(CurusDriver driver, Long account_id, Long patient_id,
+                                                Boolean UseYDS) {
 
         InternalData interval_data = driver.internalDataDao.select(patient_id, InternalDataConst.BD_SUGAR_MONITER_INTERVAL);
         JSONObject moniter_interval;
         if ( interval_data == null ) { // Default
-            boolean UseYDS = drugComps != null ? DrugServiceUtils.CompType(drugComps,"胰岛素") : DrugServiceUtils.CompType(driver,patient_id,"胰岛素");
+            if ( UseYDS == null ) return null;
             moniter_interval = new JSONObject();
             for ( Map.Entry<String,Long> entry : QuotaConst.SUB_QUOTA_IDS.entrySet() ) {
                 Long default_interval = 365L;
@@ -247,7 +248,7 @@ public class SBdSugarServiceUtils {
             } else if ( moment.compareTo("sq")  == 0 ) {
                 suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
             } else if ( moment.compareTo("yj") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrugYJ(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion = GetRefLevelSuggestionWithLevelWithoutDrugYJ(patientName, moment, value, level, BMI_PA_NO, moniter_interval);
             } else if ( moment.compareTo("ydh") == 0 ) {
                 suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
             }
@@ -260,18 +261,19 @@ public class SBdSugarServiceUtils {
     }
 
     public static List<String> GetRefLevelSuggestion(String patientName,
-                                                   JSONObject reference,
-                                                   boolean BMI_PA_NO,
-                                                   Map<String,DrugInfo> patientUseDrugMap,
-                                                   Map<String,Map<String,Double>> compRelateMap,
-                                                   Map<String,DrugComp> drugCompMap,
-                                                   JSONObject moniter_intervals) {
+                                                     JSONObject reference,
+                                                     boolean BMI_PA_NO,
+                                                     Map<String,PatientUseDrug> patientUseDrugMap,
+                                                     Map<String,DrugInfo> drugInfoMap,
+                                                     Map<String,Map<String,Double>> compRelateMap,
+                                                     Map<String,DrugComp> drugCompMap,
+                                                     JSONObject moniter_intervals) {
         List<String> suggestions = new ArrayList<String>();
         //JSONObject suggestions = new JSONObject();
         JSONObject values = reference.getJSONObject("values");
         JSONObject degrees = reference.getJSONObject("degrees");
         List<String> low_degrees = new ArrayList<String>();
-        if ( patientUseDrugMap == null || patientUseDrugMap.size() == 0 ) { // no drug
+        if ( drugInfoMap == null || drugInfoMap.size() == 0 ) { // no drug
             for ( String key : QuotaConst.SUB_QUOTA_IDS.keySet() ) {
                 if ( values.containsKey(key) ) {
                     Double value = values.getDouble(key);
@@ -284,23 +286,67 @@ public class SBdSugarServiceUtils {
             suggestions.add(String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
 
         } else { // withdrug
-            boolean USEYDS = drugCompMap == null ? false : DrugServiceUtils.CompType(drugCompMap.values(),"胰岛素");
-            boolean AIM_DECREASE_SUGAR = drugCompMap == null ? false : DrugServiceUtils.CompType(drugCompMap.values(),"α-糖苷酶抑制剂");
-
+            DrugInfo TYPE_YDS = DrugServiceUtils.CompType(drugInfoMap,drugCompMap, "胰岛素");
+            DrugInfo TYPE_TGMYZS = DrugServiceUtils.CompType(drugInfoMap,drugCompMap, "α-糖苷酶抑制剂");
+            DrugInfo AIM_JT = DrugServiceUtils.CompAim(drugInfoMap,drugCompMap,"高血糖");
+            DrugInfo LONG_HYL = DrugServiceUtils.DrugTechCompProcessType(drugInfoMap,drugCompMap,1,"磺脲类");
+            DrugInfo LONG_GLNL = DrugServiceUtils.DrugTechCompProcessType(drugInfoMap,drugCompMap,1,"格列奈类");
+            DrugInfo BLONG_17_HYL = DrugServiceUtils.DrugTechCompProcessTypeTime(patientUseDrugMap,drugInfoMap,drugCompMap,3,"磺脲类",6,7);
+            DrugInfo BLONG_17_GLNL = DrugServiceUtils.DrugTechCompProcessTypeTime(patientUseDrugMap,drugInfoMap,drugCompMap,3,"格列奈类",6,7);
             JSONObject levels = new JSONObject();
             for ( String key : values.keySet() ) {
                 levels.put(key,BdSugarLevel(key, values.getDouble(key)));
             }
-            JSONArray suggestions_use_drug = new JSONArray();
-            if ( USEYDS ) {
+
+            if ( TYPE_YDS == null ) {
+                if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") <= -1.0 ) {
+                    suggestions.add("出现了早晨空腹低血糖。");
+                    if ( AIM_JT != null && TYPE_TGMYZS != null )
+                        suggestions.add(String.format("特殊用药提醒： %s目前正在使用α-糖苷酶抑制剂（%s)，它可抑制蔗糖和淀粉类食物的吸收，因此用传统食物缓解低血糖的效果较差。建议家中常备葡萄糖或蜂蜜，其缓解低血糖的效果更佳。",
+                                patientName, TYPE_TGMYZS.getProduct_name()));
+                    if ( LONG_HYL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属磺脲类降糖药或含有该成分，它极易导致低血糖，建议首先对其减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                LONG_HYL.getProduct_name()));
+                    if ( BLONG_17_HYL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属磺脲类降糖药或含有该成分，它很可能是导致早餐前低血糖的罪魁祸首，建议首先对【使用时间】使用的%s进行减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                BLONG_17_HYL.getProduct_name(),BLONG_17_HYL.getProduct_name()));
+                    if ( LONG_GLNL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属格列奈类降糖药或含有该成分，它很可能与早餐前低血糖有关，建议首先对其减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                            LONG_GLNL.getDrug_id()));
+                    if ( BLONG_17_GLNL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属格列奈类降糖药或含有该成分，它很可能与早餐前低血糖有关，建议首先对【使用时间】使用的%s进行减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                BLONG_17_GLNL.getProduct_name(),BLONG_17_GLNL.getProduct_name()));
+                    if ( LONG_HYL == null && BLONG_17_HYL == null && LONG_GLNL == null && BLONG_17_GLNL == null )
+                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发早晨低血糖的用药。",patientName));
+                    else suggestions.add("需要注意，出现低血糖还可能与其他降糖药的使用（尤其当成分不明时）、晚餐过少或过早、早餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    moniter_intervals.put("kf",1L);
+                }
+
+                if ( degrees.getDouble("wfq") >= 1.0 && levels.getDouble("wfq") <= -1.0 ) {
+                    suggestions.add("出现了午餐前低血糖。");
+                    if ( AIM_JT != null && TYPE_TGMYZS != null )
+                        suggestions.add(String.format("特殊用药提醒： %s目前正在使用α-糖苷酶抑制剂（%s)，它可抑制蔗糖和淀粉类食物的吸收，因此用传统食物缓解低血糖的效果较差。建议家中常备葡萄糖或蜂蜜，其缓解低血糖的效果更佳。",
+                                patientName, TYPE_TGMYZS.getProduct_name()));
+                    if ( LONG_HYL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属磺脲类降糖药或含有该成分，它很可能是导致午餐前低血糖的罪魁祸首，建议首先对其减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                LONG_HYL.getProduct_name()));
+                    if ( BLONG_17_HYL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属磺脲类降糖药或含有该成分，它很可能是导致早餐前低血糖的罪魁祸首，建议首先对【使用时间】使用的%s进行减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                BLONG_17_HYL.getProduct_name(),BLONG_17_HYL.getProduct_name()));
+                    if ( LONG_GLNL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属格列奈类降糖药或含有该成分，它很可能与早餐前低血糖有关，建议首先对其减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                LONG_GLNL.getDrug_id()));
+                    if ( BLONG_17_GLNL != null )
+                        suggestions.add(String.format("特殊用药提醒：目前患者正在使用的%s属格列奈类降糖药或含有该成分，它很可能与早餐前低血糖有关，建议首先对【使用时间】使用的%s进行减量或停用，再尽早咨询医生，同时连续监测低血糖发生情况。",
+                                BLONG_17_GLNL.getProduct_name(),BLONG_17_GLNL.getProduct_name()));
+                    if ( LONG_HYL == null && BLONG_17_HYL == null && LONG_GLNL == null && BLONG_17_GLNL == null )
+                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发早晨低血糖的用药。",patientName));
+                    else suggestions.add("需要注意，出现低血糖还可能与其他降糖药的使用（尤其当成分不明时）、晚餐过少或过早、早餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    moniter_intervals.put("kf",1L);
+                }
 
             } else {
-                if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") <= -1.0 ) {
-                    suggestions_use_drug.add("出现了早晨空腹低血糖。");
-                    if ( AIM_DECREASE_SUGAR ) suggestions_use_drug.add(String.format("特殊用药提醒： %s目前正在使用α-糖苷酶抑制剂（%s)，它可抑制蔗糖和淀粉类食物的吸收，因此用传统食物缓解低血糖的效果较差。建议家中常备葡萄糖或蜂蜜，其缓解低血糖的效果更佳。",
-                                    patientName, DrugServiceUtils.CompType(patientUseDrugMap, drugCompMap, "α-糖苷酶抑制剂").getProduct_name()));
 
-                }
             }
             suggestions.add("用药还在开发");
         }
@@ -349,7 +395,7 @@ public class SBdSugarServiceUtils {
                 Quota quota = values_lastest.getObject(moment,Quota.class);
                 if ( TimeUtils.dateDiffToNow(quota.getMeasure_date()) > monitor_interval ) {
                     suggestion = String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！",monitor_interval,moment_context);
-                    suggestions.add(suggestion);
+                    if (suggestions!=null)  suggestions.add(suggestion);
                     return false;
                 } else {
                     ref_value = JSONObject.parseObject(quota.getRecord()).getDouble("sugarvalue");
@@ -365,10 +411,11 @@ public class SBdSugarServiceUtils {
                     }
                 }
             } else {
-                suggestions.add(String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！", monitor_interval, moment_context));
+                if ( suggestions != null )
+                suggestions.add(String.format("患者%d天内一直没有记录%s血糖变化，系统无法进行评估！", monitor_interval, moment_context));
                 return false;
             }
-        } else if ( values_in_ref_duration.getJSONArray(moment).size() == 1 ){ // ref_duration 1 条记录
+        } else if ( values_in_ref_duration.getJSONArray(moment).size() == 1 ) { // ref_duration 1 条记录
             JSONObject lastest_quota = values_in_ref_duration.getJSONArray(moment).getJSONObject(0);
             ref_value = lastest_quota.getDouble("sugarvalue");
             String date_string = TimeUtils.DateFormat(TimeUtils.parseDate(lastest_quota.getLong("measure_date")));
@@ -668,10 +715,10 @@ public class SBdSugarServiceUtils {
         Map<String,DrugInfo> drugInfoMap = new HashMap<String, DrugInfo>();
         Map<String,Map<String,Double>> drugCompRelationMap = new HashMap<String, Map<String,Double>>();
         Map<String,DrugComp> drugCompMap = new HashMap<String, DrugComp>();
+        Map<String,PatientUseDrug> patientUseDrugMap = new HashMap<String, PatientUseDrug>();
+        DrugServiceUtils.GetUseDrugAndDrugComp(driver,patient_id,drugInfoMap,drugCompRelationMap,drugCompMap,patientUseDrugMap);
 
-        DrugServiceUtils.GetUseDrugAndDrugComp(driver,patient_id,drugInfoMap,drugCompRelationMap,drugCompMap);
-
-        JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,drugCompMap.values());
+        JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,DrugServiceUtils.CompType(drugInfoMap,drugCompMap,"胰岛素")!=null);
 
         String patient_name = PatientServiceUtils.GetPatientName(driver,patient_id);
 
@@ -684,7 +731,7 @@ public class SBdSugarServiceUtils {
         Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
         Double PA =  SWeightSerivceUtils.GetActEnergy(driver, account_id, patient_id);
 
-        List<String> level_suggestion = GetRefLevelSuggestion(patient_name,reference_value_degree,(BMI<22||PA>60),drugInfoMap, drugCompRelationMap,drugCompMap,moniter_interval);
+        List<String> level_suggestion = GetRefLevelSuggestion(patient_name,reference_value_degree,(BMI<22||PA>60),patientUseDrugMap,drugInfoMap, drugCompRelationMap,drugCompMap,moniter_interval);
 
         responseData.put("level-suggestion",level_suggestion);
         responseData.put("reference-suggestion",reference_suggestion);
@@ -712,12 +759,17 @@ public class SBdSugarServiceUtils {
         Double activity_decrease = activity;
         Double diet_decrease = diet;
         JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,null);
+        if ( moniter_interval == null )
+            moniter_interval = GetMonitorInterval(driver,account_id,patient_id,DrugServiceUtils.CompType(driver,patient_id,"胰岛素")!=null);
         Long change_lastday = GetQuotaChangeDays(driver,account_id,patient_id);
         JSONObject reference = GetReferenceValueAndDegree(driver,account_id,patient_id,null,change_lastday,moniter_interval,null);
         Double ref_sugar = reference.getJSONObject("values").containsKey("kf") == true ?
                 reference.getJSONObject("values").getDouble("kf") : null;
 
-        if ( ref_sugar == null ) return;
+        if ( ref_sugar == null ) {
+            responseData.put("message","请进行血糖测量");
+            return;
+        }
 
         if ( diet == null ) {
 

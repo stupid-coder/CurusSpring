@@ -18,6 +18,13 @@ public class DrugConst {
         put(7,"复方糖尿病药物");
     }};
 
+    public static Map<Integer,String> COMP_AIM = new HashMap<Integer,String>() {{
+        put(0,"高血压");
+        put(1,"高血糖");
+        put(2,"冠心病");
+        put(3,"脑瘁中");
+    }};
+
     public static Map<Integer,String> DRUG_FORM = new HashMap<Integer,String>() {{
         put(0,"片");
         put(1,"粒");
