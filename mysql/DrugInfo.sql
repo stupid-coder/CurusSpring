@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `DrugInfo`;
 CREATE TABLE `DrugInfo` (
-  `id` varchar(36) NOT NULL,
+  `drug_id` varchar(36) NOT NULL,
   `gov_id` varchar(20) DEFAULT NULL,
   `product_name` varchar(100) DEFAULT NULL,
   `chemical_name` varchar(100) DEFAULT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `DrugInfo` (
   `taboo` varchar(1000) DEFAULT NULL,
   `side_effect` varchar(1000) DEFAULT NULL,
   `aim` varchar(1000) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`drug_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
