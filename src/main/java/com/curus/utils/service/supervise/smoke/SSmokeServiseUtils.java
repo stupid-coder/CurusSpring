@@ -76,6 +76,7 @@ public class SSmokeServiseUtils {
                                   Date create) {
         JSONObject initSmoke = JSONObject.parseObject(init);
         List<Quota> quotaList = driver.quotaDao.selectAfterMeasureDate(account_id, patient_id, QuotaConst.QUOTA_SMOKE_ID,create);
+        if ( quotaList.size() == 0 ) return 0.0;
         return dayMoney(init) * TimeUtils.dateDiff(create,TimeUtils.getDate()) - calculateMoney(quotaList, create,TimeUtils.getDate());
     }
 
