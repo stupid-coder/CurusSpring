@@ -138,7 +138,7 @@ public class DrugServiceUtils {
             else {
                 for ( DrugCompRelation drugCompRelation : drugCompRelationList ) {
                     if ( drugCompRelationMap != null ) {
-                        drugCompRelationMap.put(patientUseDrug.getDrug_id()+"$"+drugCompRelation.getComp_id(), drugCompRelation.getComp_dosis());
+                        drugCompRelationMap.put(patientUseDrug.getDrug_id()+"#"+drugCompRelation.getComp_id(), drugCompRelation.getComp_dosis());
                     }
 
                     DrugComp drugComp = driver.drugCompDao.selectByCompId(drugCompRelation.getComp_id());
@@ -162,7 +162,7 @@ public class DrugServiceUtils {
 
         if ( compTypeMap == null ) { //init
             for ( Map.Entry<String,Double> entry : drugCompRelationMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 DrugComp drugComp = drugCompMap.get(ids[1]);
                 if ( comp_type == null ) {
                     newCompTypeMap.put(entry.getKey(),drugComp.getComp_type());
@@ -173,7 +173,7 @@ public class DrugServiceUtils {
         } else {
 
             for ( Map.Entry<String,Integer> entry : compTypeMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 DrugComp drugComp = drugCompMap.get(ids[1]);
                 if ( type == null ) {
                     newCompTypeMap.put(entry.getKey(),entry.getValue());
@@ -195,7 +195,7 @@ public class DrugServiceUtils {
         Map<String,Integer> newCompAimMap = new HashMap<String, Integer>();
         if ( compAimMap == null ) {
             for ( Map.Entry<String,Double> entry : drugCompRelationMap.entrySet() ) {
-                String ids[] = entry.getKey().split("$");
+                String ids[] = entry.getKey().split("#");
                 DrugComp drugComp = drugCompMap.get(ids[1]);
                 if ( comp_aim == null ) {
                     newCompAimMap.put(entry.getKey(),DrugUtils.GetCompAimId(drugComp.getComp_aim()));
@@ -205,7 +205,7 @@ public class DrugServiceUtils {
             }
         } else {
             for ( Map.Entry<String,Integer> entry : compAimMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 DrugComp drugComp = drugCompMap.get(ids[1]);
                 if ( Integer.parseInt(drugComp.getComp_aim()) == comp_aim ) {
                     newCompAimMap.put(entry.getKey(), comp_aim);
@@ -220,27 +220,24 @@ public class DrugServiceUtils {
     static public Map<String,JSONArray> DrugTime(Map<String,Integer> drugCompMap,
                                                  Map<String,Double> drugCompRelationMap,
                                                  Map<String,PatientUseDrug> patientUseDrugMap,
-                                                 String begin, String end) {
-
-        Integer drugBegin = (begin == null ? null : QuotaConst.SUB_QUOTA_IDS.get(begin).intValue());
-        Integer drugEnd = (end == null ? null : QuotaConst.SUB_QUOTA_IDS.get(end).intValue());
+                                                 Integer begin, Integer end) {
 
         Map<String,JSONArray> newDrugTimeMap = new HashMap<String, JSONArray>();
 
         if ( drugCompMap == null ) {
             for ( Map.Entry<String,Double> entry : drugCompRelationMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 PatientUseDrug patientUseDrug = patientUseDrugMap.get(ids[0]);
 
                 JSONObject use_policy = JSONObject.parseObject(patientUseDrug.getUse_policy());
                 JSONArray use_points = use_policy.getJSONArray("points");
-                if ( drugBegin == null && drugEnd == null ) newDrugTimeMap.put(entry.getKey(),use_points);
+                if ( begin == null && end == null ) newDrugTimeMap.put(entry.getKey(),use_points);
                 else {
                     JSONArray ok_points = new JSONArray();
                     for (int i = 0; i < use_points.size(); ++i) {
                         JSONObject use_point = use_points.getJSONObject(i);
                         Integer use_id = use_point.getInteger("pointId");
-                        if (use_id.compareTo(drugEnd) <= 0 && use_id.compareTo(drugBegin) >= 0) {
+                        if (use_id.compareTo(begin) <= 0 && use_id.compareTo(end) >= 0) {
                             ok_points.add(use_point);
                         }
                     }
@@ -250,18 +247,18 @@ public class DrugServiceUtils {
             }
         } else {
             for ( Map.Entry<String,Integer> entry : drugCompMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 PatientUseDrug patientUseDrug = patientUseDrugMap.get(ids[0]);
                 JSONObject use_policy = JSONObject.parseObject(patientUseDrug.getUse_policy());
                 JSONArray  use_points = use_policy.getJSONArray("points");
-                if ( drugBegin == null && drugEnd == null )
+                if ( begin == null && end == null )
                     newDrugTimeMap.put(entry.getKey(),use_points);
                 else {
                     JSONArray ok_points = new JSONArray();
                     for (int i = 0; i < use_points.size(); ++i) {
                         JSONObject use_point = use_points.getJSONObject(i);
                         Integer use_id = use_point.getInteger("pointId");
-                        if (use_id.compareTo(drugEnd) <= 0 && use_id.compareTo(drugBegin) >= 0)
+                        if (use_id.compareTo(begin) >= 0 && use_id.compareTo(end) <= 0)
                             ok_points.add(use_point);
 
                     }
@@ -279,12 +276,13 @@ public class DrugServiceUtils {
         Map<String,Integer> drugCompTechMap = new HashMap<String, Integer>();
         if ( drugCompMap == null ) {
             for ( Map.Entry<String,Double> entry : drugCompRelationMap.entrySet() ) {
-                DrugInfo drugInfo = drugInfoMap.get(entry.getKey());
+                String[] ids = entry.getKey().split("#");
+                DrugInfo drugInfo = drugInfoMap.get(ids[0]);
                 drugCompTechMap.put(entry.getKey(), drugInfo.getTech());
             }
         } else {
             for ( Map.Entry<String,Integer> entry : drugCompMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 drugCompTechMap.put(entry.getKey(), drugInfoMap.get(ids[0]).getTech());
             }
         }
@@ -299,14 +297,14 @@ public class DrugServiceUtils {
 
         if ( drugCompTechMap == null ) {
             for ( Map.Entry<String,Double> entry : drugCompRelationMap.entrySet() ) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 DrugComp drugComp = drugCompMap.get(ids[0]);
                 if ( process == null ) newDrugCompMap.put(entry.getKey(),drugComp.getComp_process());
                 else if ( drugComp.getComp_process() == process ) newDrugCompMap.put(entry.getKey(),drugComp.getComp_process());
             }
         } else {
             for ( Map.Entry<String,Integer> entry : drugCompTechMap.entrySet()) {
-                String[] ids = entry.getKey().split("$");
+                String[] ids = entry.getKey().split("#");
                 DrugComp drugComp = drugCompMap.get(ids[1]);
                 Integer  comp_process = drugComp.getComp_process();
                 if ( entry.getValue() == 1 ) {
@@ -316,7 +314,7 @@ public class DrugServiceUtils {
                     comp_process = 4;
                 }
                 if ( process == null ) newDrugCompMap.put(entry.getKey(), drugComp.getComp_process());
-                else if ( comp_process == process ) newDrugCompMap.put(entry.getKey(), process);
+                else if ( comp_process.compareTo(process) == 0 ) newDrugCompMap.put(entry.getKey(), process);
             }
         }
 
@@ -326,7 +324,7 @@ public class DrugServiceUtils {
     static public String GetProductionName(Map<String,Integer> drugCompMap,
                                            Map<String,DrugInfo> drugInfoMap) {
         String drug_id_comp_id = drugCompMap.keySet().iterator().next();
-        String[] ids = drug_id_comp_id.split("$");
+        String[] ids = drug_id_comp_id.split("#");
         return drugInfoMap.get(ids[0]).getProduct_name();
     }
 
@@ -334,7 +332,7 @@ public class DrugServiceUtils {
                                            Map<String,DrugInfo> drugInfoMap,
                                            String jsonArray) {
         String drug_id_comp_id = drugCompMap.keySet().iterator().next();
-        String[] ids = drug_id_comp_id.split("$");
+        String[] ids = drug_id_comp_id.split("#");
         return drugInfoMap.get(ids[0]).getProduct_name();
     }
 
@@ -403,7 +401,8 @@ public class DrugServiceUtils {
 
     static public String GetMomentContext(Map<String,JSONArray> timeDrugs) {
         JSONArray use_points = timeDrugs.entrySet().iterator().next().getValue();
-        return SBdSugarServiceUtils.GetMomentContext(QuotaUtils.getSubQuotaName(use_points.getJSONObject(0).getInteger("pointId").longValue()));
+
+        return QuotaUtils.getSubQuotaTimeName(use_points.getJSONObject(0).getInteger("pointId"));
     }
 
     static public Map<String,JSONArray> CheckTimeProcessType(Map<String,JSONArray> last_result,
@@ -414,7 +413,7 @@ public class DrugServiceUtils {
                                                              List<String> suggestions,
                                                              String patientName,
                                                              String moment,
-                                                             String begin, String end,
+                                                             Integer begin, Integer end,
                                                              Integer process,
                                                              String type) {
 
@@ -431,5 +430,42 @@ public class DrugServiceUtils {
         return last_result;
     }
 
+    static public JSONObject GetDrugsInfo(Map<String,PatientUseDrug> patientUseDrugMap,
+                                            Map<String,DrugInfo> drugInfoMap,
+                                            Map<String,Double> drugCompRelationMap,
+                                            Map<String,DrugComp> drugCompMap) {
+        JSONObject drugsUseInfo = new JSONObject();
+        for ( Map.Entry<String,PatientUseDrug> patientUseDrugEntry : patientUseDrugMap.entrySet() ) {
+            JSONObject drug = new JSONObject();
+            String drug_id = patientUseDrugEntry.getKey();
+            DrugInfo drugInfo = drugInfoMap.get(drug_id);
+            drug.put("use",drugInfo.getUse());
+
+            JSONArray time = JSONObject.parseObject(patientUseDrugEntry.getValue().getUse_policy()).getJSONArray("points");
+            drug.put("time",time);
+
+            if ( drugInfo.getTech() == 2 ) {
+                drug.put("process","4");
+            } else {
+                String process = null;
+                String dosis = null;
+                for ( Map.Entry<String,Double> drugCompRelationEntry : drugCompRelationMap.entrySet() ) {
+                    String[] ids = drugCompRelationEntry.getKey().split("#");
+                    if ( ids[0].compareTo(drug_id) != 0 ) continue;
+                    String comp_id = ids[1];
+                    DrugComp drugComp = drugCompMap.get(comp_id);
+                    Integer comp_process = drugComp.getComp_process()+drugInfo.getTech();
+                    process = (process == null ? comp_process.toString() : process+"#"+comp_process);
+                    dosis = (dosis == null ? drugCompRelationEntry.getValue().toString() : dosis+"#"+drugCompRelationEntry.getValue());
+                }
+                drug.put("process",process);
+                drug.put("dosis",dosis);
+            }
+            drugsUseInfo.put(drug_id,drug);
+        }
+        return drugsUseInfo;
+    }
+
 
 }
+

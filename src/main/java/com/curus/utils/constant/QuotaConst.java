@@ -58,6 +58,18 @@ public class QuotaConst {
         put("ydh", 10L);
     }};
 
+    static public Map<Integer,String> SUB_QUOTA_TIME_IDS = new HashMap<Integer, String>() {{
+        put(6,"早餐前空腹");
+        put(7,"早餐时");
+        put(8,"早餐后");
+        put(11,"午餐前");
+        put(12, "午餐时");
+        put(13,"午餐后");
+        put(17,"晚餐前");
+        put(18,"晚餐后");
+        put(22,"睡前");
+        put(0,"其他");
+    }};
 
     static public class BdSugerLevelConfig {
         BdSugerLevelConfig(Double max_value, Double level) {

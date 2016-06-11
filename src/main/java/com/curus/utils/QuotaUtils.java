@@ -45,4 +45,10 @@ public class QuotaUtils {
         }
         return null;
     }
+
+    static public String getSubQuotaTimeName(Integer time) {
+        if ( time == null ) return null;
+        if (QuotaConst.SUB_QUOTA_TIME_IDS.containsKey(time)) return QuotaConst.SUB_QUOTA_TIME_IDS.get(time);
+        else return null;
+    }
 }

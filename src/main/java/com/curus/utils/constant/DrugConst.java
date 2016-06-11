@@ -11,11 +11,13 @@ public class DrugConst {
     public static Map<Integer,String> COMP_TYPE = new HashMap<Integer,String>() {{
         put(1,"胰岛素");
         put(2,"GLP-1受体激动剂");
-        put(3,"促泌剂");
+        put(3,"醛糖还原酶抑制");
         put(4,"双胍类");
-        put(5,"噻唑烷二酮类（TZDs）");
+        put(5,"噻唑烷二酮类(TZDs)");
         put(6,"α-糖苷酶抑制剂");
-        put(7,"复方糖尿病药物");
+        put(7,"磺脲类");
+        put(8,"格列奈类");
+        put(9,"二肽基肽酶-IV抑制剂(DPP4抑制剂)");
     }};
 
     public static Map<Integer,String> COMP_AIM = new HashMap<Integer,String>() {{

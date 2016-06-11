@@ -24,4 +24,11 @@ public class DrugUtils {
         }
         return null;
     }
+
+    static public String GetFormContext(Integer form) {
+        for ( Map.Entry<Integer,String> entry : DrugConst.DRUG_FORM.entrySet() ) {
+            if ( entry.getKey().compareTo(form) == 0 ) return entry.getValue();
+        }
+        return null;
+    }
 }

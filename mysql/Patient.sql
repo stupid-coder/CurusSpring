@@ -23,3 +23,4 @@ CREATE TABLE `Patient` (
   `can_email_push` tinyint(1) NOT NULL DEFAULT FALSE ,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+
