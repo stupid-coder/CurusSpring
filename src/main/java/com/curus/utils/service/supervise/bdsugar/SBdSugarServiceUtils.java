@@ -286,9 +286,12 @@ public class SBdSugarServiceUtils {
             suggestions.add(String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
 
         } else { // withdrug
-            DrugInfo TYPE_YDS = DrugServiceUtils.CompType(drugInfoMap,drugCompMap, "胰岛素");
-            DrugInfo TYPE_TGMYZS = DrugServiceUtils.CompType(drugInfoMap,drugCompMap, "α-糖苷酶抑制剂");
-            DrugInfo AIM_JT = DrugServiceUtils.CompAim(drugInfoMap,drugCompMap,"高血糖");
+            suggestions.add("用药还在开发");
+            return suggestions;
+            /*
+            Set<String> TYPE_YDS = DrugServiceUtils.CompType(null,drugCompMap, "胰岛素");
+            Set<String> TYPE_TGMYZS = DrugServiceUtils.CompType(null,drugCompMap, "α-糖苷酶抑制剂");
+            Set<String> AIM_JT = DrugServiceUtils.CompAim(null,drugCompMap,"高血糖");
             DrugInfo LONG_HYL = DrugServiceUtils.DrugTechCompProcessType(drugInfoMap,drugCompMap,1,"磺脲类");
             DrugInfo LONG_GLNL = DrugServiceUtils.DrugTechCompProcessType(drugInfoMap,drugCompMap,1,"格列奈类");
             DrugInfo BLONG_17_HYL = DrugServiceUtils.DrugTechCompProcessTypeTime(patientUseDrugMap,drugInfoMap,drugCompMap,3,"磺脲类",6,7);
@@ -348,7 +351,7 @@ public class SBdSugarServiceUtils {
             } else {
 
             }
-            suggestions.add("用药还在开发");
+*/
         }
 
         return suggestions;
@@ -718,7 +721,7 @@ public class SBdSugarServiceUtils {
         Map<String,PatientUseDrug> patientUseDrugMap = new HashMap<String, PatientUseDrug>();
         DrugServiceUtils.GetUseDrugAndDrugComp(driver,patient_id,drugInfoMap,drugCompRelationMap,drugCompMap,patientUseDrugMap);
 
-        JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,DrugServiceUtils.CompType(drugInfoMap,drugCompMap,"胰岛素")!=null);
+        JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,DrugServiceUtils.CompType(null,drugCompMap,"胰岛素")!=null);
 
         String patient_name = PatientServiceUtils.GetPatientName(driver,patient_id);
 

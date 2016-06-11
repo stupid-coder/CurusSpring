@@ -90,7 +90,7 @@ public class DrugServiceUtils {
         directions.put("副作用/不良反应",drugInfo.getSide_effect());
         return directions;
     }
-
+    /*
     public static DrugInfo CompAim(Map<String,DrugInfo> drugInfoMap,
                                    Map<String,DrugComp> drugCompMap,
                                    String aim) {
@@ -116,7 +116,7 @@ public class DrugServiceUtils {
         }
         return null;
     }
-
+*/
     public static String CompType(CurusDriver driver, Long patient_id, String type) {
         Integer comp_type = DrugUtils.GetCompTypeId(type);
         if ( comp_type == null ) return null;
@@ -215,7 +215,7 @@ public class DrugServiceUtils {
     }
 
 
-    public Set<String> CompType(Set<String> drugSet,
+    static public Set<String> CompType(Set<String> drugSet,
                                  Map<String,DrugComp> drugCompMap,
                                  String type) {
         Integer comp_type = DrugUtils.GetCompTypeId(type);
@@ -239,7 +239,7 @@ public class DrugServiceUtils {
     }
 
 
-    public Set<String> CompAim(Set<String> drugSet,
+    static public Set<String> CompAim(Set<String> drugSet,
                                Map<String,DrugComp> drugCompMap,
                                String aim) {
         Integer comp_aim = DrugUtils.GetCompAimId(aim);
@@ -261,7 +261,7 @@ public class DrugServiceUtils {
         return  newDrugSet;
     }
 
-    public Set<String> DrugTime(Set<String> drugSet,
+    static public Set<String> DrugTime(Set<String> drugSet,
                                 Map<String,PatientUseDrug> patientUseDrugMap,
                                 String begin, String end) {
         Integer drugBegin = QuotaConst.SUB_QUOTA_IDS.get(begin).intValue();
