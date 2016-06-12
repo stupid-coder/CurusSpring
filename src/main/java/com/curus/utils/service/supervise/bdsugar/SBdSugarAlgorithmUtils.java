@@ -140,12 +140,12 @@ public class SBdSugarAlgorithmUtils {
 
         if ( hour == 7 ) { // 早上
             Double wfq = levels.getDouble("wfq");
-
+            Double min = wfq;
             if ( wfq <= 0 ) jltz = wfq*2;
             else jltz = wfq*2-1;
 
-            levels_xggs.put("zch", Math.min(jltz,levels.getDouble("zch")));
-            levels_xggs.put("wfq",wfq <= 0.0 ? jltz - 2 * wfq : jltz);
+            levels_xggs.put("zch", Math.min(min,levels.getDouble("zch")));
+            levels_xggs.put("wfq",wfq <= 0.0 ? min - 2 * wfq : min);
 
             levels_result.put("zch",levels.getDouble("zch")-levels_xggs.getDouble("zch"));
             levels_result.put("wfq",wfq-levels_xggs.getDouble("wfq"));
@@ -153,13 +153,13 @@ public class SBdSugarAlgorithmUtils {
         } else if ( hour == 12 ) { // 中午
 
             Double wcq = levels.getDouble("wcq");
-
+            Double min = wcq;
             if ( wcq <= 0 ) jltz = wcq * 2;
             else jltz = wcq * 2 - 1;
 
 
-            levels_xggs.put("wfh",Math.min(jltz, levels.getDouble("wfh")));
-            levels_xggs.put("wcq",wcq <= 0.0 ? jltz - 2 * wcq : jltz);
+            levels_xggs.put("wfh",Math.min(min, levels.getDouble("wfh")));
+            levels_xggs.put("wcq",wcq <= 0.0 ? min - 2 * wcq : min);
 
 
             levels_result.put("wfh",levels.getDouble("wfh")-levels_xggs.getDouble("wfh"));
@@ -168,12 +168,12 @@ public class SBdSugarAlgorithmUtils {
         } else if ( hour == 17 ) { // 晚上
 
             Double sq = levels.getDouble("sq");
-
+            Double min = sq;
             if ( sq <= 0 ) jltz = sq * 2;
             else jltz = sq * 2 - 1;
 
-            levels_xggs.put("wch",Math.min(jltz, levels.getDouble("wch")));
-            levels_xggs.put("sq",sq <= 0.0 ? jltz - 2 * sq : jltz);
+            levels_xggs.put("wch",Math.min(min, levels.getDouble("wch")));
+            levels_xggs.put("sq",sq <= 0.0 ? min - 2 * sq : min);
 
             levels_result.put("wch",levels.getDouble("wch")-levels_xggs.getDouble("wch"));
             levels_result.put("sq",sq-levels_xggs.getDouble("sq"));
@@ -200,20 +200,20 @@ public class SBdSugarAlgorithmUtils {
             Double sq = levels.getDouble("sq");
             Double yj = levels.getDouble("yj");
 
-            jltz = Math.min(kf,(1-r)*wfq); jltz = Math.min(jltz,wcq); jltz = Math.min(jltz,sq);
-            jltz = Math.min(jltz,yj);
+            Double min = Math.min(kf,(1-r)*wfq); min = Math.min(min,wcq); min = Math.min(min,sq);
+            min = Math.min(min,yj);
 
-            if ( jltz <= 0.0 ) jltz = jltz/(1-r)*2;
-            else jltz = jltz/(1-r)*2-1;
+            if ( min <= 0.0 ) jltz = min/(1-r)*2;
+            else jltz = min/(1-r)*2-1;
 
-            levels_xggs.put("kf",kf<=0.0?jltz-2*kf:jltz);
-            levels_xggs.put("zch",Math.min(jltz/(1-r),levels.getDouble("zch")));
-            levels_xggs.put("wfq",wfq<=0?jltz/(1-r)-2*wfq:jltz/(1-r));
-            levels_xggs.put("wfh",Math.min(jltz,levels.getDouble("wfh")));
-            levels_xggs.put("wcq", wcq <= 0 ? jltz - 2 * wcq : jltz);
-            levels_xggs.put("wch",Math.min(levels.getDouble("wch"),jltz));
-            levels_xggs.put("sq",sq<=0?jltz-2*sq:jltz);
-            levels_xggs.put("yj",yj<=0?jltz-2*yj:jltz);
+            levels_xggs.put("kf",kf<=0.0?min-2*kf:min);
+            levels_xggs.put("zch",Math.min(min/(1-r),levels.getDouble("zch")));
+            levels_xggs.put("wfq",wfq<=0?min/(1-r)-2*wfq:min/(1-r));
+            levels_xggs.put("wfh",Math.min(min,levels.getDouble("wfh")));
+            levels_xggs.put("wcq", wcq <= 0 ? min - 2 * wcq : min);
+            levels_xggs.put("wch",Math.min(levels.getDouble("wch"),min));
+            levels_xggs.put("sq",sq<=0?min-2*sq:min);
+            levels_xggs.put("yj",yj<=0?min-2*yj:min);
 
         } else if ( hour == 12 ) {
 
@@ -223,20 +223,20 @@ public class SBdSugarAlgorithmUtils {
             Double sq = levels.getDouble("sq");
             Double yj = levels.getDouble("yj");
 
-            jltz = Math.min(kf,wfq); jltz = Math.min(jltz,(1-r)*wcq); jltz = Math.min(jltz,sq);
-            jltz = Math.min(jltz,yj);
+            Double min = Math.min(kf,wfq); min = Math.min(min,(1-r)*wcq); min = Math.min(min,sq);
+            min = Math.min(min,yj);
 
-            if ( jltz <= 0.0 ) jltz = jltz/(1-r)*2;
-            else jltz = jltz/(1-r)*2-1;
+            if ( min <= 0.0 ) jltz = min/(1-r)*2;
+            else jltz = min/(1-r)*2-1;
 
-            levels_xggs.put("kf",kf<=0.0?jltz-2*kf:jltz);
-            levels_xggs.put("zch",Math.min(jltz,levels.getDouble("zch")));
-            levels_xggs.put("wfq",wfq<=0?jltz-2*wfq:jltz);
-            levels_xggs.put("wfh",Math.min(jltz/(1-r),levels.getDouble("wfh")));
-            levels_xggs.put("wcq", wcq <= 0 ? jltz/(1-r) - 2 * wcq : jltz/(1-r));
-            levels_xggs.put("wch",Math.min(levels.getDouble("wch"),jltz));
-            levels_xggs.put("sq",sq<=0?jltz-2*sq:jltz);
-            levels_xggs.put("yj",yj<=0?jltz-2*yj:jltz);
+            levels_xggs.put("kf",kf<=0.0?min-2*kf:min);
+            levels_xggs.put("zch",Math.min(min,levels.getDouble("zch")));
+            levels_xggs.put("wfq",wfq<=0?min-2*wfq:min);
+            levels_xggs.put("wfh",Math.min(min/(1-r),levels.getDouble("wfh")));
+            levels_xggs.put("wcq", wcq <= 0 ? min/(1-r) - 2 * wcq : min/(1-r));
+            levels_xggs.put("wch",Math.min(levels.getDouble("wch"),min));
+            levels_xggs.put("sq",sq<=0?min-2*sq:min);
+            levels_xggs.put("yj",yj<=0?min-2*yj:min);
 
         } else if ( hour == 17 ) {
 
@@ -246,20 +246,20 @@ public class SBdSugarAlgorithmUtils {
             Double sq = levels.getDouble("sq");
             Double yj = levels.getDouble("yj");
 
-            jltz = Math.min(kf,wfq); jltz = Math.min(jltz,wcq); jltz = Math.min(jltz,(1-r)*sq);
-            jltz = Math.min(jltz,yj);
+            Double min = Math.min(kf,wfq); min = Math.min(min,wcq); min = Math.min(min,(1-r)*sq);
+            min = Math.min(min,yj);
 
-            if ( jltz <= 0.0 ) jltz = jltz/(1-r)*2;
-            else jltz = jltz/(1-r)*2-1;
+            if ( min <= 0.0 ) jltz = min/(1-r)*2;
+            else jltz = min/(1-r)*2-1;
 
-            levels_xggs.put("kf",kf<=0.0?jltz-2*kf:jltz);
-            levels_xggs.put("zch",Math.min(jltz,levels.getDouble("zch")));
-            levels_xggs.put("wfq",wfq<=0?jltz-2*wfq:jltz);
-            levels_xggs.put("wfh",Math.min(jltz/(1-r),levels.getDouble("wfh")));
-            levels_xggs.put("wcq", wcq <= 0 ? jltz - 2 * wcq : jltz);
-            levels_xggs.put("wch",Math.min(levels.getDouble("wch"),jltz/(1-r)));
-            levels_xggs.put("sq",sq<=0?jltz/(1-r)-2*sq:jltz/(1-r));
-            levels_xggs.put("yj",yj<=0?jltz-2*yj:jltz);
+            levels_xggs.put("kf",kf<=0.0?min-2*kf:min);
+            levels_xggs.put("zch",Math.min(min,levels.getDouble("zch")));
+            levels_xggs.put("wfq",wfq<=0?min-2*wfq:min);
+            levels_xggs.put("wfh",Math.min(min/(1-r),levels.getDouble("wfh")));
+            levels_xggs.put("wcq", wcq <= 0 ? min - 2 * wcq : min);
+            levels_xggs.put("wch",Math.min(levels.getDouble("wch"),min/(1-r)));
+            levels_xggs.put("sq",sq<=0?min/(1-r)-2*sq:min/(1-r));
+            levels_xggs.put("yj",yj<=0?min-2*yj:min);
 
         }
 
