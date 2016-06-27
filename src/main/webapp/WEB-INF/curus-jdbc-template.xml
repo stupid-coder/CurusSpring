@@ -18,6 +18,7 @@
         <property name="url" value="jdbc:mysql://123.57.227.101:3306/curus?useUnicode=true&amp;characterEncoding=utf-8&amp;autoReconnect=true"/>
         <property name="username" value="root"/>
         <property name="password" value="buaa"/>
+
     </bean>
 
     <bean id="curusDriver" class="com.curus.dao.CurusDriver" scope="prototype">
