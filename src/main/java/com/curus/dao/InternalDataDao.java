@@ -36,8 +36,8 @@ public class InternalDataDao extends BaseDao<InternalData> {
         InternalData internalData = new InternalData();
         internalData.setCate(cate);
         internalData.setData(internal_data.toJSONString());
+        internalData.setPatient_id(patient_id);
         if ( internal_data.containsKey("id") ) internalData.setId(internal_data.getLong("id"));
-        else internalData.setPatient_id(patient_id);
         save(internalData,"id");
     }
 
