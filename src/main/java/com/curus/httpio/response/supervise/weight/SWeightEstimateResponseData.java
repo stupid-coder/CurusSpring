@@ -2,6 +2,7 @@ package com.curus.httpio.response.supervise.weight;
 
 import com.curus.model.record.SuperviseWeightListRecord;
 
+import java.security.Timestamp;
 import java.util.List;
 
 /**
@@ -9,6 +10,7 @@ import java.util.List;
  */
 public class SWeightEstimateResponseData {
 
+    private Long supervise_begin;
     private Long day_wermanagerment;
     private String weight_change;
     private SuperviseWeightListRecord weight_lossposition;
@@ -20,14 +22,23 @@ public class SWeightEstimateResponseData {
     @Override
     public String toString() {
         return "SWeightEstimateResponseData{" +
-                "day_wermanagerment=" + day_wermanagerment +
-                ", weight_change=" + weight_change +
+                "supervise_begin=" + supervise_begin +
+                ", day_wermanagerment=" + day_wermanagerment +
+                ", weight_change='" + weight_change + '\'' +
                 ", weight_lossposition=" + weight_lossposition +
-                ", weight_loss='" + weight_loss + '\'' +
+                ", weight_loss=" + weight_loss +
                 ", BMI=" + BMI +
                 ", BMI_evaluation='" + BMI_evaluation + '\'' +
                 ", we_loss_evaluation='" + we_loss_evaluation + '\'' +
                 '}';
+    }
+
+    public Long getSupervise_begin() {
+        return supervise_begin;
+    }
+
+    public void setSupervise_begin(Long supervise_begin) {
+        this.supervise_begin = supervise_begin;
     }
 
     public Long getDay_wermanagerment() {

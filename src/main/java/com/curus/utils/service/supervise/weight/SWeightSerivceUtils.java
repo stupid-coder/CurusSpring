@@ -47,10 +47,14 @@ public class SWeightSerivceUtils {
             if ( info != null ) {
                 expwtloss = QuotaServiceUtils.getWeightLoss(patientSupervise.getTarget());
                 oldwtloss = QuotaServiceUtils.getWeightLoss(patientSupervise.getCurrent());
-                days = TimeUtils.timestampDiff(TimeUtils.getTimestamp(), patientSupervise.getCreate_time());
+                days = TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp());
             }
 
-            if ( curwtloss.compareTo(oldwtloss) != 0 ) {
+            if ( TimeUtils.getTimestamp().compareTo(patientSupervise.getCreate_time()) > 0 ) {
+                patientSupervise.setLast(CommonConst.FALSE);
+            }
+
+            if ( curwtloss.compareTo(oldwtloss) != 0 || patientSupervise.getLast().compareTo(CommonConst.FALSE) == 0 ) {
                 patientSupervise.setCurrent(QuotaServiceUtils.getWeightLossQuota(curwtloss));
                 driver.patientSuperviseDao.update(patientSupervise, "id");
             }
@@ -312,6 +316,8 @@ public class SWeightSerivceUtils {
         SWeightEstimateResponseData responseData = new SWeightEstimateResponseData();
 
         JSONObject weightLossInfo = GetUpdateWeightSupervise(driver,account_id,request.getPatient_id(), CommonConst.TRUE);
+        PatientSupervise patientSupervise = weightLossInfo.getObject("supervise",PatientSupervise.class);
+        responseData.setSupervise_begin(patientSupervise == null ? TimeUtils.m2t(TimeUtils.getTimestamp().getTime()) : patientSupervise.getLast().compareTo(CommonConst.FALSE) == 0 ? TimeUtils.m2t(TimeUtils.getTimestamp().getTime()) : TimeUtils.m2t(patientSupervise.getCreate_time().getTime()));
         responseData.setDay_wermanagerment(weightLossInfo.getLong("days"));
         responseData.setWeight_loss(weightLossInfo.getDouble("curwtloss"));
         responseData.setWeight_change(WeightLossIndex(responseData.getWeight_loss()));

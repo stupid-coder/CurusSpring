@@ -17,6 +17,7 @@ import com.curus.utils.constant.DrugConst;
 import com.curus.utils.constant.InternalDataConst;
 import com.curus.utils.constant.QuotaConst;
 import com.curus.utils.service.drug.DrugServiceUtils;
+import com.curus.utils.service.supervise.bdpressure.SBdPressureServiseUtils;
 import com.curus.utils.service.supervise.bdsugar.SBdSugarServiceUtils;
 import com.curus.utils.service.supervise.food.SFoodServiceUtils;
 import com.curus.utils.service.supervise.smoke.SSmokeServiseUtils;
@@ -204,6 +205,7 @@ public class QuotaServiceUtils {
             JSONObject responseItem = new JSONObject();
             responseItem.put("measure_date", TimeUtils.date2String(quotaList.get(0).getMeasure_date()));
             responseItem.put("value",quotaBP);
+            responseItem.put("score", SBdPressureServiseUtils.GetBPLevel(quotaBP));
             response.put(QuotaConst.QUOTA_BP,responseItem);
             ret ++;
         }
