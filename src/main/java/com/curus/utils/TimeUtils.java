@@ -34,9 +34,11 @@ public class TimeUtils {
     public static Long dateDiffToNow(Date bdate) {
         return (System.currentTimeMillis()+offset)/t2m(24*3600L) - (bdate.getTime()+offset)/t2m(24*3600L) + 1;
     }
-
     public static String DateFormat(Date date) {
         return date.toString();
         //return DateFormat.getDateInstance().format(date);
+    }
+    public static Double timestampDiffHour(Timestamp bts) {
+        return (getTimestamp().getTime()-bts.getTime())/3600.0/1000.0;
     }
 }

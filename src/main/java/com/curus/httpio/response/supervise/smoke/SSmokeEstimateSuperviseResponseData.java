@@ -10,7 +10,15 @@ public class SSmokeEstimateSuperviseResponseData {
     private String positionindex;
     private String lossposition;
     private String st_goal;
+    private Double no_smoke_hour;
 
+    public Double getNo_smoke_hour() {
+        return no_smoke_hour;
+    }
+
+    public void setNo_smoke_hour(Double no_smoke_hour) {
+        this.no_smoke_hour = no_smoke_hour;
+    }
 
     public String getPositionindex() {
         return positionindex;
@@ -60,6 +68,7 @@ public class SSmokeEstimateSuperviseResponseData {
                 ", positionindex='" + positionindex + '\'' +
                 ", lossposition='" + lossposition + '\'' +
                 ", st_goal='" + st_goal + '\'' +
+                ", no_smoke_hour=" + no_smoke_hour +
                 '}';
     }
 }

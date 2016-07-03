@@ -95,7 +95,7 @@ public class SuperviceController {
 
     @RequestMapping(value="/smoke/estimate",method= RequestMethod.POST, consumes = "application/json")
     public @ResponseBody
-    ResponseBase SmokeAdd(@RequestBody SSmokeEstimateSuperviseRequest request) {
+    ResponseBase SmokeEstimate(@RequestBody SSmokeEstimateSuperviseRequest request) {
         SSmokeEstimateSuperviseService service = new SSmokeEstimateSuperviseService(request,driver);
         return service.process();
     }

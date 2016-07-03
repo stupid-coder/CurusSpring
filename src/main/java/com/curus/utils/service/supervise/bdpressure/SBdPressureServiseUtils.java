@@ -156,6 +156,7 @@ public class SBdPressureServiseUtils {
             }
             bploss = Math.min(Math.round(Math.min(Math.max(sbp-120,0), Math.round(wtloss * 2 * sbp / 160))), 20);
         }
+        bplossResult.put("now",QuotaServiceUtils.getLastWeight(driver, account_id, patient_id));
         bplossResult.put("status", wtloss);
         bplossResult.put("value", bploss);
     }
@@ -165,14 +166,16 @@ public class SBdPressureServiseUtils {
                                         JSONObject bdpressure, JSONObject bplossResult) {
         Long bploss = 0L;
         Long foodinc = 0L;
-
+        Double now = 0.0;
         if ( bdpressure != null ) {
             Double sbp = bdpressure.getDouble("sbloodpre");
-            Long max_inc = Math.round((100-SFoodServiceUtils.CalculateFoodScore(driver,account_id,patient_id))*0.9);
+            now = SFoodServiceUtils.CalculateFoodScore(driver, account_id, patient_id);
+            Long max_inc = Math.round((100-now)*0.9);
             if ( query_food < max_inc.doubleValue() ) foodinc = query_food.longValue();
             else foodinc = max_inc;
             bploss = Math.round(Math.min(Math.max(sbp - 120, 0), Math.min(foodinc / 2 * sbp / 160, 20)));
         }
+        bplossResult.put("now",now);
         bplossResult.put("value",bploss);
         bplossResult.put("status",foodinc);
     }
@@ -192,15 +195,16 @@ public class SBdPressureServiseUtils {
                                             JSONObject bdpressure, JSONObject bplossResult) {
         Long bploss = 0L;
         Long actinc = 0L;
-
+        Double now = 0.0;
         if ( bdpressure != null ) {
             Double sbp = bdpressure.getDouble("sbloodpre");
-            Long max_act = Math.round(Math.min(Math.max((40 - CalculateActivity(driver, account_id, patient_id))*0.8, 0), 20));
+            now =  CalculateActivity(driver, account_id, patient_id);
+            Long max_act = Math.round(Math.min(Math.max((40 - now)*0.8, 0), 20));
             if ( query_act < max_act.doubleValue() )  actinc = query_act.longValue();
             else actinc = max_act;
             bploss = Math.round(Math.min(Math.min(Math.max(sbp - 120, 0), actinc / 4 * sbp / 160), 20));
         }
-
+        bplossResult.put("now",now);
         bplossResult.put("value",bploss);
         bplossResult.put("status",actinc);
     }

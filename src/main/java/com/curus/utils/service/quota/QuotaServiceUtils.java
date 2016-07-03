@@ -96,6 +96,12 @@ public class QuotaServiceUtils {
         Long sub_quota_id = QuotaUtils.getSubQuotaIds(subcate);
         date = date == null ? TimeUtils.getDate() : date.compareTo(TimeUtils.getDate()) > 0 ? TimeUtils.getDate() : date;
 
+        if ( quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0 ) {
+            JSONObject jo = JSONObject.parseObject(quota_str);
+            jo.put("timestamp",TimeUtils.getTimestamp());
+            quota_str = jo.toJSONString();
+        }
+
         int ret = 0;
         if ( quota_id.compareTo(QuotaConst.QUOTA_UNKNOW_ID) == 0 ) {
             return 0;
