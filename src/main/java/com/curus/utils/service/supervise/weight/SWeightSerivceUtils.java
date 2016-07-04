@@ -50,7 +50,7 @@ public class SWeightSerivceUtils {
                 days = TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp());
             }
 
-            if ( TimeUtils.getTimestamp().compareTo(patientSupervise.getCreate_time()) > 0 ) {
+            if ( TimeUtils.getTimestamp().compareTo(patientSupervise.getEnd_date()) > 0 ) {
                 patientSupervise.setLast(CommonConst.FALSE);
             }
 
@@ -196,6 +196,7 @@ public class SWeightSerivceUtils {
             driver.patientSuperviseDao.update(patientSupervise,"id");
             WeightLossList(driver,JSONObject.parseObject(patientSupervise.getCurrent()).getDouble("weight_loss"),0.0);
         }
+
         JSONObject jo = new JSONObject();
         patientSupervise.setCreate_time(TimeUtils.getTimestamp());
         patientSupervise.setEnd_date(TimeUtils.getDate(30L));

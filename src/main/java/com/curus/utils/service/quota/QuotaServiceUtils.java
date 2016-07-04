@@ -193,7 +193,7 @@ public class QuotaServiceUtils {
             JSONObject responseItem = new JSONObject();
             responseItem.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
             responseItem.put("value", quotaWeight);
-            double height = getLastHeight(driver,account_id,patient_id);
+            double height = getLastHeight(driver,account_id,patient_id)/100.0;
             double bmi = SWeightSerivceUtils.BMI(height,quotaWeight.getDouble("weight"));
             if ( bmi <= 18.5 ) responseItem.put("suggestion","偏廋");
             else if ( bmi <= 22.9 ) responseItem.put("suggestion","正常");
