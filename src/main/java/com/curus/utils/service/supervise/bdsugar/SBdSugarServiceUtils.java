@@ -1201,33 +1201,39 @@ public class SBdSugarServiceUtils {
                                                         Long patient_id,
                                                         String patientName,
                                                         Long last_change_days,
-                                                        JSONObject moniter_interval,
+                                                        JSONObject monitor_interval,
+                                                        JSONObject monitor_date,
                                                         List<String> suggestions) {
 
         JSONObject values_in_ref_duration = new JSONObject();
         QuotaServiceUtils.listQuotas(driver,Math.min(7L,last_change_days),account_id,patient_id,QuotaConst.QUOTA_BS,null,values_in_ref_duration);
         JSONObject values_lastest = driver.quotaDao.selectLastestBSQuota(account_id,patient_id);
 
+        for ( String sub_cate : values_lastest.keySet()) {
+            java.sql.Date measure_date = values_lastest.getJSONObject(sub_cate).getSqlDate("measure_date");
+            monitor_date.put(sub_cate,TimeUtils.date2Long(TimeUtils.getDate(measure_date, monitor_interval.getInteger(sub_cate))));
+        }
+
         JSONObject reference_value_degree = new JSONObject();
         reference_value_degree.put("values",new JSONObject());
         reference_value_degree.put("degrees",new JSONObject());
 
         {
-            if ( ! GetRefBSAndDegreeKF (patientName,moniter_interval.getLong("kf"),
+            if ( ! GetRefBSAndDegreeKF (patientName,monitor_interval.getLong("kf"),
                     values_lastest,values_in_ref_duration,suggestions,reference_value_degree) )
                 return reference_value_degree;
         }
 
         if ( suggestions != null ) {
-            GetRefBSAndDegreeH(patientName, moniter_interval.getLong("zch"), "zch", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeQ(patientName, moniter_interval.getLong("wfq"), "wfq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeH(patientName, moniter_interval.getLong("wfh"), "wfh", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeQ(patientName, moniter_interval.getLong("wcq"), "wcq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeH(patientName, moniter_interval.getLong("wch"), "wch", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeQ(patientName, moniter_interval.getLong("sq"), "sq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeQ(patientName, moniter_interval.getLong("yj"), "yj", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeH(patientName, moniter_interval.getLong("ydq"), "ydq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
-            GetRefBSAndDegreeQ(patientName, moniter_interval.getLong("ydh"), "ydh", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeH(patientName, monitor_interval.getLong("zch"), "zch", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeQ(patientName, monitor_interval.getLong("wfq"), "wfq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeH(patientName, monitor_interval.getLong("wfh"), "wfh", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeQ(patientName, monitor_interval.getLong("wcq"), "wcq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeH(patientName, monitor_interval.getLong("wch"), "wch", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeQ(patientName, monitor_interval.getLong("sq"), "sq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeQ(patientName, monitor_interval.getLong("yj"), "yj", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeH(patientName, monitor_interval.getLong("ydq"), "ydq", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
+            GetRefBSAndDegreeQ(patientName, monitor_interval.getLong("ydh"), "ydh", values_lastest, values_in_ref_duration, suggestions, reference_value_degree);
 
 
             List<Quota> a1cQuotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, QuotaConst.QUOTA_A1C_ID, 2L);
@@ -1251,27 +1257,30 @@ public class SBdSugarServiceUtils {
         Map<String,PatientUseDrug> patientUseDrugMap = new HashMap<String, PatientUseDrug>();
         DrugServiceUtils.GetUseDrugAndDrugComp(driver,patient_id,drugInfoMap,drugCompRelationMap,drugCompMap,patientUseDrugMap);
 
-        JSONObject moniter_interval = GetMonitorInterval(driver,account_id,patient_id,DrugServiceUtils.CompType(null,drugCompRelationMap,drugCompMap,"胰岛素").size()!=0);
+
+        JSONObject monitor_interval = GetMonitorInterval(driver,account_id,patient_id,DrugServiceUtils.CompType(null,drugCompRelationMap,drugCompMap,"胰岛素").size()!=0);
 
         String patient_name = PatientServiceUtils.GetPatientName(driver,patient_id);
 
         Long lastChanges = GetQuotaChangeDays(driver,account_id,patient_id);
 
         List<String> reference_suggestion = new ArrayList<String>();
-        JSONObject reference_value_degree = GetReferenceValueAndDegree(driver,account_id,patient_id,patient_name,lastChanges,moniter_interval,reference_suggestion);
+        JSONObject monitor_date = new JSONObject();
+        JSONObject reference_value_degree = GetReferenceValueAndDegree(driver,account_id,patient_id,patient_name,lastChanges,monitor_interval,monitor_date,reference_suggestion);
 
 
         Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
         Double PA =  SWeightSerivceUtils.GetActEnergy(driver, account_id, patient_id);
         List<String> level_suggestion = null;
         if ( reference_value_degree.getJSONObject("values").size()>0 ) {
-            level_suggestion = GetRefLevelSuggestion(patient_name, reference_value_degree, (BMI >= 24 || PA < 50), patientUseDrugMap, drugInfoMap, drugCompRelationMap, drugCompMap, moniter_interval);
-            UpdateMoniterInterval(driver, patient_id, moniter_interval);
+            level_suggestion = GetRefLevelSuggestion(patient_name, reference_value_degree, (BMI >= 24 || PA < 50), patientUseDrugMap, drugInfoMap, drugCompRelationMap, drugCompMap, monitor_interval);
+            UpdateMoniterInterval(driver, patient_id, monitor_interval);
         }
         if ( level_suggestion != null )
             responseData.put("level_suggestion",level_suggestion);
         responseData.put("reference_suggestion",reference_suggestion);
 
+        responseData.put("monitor_date",monitor_date);
         return responseData;
     }
 
@@ -1298,7 +1307,7 @@ public class SBdSugarServiceUtils {
         if ( moniter_interval == null )
             moniter_interval = GetMonitorInterval(driver,account_id,patient_id,(DrugServiceUtils.CompType(driver,patient_id,"胰岛素")!=null));
         Long change_lastday = GetQuotaChangeDays(driver,account_id,patient_id);
-        JSONObject reference = GetReferenceValueAndDegree(driver,account_id,patient_id,null,change_lastday,moniter_interval,null);
+        JSONObject reference = GetReferenceValueAndDegree(driver,account_id,patient_id,null,change_lastday,moniter_interval,null,null);
         Double ref_sugar = reference.getJSONObject("values").containsKey("kf") == true ?
                 reference.getJSONObject("values").getDouble("kf") : null;
 

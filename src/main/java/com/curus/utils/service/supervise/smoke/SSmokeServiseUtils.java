@@ -50,7 +50,7 @@ public class SSmokeServiseUtils {
 
     public static Double dayMoney(String record) {
         JSONObject jo = JSONObject.parseObject(record);
-        return jo.getDouble("price") * jo.getLong("number") / 20.0;
+        return jo.getDouble("price") * jo.getLong("smoke") / 20.0;
     }
 
     public static Double calculateMoney(String init, List<Quota> quotaList, Date begin, Date end) {
@@ -148,7 +148,6 @@ public class SSmokeServiseUtils {
     public static Double recovery(CurusDriver driver, Long account_id, Long patient_id)
     {
         List<Quota> quotaList = driver.quotaDao.selectLastestQuota(account_id,patient_id, QuotaConst.QUOTA_SMOKE_ID,1L);
-        JSONObject ret = new JSONObject();
         Double no_smoke_hours = 0.0;
         if ( quotaList.size() != 0 ) {
             Quota quota = quotaList.get(0);
@@ -185,6 +184,7 @@ public class SSmokeServiseUtils {
         responseData.setDays(days);
         responseData.setSt_goal(st_goal);
         responseData.setSv_money(sv_money);
+        responseData.setNo_smoke_hour(recovery(driver,account_id,patient_id));
         return responseData;
     }
 

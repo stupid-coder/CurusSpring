@@ -51,7 +51,7 @@ public class QuotaDao extends BaseDao<Quota> {
                 rowMapper,account_id,patient_id,quota_id);
     }
 
-        public JSONObject selectLastestBSQuota(Long account_id, Long patient_id) {
+    public JSONObject selectLastestBSQuota(Long account_id, Long patient_id) {
         JSONObject bsquota = new JSONObject();
         RowMapper<Quota> rowMapper = BeanPropertyRowMapper.newInstance(Quota.class);
         for ( Long sub_cat = 1L; sub_cat <=  QuotaConst.SUB_QUOTA_IDS.size(); ++ sub_cat) {

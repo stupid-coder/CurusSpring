@@ -2,6 +2,8 @@ package com.curus.utils;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+//import java.util.Date;
+//import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
 /**
@@ -27,6 +29,13 @@ public class TimeUtils {
     public static Long date2Long(Date date) { return m2t(date.getTime()); }
     public static Long timestampDiff(Timestamp bts, Timestamp ets) {
         return (ets.getTime()+offset)/t2m(24*3600L)-(bts.getTime()+offset)/t2m(24*3600L) + 1;
+    }
+    public static Date getDate(Date now, Integer days)
+    {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(now);
+        calendar.add(calendar.DATE,days);
+        return new Date(calendar.getTime().getTime());
     }
     public static Long dateDiff(Date bdate, Date edate) {
         return (edate.getTime()+offset)/t2m(24*3600L) - (bdate.getTime()+offset)/t2m(24*3600L) + 1;

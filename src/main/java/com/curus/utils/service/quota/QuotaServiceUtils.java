@@ -305,7 +305,8 @@ public class QuotaServiceUtils {
         PatientSupervise patientSupervise = driver.patientSuperviseDao.selectLastSupervise(account_id, patient_id, QuotaConst.QUOTA_SMOKE_ID);
         if (patientSupervise != null) {
             JSONObject responseItem = new JSONObject();
-            responseItem.put("score",TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp()));
+            responseItem.put("target",patientSupervise.getTarget());
+            responseItem.put("days",TimeUtils.timestampDiff(patientSupervise.getCreate_time(),TimeUtils.getTimestamp()));
             response.put(QuotaConst.QUOTA_SMOKE,responseItem);
             ret ++;
         }
