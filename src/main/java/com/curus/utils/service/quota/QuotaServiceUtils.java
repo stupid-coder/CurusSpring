@@ -147,13 +147,13 @@ public class QuotaServiceUtils {
                 response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
                 response.put("value", diet);
             }
-        } else if (quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0) {
-            quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, 1L);
-            if (quotaList != null && quotaList.size() > 0) {
-                JSONObject smoke = JSONObject.parseObject(quotaList.get(0).getRecord());
-                response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
-                response.put("value", smoke);
-            }
+        //} else if (quota_id.compareTo(QuotaConst.QUOTA_SMOKE_ID) == 0) {
+        //    quotaList = driver.quotaDao.selectLastestQuota(account_id, patient_id, quota_id, 1L);
+        //    if (quotaList != null && quotaList.size() > 0) {
+        //        JSONObject smoke = JSONObject.parseObject(quotaList.get(0).getRecord());
+        //        response.put("measure_date", TimeUtils.date2Long(quotaList.get(0).getMeasure_date()));
+        //        response.put("value", smoke);
+        //    }
         } else if ( quota_id.compareTo(QuotaConst.QUOTA_BS_ID) == 0 ) {
             quotaList = driver.quotaDao.selectByMeasureDateLastDays(account_id, patient_id, quota_id, subcate_id, days);
             for ( Quota q : quotaList ) {
