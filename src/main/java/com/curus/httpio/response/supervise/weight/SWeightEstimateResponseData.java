@@ -14,6 +14,7 @@ public class SWeightEstimateResponseData {
     private Long day_wermanagerment;
     private String weight_change;
     private SuperviseWeightListRecord weight_lossposition;
+    private Double target;
     private Double weight_loss;
     private Double BMI;
     private String BMI_evaluation;
@@ -26,11 +27,20 @@ public class SWeightEstimateResponseData {
                 ", day_wermanagerment=" + day_wermanagerment +
                 ", weight_change='" + weight_change + '\'' +
                 ", weight_lossposition=" + weight_lossposition +
+                ", target='" + target + '\'' +
                 ", weight_loss=" + weight_loss +
                 ", BMI=" + BMI +
                 ", BMI_evaluation='" + BMI_evaluation + '\'' +
                 ", we_loss_evaluation='" + we_loss_evaluation + '\'' +
                 '}';
+    }
+
+    public Double getTarget() {
+        return target;
+    }
+
+    public void setTarget(Double target) {
+        this.target = target;
     }
 
     public Long getSupervise_begin() {
