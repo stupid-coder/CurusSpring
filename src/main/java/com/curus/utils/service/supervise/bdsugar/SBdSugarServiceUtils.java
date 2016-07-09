@@ -13,6 +13,7 @@ import com.curus.utils.service.drug.DrugServiceUtils;
 import com.curus.utils.service.patient.PatientServiceUtils;
 import com.curus.utils.service.quota.QuotaServiceUtils;
 import com.curus.utils.service.supervise.weight.SWeightSerivceUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 
@@ -220,7 +221,7 @@ public class SBdSugarServiceUtils {
         return suggestion;
     }
 
-    public static String GetRefLevelSuggestionContextWihtoutDrug(String patientName,
+    public static Map<String,String> GetRefLevelSuggestionContextWihtoutDrug(String patientName,
                                                                  String moment,
                                                                  Double value,
                                                                  Double level,
@@ -229,37 +230,47 @@ public class SBdSugarServiceUtils {
                                                                  List<String> low_degrees,
                                                                  JSONObject moniter_interval) {
         String context = GetMomentContext(moment);
-        String suggestion = null;
+        Map<String,String> suggestion = new HashMap<String, String>();
         Long default_interval = moniter_interval.getLong(moment);
         if ( degree >= 1.0 ) {
             if ( moment.compareTo("kf") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelithoutDrugFK(patientName, value, level, BMI_PA_NO, moniter_interval);
+                suggestion.put("title", "空腹血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelithoutDrugFK(patientName, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("zch") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","早餐前血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("wfq") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","午餐前血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("wfh") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithValueWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","午餐后血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithValueWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("wcq") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","晚餐前血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("wch") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithValueWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","晚餐后血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithValueWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("sq")  == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","晚餐后血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("yj") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrugYJ(patientName, moment, value, level, BMI_PA_NO, moniter_interval);
+                suggestion.put("title","夜间血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrugYJ(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("ydh") == 0 ) {
-                suggestion = GetRefLevelSuggestionWithLevelWithoutDrug(patientName,moment,value,level,BMI_PA_NO,moniter_interval);
+                suggestion.put("title","运动后血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             }
         } else {
             if ( moment.compareTo("ydq") != 0 && moment.compareTo("ydh") != 0)
                 low_degrees.add(context);
         }
         moniter_interval.put(moment,default_interval);
+
         return suggestion;
     }
 
-    public static List<String> GetRefLevelSuggestion(String patientName,
+    public static List<Map<String,String>> GetRefLevelSuggestion(String patientName,
                                                      JSONObject reference,
                                                      boolean BMI_PA_NO,
                                                      Map<String,PatientUseDrug> patientUseDrugMap,
@@ -267,22 +278,27 @@ public class SBdSugarServiceUtils {
                                                      Map<String,Double> compRelateMap,
                                                      Map<String,DrugComp> drugCompMap,
                                                      JSONObject moniter_intervals) {
-        List<String> suggestions = new ArrayList<String>();
+        List<Map<String,String>> suggestions = new ArrayList<Map<String, String>>();
         JSONObject values = reference.getJSONObject("values");
         JSONObject degrees = reference.getJSONObject("degrees");
         List<String> low_degrees = new ArrayList<String>();
 
         if ( drugInfoMap == null || drugInfoMap.size() == 0 ) { // no drug
-            for ( String key : QuotaConst.SUB_QUOTA_IDS.keySet() ) {
+            for ( String key : QuotaConst.SUB_QUOTA_ORDER ) {
                 if ( values.containsKey(key) ) {
                     Double value = values.getDouble(key);
                     Double level = BdSugarLevel(key, value);
                     Double degree = degrees.getDouble(key);
-                    String suggestion = GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals);
+                    Map<String,String> suggestion = GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals);
                     if (suggestion != null) suggestions.add(suggestion);
                 }
             }
-            suggestions.add(String.format("以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
+            if ( !low_degrees.isEmpty() ) {
+                Map<String, String> low_suggestion = new HashMap<String, String>();
+                low_suggestion.put("title","参考度低");
+                low_suggestion.put("suggestion", String.format("以上未对可参考度较低的时点血糖%s进行评价。", low_degrees));
+                suggestions.add(low_suggestion);
+            }
 
         } else { // withdrug
 
@@ -297,175 +313,192 @@ public class SBdSugarServiceUtils {
                 if ( key.compareTo("a1c") != 0 ) levels.put(key,BdSugarLevel(key, values.getDouble(key)));
             }
 
+            Map<String,String> title_suggestions = new HashMap<String, String>();
+            List<String> sub_suggestions = new ArrayList<String>();
 
             if ( TYPE_YDS.size() == 0 ) {
+
                 if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") <= -1.0 ) {
 
-                    suggestions.add("出现了早晨空腹低血糖。");
+                    sub_suggestions.add("出现了早晨空腹低血糖。");
                     if ( AIM_JT.size() != 0 )
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"kf",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", 17, 24, 3, "磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_GLNL,drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", 4, "格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", 17, 24, 3, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"kf",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 17, 24, 3, "磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_GLNL,drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 4, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 17, 24, 3, "格列奈类").size() != 0);
 
                     if ( !special_drug )
-                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发早晨低血糖的用药。",patientName));
+                        sub_suggestions.add(String.format("系统未发现%s正在使用特别易于诱发早晨低血糖的用药。",patientName));
                     else
-                        suggestions.add("需要注意，出现低血糖还可能与其他降糖药的使用（尤其当成分不明时）、晚餐过少或过早、早餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                        sub_suggestions.add("需要注意，出现低血糖还可能与其他降糖药的使用（尤其当成分不明时）、晚餐过少或过早、早餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("kf",1L);
                 }
 
                 if ( degrees.getDouble("wfq") >= 1.0 && levels.getDouble("wfq") <= -1.0 ) {
-                    suggestions.add("出现了午餐前低血糖。");
+                    sub_suggestions.add("出现了午餐前低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "wfq", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "wfq", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wfq", 6, 8, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wfq", 6, 8, 2, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",6,8,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",6,8,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wfq",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wfq", 6, 8, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wfq", 6, 8, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wfq",4,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wfq",6,8,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wfq",6,8,2,"格列奈类").size() !=0);
 
 
                     if ( !special_drug )
-                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发午餐前低血糖的用药。",patientName));
-                    else suggestions.add("需要注意，出现午餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃早餐或早餐过早、午餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                        sub_suggestions.add(String.format("系统未发现%s正在使用特别易于诱发午餐前低血糖的用药。",patientName));
+                    else sub_suggestions.add("需要注意，出现午餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃早餐或早餐过早、午餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("wfq",1L);
                 }
 
                 if ( degrees.getDouble("wcq") >= 1.0 && levels.getDouble("wcq") <= -1.0 ) {
-                    suggestions.add("出现了晚餐前低血糖。");
+                    sub_suggestions.add("出现了晚餐前低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "wcq", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "wcq", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wcq", 6, 8, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wcq", 11, 13, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wcq", 11, 13, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 6, 8, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 11, 13, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 11, 13, 2, "磺脲类").size() !=0);
 
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",6,8,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",11,13,3,"格列奈类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",11,13,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",4,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",6,8,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",11,13,3,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",11,13,2,"格列奈类").size() !=0);
 
 
                     if ( !special_drug )
-                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发晚餐前低血糖的用药。",patientName));
-                    else suggestions.add("需要注意，出现晚餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                        sub_suggestions.add(String.format("系统未发现%s正在使用特别易于诱发晚餐前低血糖的用药。",patientName));
+                    else sub_suggestions.add("需要注意，出现晚餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("wcq",1L);
                 }
 
                 if ( degrees.getDouble("sq") >= 1.0 && levels.getDouble("sq") <= -1.0 ) {
-                    suggestions.add("出现了睡前低血糖。");
+                    sub_suggestions.add("出现了睡前低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "sq", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "sq", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "sq", 11,13, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "sq", 17,19, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "sq", 17,19, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 11,13, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 17,19, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 17,19, 2, "磺脲类").size() !=0);
 
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",11,13,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",17,19,3,"格列奈类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",17,19,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",4,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",11,13,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",17,19,3,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",17,19,2,"格列奈类").size() !=0);
 
 
                     if ( !special_drug )
-                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发睡前低血糖的用药。",patientName));
-                    else suggestions.add("需要注意，出现睡前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                        sub_suggestions.add(String.format("系统未发现%s正在使用特别易于诱发睡前低血糖的用药。",patientName));
+                    else sub_suggestions.add("需要注意，出现睡前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("sq",1L);
                 }
 
                 if ( degrees.getDouble("yj") >= 1.0 && levels.getDouble("yj") <= -1.0 ) {
-                    suggestions.add("出现了夜间低血糖。");
+                    sub_suggestions.add("出现了夜间低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "yj", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "yj", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"yj",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "yj", 17,19, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "yj", 22,22, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "yj", 22,22, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"yj",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "yj", 17,19, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "yj", 22,22, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "yj", 22,22, 2, "磺脲类").size() !=0);
 
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",17,19,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",22,22,3,"格列奈类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",22,22,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",4,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",17,19,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",22,22,3,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",22,22,2,"格列奈类").size() !=0);
 
 
                     if ( !special_drug )
-                        suggestions.add(String.format("系统未发现%s正在使用特别易于诱发夜间低血糖的用药。",patientName));
-                    else suggestions.add("需要注意，出现夜间低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                        sub_suggestions.add(String.format("系统未发现%s正在使用特别易于诱发夜间低血糖的用药。",patientName));
+                    else sub_suggestions.add("需要注意，出现夜间低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("yj",1L);
                 }
 
 
                 if ( degrees.getDouble("ydh") >= 1.0 && levels.getDouble("ydh") <= -1.0 ) {
-                    suggestions.add("出现了运动后低血糖。");
+                    sub_suggestions.add("出现了运动后低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "ydh", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "ydh", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "ydh", null, "磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "ydh", null, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "ydh", null, "磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "ydh", null, "格列奈类").size() != 0);
 
 
                     if ( !special_drug )
-                        suggestions.add(String.format("系统未发现 %s 正在使用特别易于诱发运动后低血糖的用药。可尝试将运动后低血糖记录为下一餐的餐前低血糖，系统会为您提供进一步药物调整建议。如下午运动后低血糖可记录为晚餐前低血糖。",patientName));
-                    else suggestions.add("需要注意，出现运动后低血糖还可能与其他降糖药的使用（尤其当成分不明时）、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                        sub_suggestions.add(String.format("系统未发现 %s 正在使用特别易于诱发运动后低血糖的用药。可尝试将运动后低血糖记录为下一餐的餐前低血糖，系统会为您提供进一步药物调整建议。如下午运动后低血糖可记录为晚餐前低血糖。",patientName));
+                    else sub_suggestions.add("需要注意，出现运动后低血糖还可能与其他降糖药的使用（尤其当成分不明时）、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("ydh",1L);
                 }
 
+                if ( !sub_suggestions.isEmpty() ) {
+                    title_suggestions.put("title","低血糖建议");
+                    title_suggestions.put("suggestion", StringUtils.join(sub_suggestions,""));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                    sub_suggestions.clear();
+                }
 
                 if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") > -1.0 && levels.getDouble("kf") < 1.0 ) {
-                    suggestions.add("早晨空腹血糖控制达标。");
+                    sub_suggestions.add("早晨空腹血糖控制达标。");
                     moniter_intervals.put("kf",Math.min(moniter_intervals.getLong("kf")*4,365L));
                 }
                 if ( degrees.getDouble("wfq") >= 1.0 && levels.getDouble("wfq") == 0.0 ) {
-                    suggestions.add("午餐前血糖控制不错。");
+                    sub_suggestions.add("午餐前血糖控制不错。");
                     moniter_intervals.put("wfq",Math.min(moniter_intervals.getLong("wfq")*4,365L));
                 }
                 if ( degrees.getDouble("wcq") >= 1.0 && levels.getDouble("wcq") == 0.0 ) {
-                    suggestions.add("晚餐前血糖控制不错。");
+                    sub_suggestions.add("晚餐前血糖控制不错。");
                     moniter_intervals.put("wcq",Math.min(moniter_intervals.getLong("wcq")*4,365L));
                 }
                 if ( degrees.getDouble("sq") >= 1.0 && levels.getDouble("sq") == 0.0 ) {
-                    suggestions.add("睡前血糖控制不错。");
+                    sub_suggestions.add("睡前血糖控制不错。");
                     moniter_intervals.put("sq",Math.min(moniter_intervals.getLong("sq")*4,365L));
                 }
                 if ( degrees.getDouble("yj") >= 1.0 && levels.getDouble("yj") == 0.0 ) {
-                    suggestions.add("夜间血糖不低。");
+                    sub_suggestions.add("夜间血糖不低。");
                     moniter_intervals.put("yj",Math.min(moniter_intervals.getLong("yj")*4,365L));
                 }
                 if ( degrees.getDouble("ydh") >= 1.0 && levels.getDouble("ydh") >= 0.0 ) {
-                    suggestions.add("运动后血糖不低，患者可根据运动后血糖水平调整运动前饮食及运动时间和强度，户外运动时必须随身携带含糖小食品和糖尿病救助卡。");
+                    sub_suggestions.add("运动后血糖不低，患者可根据运动后血糖水平调整运动前饮食及运动时间和强度，户外运动时必须随身携带含糖小食品和糖尿病救助卡。");
                     moniter_intervals.put("ydh",Math.min(moniter_intervals.getLong("ydh")*4,365L));
                 }
 
+                if ( !sub_suggestions.isEmpty() ) {
+                    title_suggestions.put("title","正常血糖建议");
+                    title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                    sub_suggestions.clear();
+                }
 
                 String moment = "kf";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 7L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -473,19 +506,19 @@ public class SBdSugarServiceUtils {
                 moment = "wfq";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 7L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -493,19 +526,19 @@ public class SBdSugarServiceUtils {
                 moment = "wcq";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 7L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -513,19 +546,19 @@ public class SBdSugarServiceUtils {
                 moment = "sq";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 7L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -533,17 +566,17 @@ public class SBdSugarServiceUtils {
                 moment = "zch";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
                         moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
                     } else if (levels.getDouble(moment) == 0.8) {
-                        suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
+                        sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
                         moniter_intervals.put(moment,15L);
                     } else if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖，如早餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖，如早餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
                         moniter_intervals.put(moment,7L);
                     }
                 }
@@ -551,17 +584,17 @@ public class SBdSugarServiceUtils {
                 moment = "wfh";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
                         moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
                     } else if (levels.getDouble(moment) == 0.8) {
-                        suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
+                        sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
                         moniter_intervals.put(moment,15L);
                     } else if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
                         moniter_intervals.put(moment,7L);
                     }
                 }
@@ -569,19 +602,27 @@ public class SBdSugarServiceUtils {
                 moment = "wch";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
                         moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
                     } else if (levels.getDouble(moment) == 0.8) {
-                        suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
+                        sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
                         moniter_intervals.put(moment,15L);
                     } else if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
                         moniter_intervals.put(moment,7L);
                     }
+                }
+
+                if ( !sub_suggestions.isEmpty() ) {
+                    title_suggestions.put("title","高血糖建议");
+                    title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                    sub_suggestions.clear();
                 }
 
                 if ( degrees.getDouble("kf") < 1.0 ) low_degrees.add(GetMomentContext("kf"));
@@ -593,159 +634,176 @@ public class SBdSugarServiceUtils {
                 if ( degrees.getDouble("sq") < 1.0 ) low_degrees.add(GetMomentContext("sq"));
                 if ( degrees.getDouble("yj") < 1.0 ) low_degrees.add(GetMomentContext("yj"));
                 if ( degrees.getDouble("ydh") < 1.0 ) low_degrees.add(GetMomentContext("ydh"));
-                if (degrees.size() != 0 )
-                    suggestions.add(String.format("注意：以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
-
-                JSONObject algorithm = SBdSugarAlgorithmUtils.SugarDrugsAlgorithm(patientUseDrugMap, drugInfoMap, compRelateMap, drugCompMap, levels);
-                SBdSugarAlgorithmUtils.GetSuggestion(patientName,algorithm,patientUseDrugMap,drugInfoMap,suggestions);
+                if (degrees.size() != 0 ) {
+                    title_suggestions.put("title","参考度低");
+                    title_suggestions.put("suggestion",String.format("注意：以上未对可参考度较低的时点血糖%s进行评价。", low_degrees));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                }
 
             } else {
 
                 if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") <= -1.0 ) {
-                    suggestions.add("出现了早晨空腹低血糖。");
+                    sub_suggestions.add("出现了早晨空腹低血糖。");
                     if ( AIM_JT.size() != 0 )
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"kf",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", 17, 24, 3, "磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_GLNL,drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", 4, "格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "kf", 17, 24, 3, "格列奈类").size() != 0);
-                    suggestions.add("需要注意，出现低血糖还可能与其他降糖药的使用（尤其当成分不明时）、晚餐过少或过早、早餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 4, "磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 17, 24, 3, "磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_GLNL, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 4, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "kf", 17, 24, 3, "格列奈类").size() != 0);
+                    sub_suggestions.add("需要注意，出现低血糖还可能与其他降糖药的使用（尤其当成分不明时）、晚餐过少或过早、早餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("kf",1L);
                 }
 
                 if ( degrees.getDouble("wfq") >= 1.0 && levels.getDouble("wfq") <= -1.0 ) {
-                    suggestions.add("出现了午餐前低血糖。");
+                    sub_suggestions.add("出现了午餐前低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "wfq", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "wfq", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wfq", 6, 8, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wfq", 6, 8, 2, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",6,8,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wfq",6,8,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wfq", 4, "磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wfq", 6, 8, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wfq", 6, 8, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wfq", 4, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wfq",6,8,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wfq",6,8,2,"格列奈类").size() !=0);
 
-                    suggestions.add("需要注意，出现午餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃早餐或早餐过早、午餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    sub_suggestions.add("需要注意，出现午餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃早餐或早餐过早、午餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("wfq",1L);
                 }
 
                 if ( degrees.getDouble("wcq") >= 1.0 && levels.getDouble("wcq") <= -1.0 ) {
-                    suggestions.add("出现了晚餐前低血糖。");
+                    sub_suggestions.add("出现了晚餐前低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "wcq", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "wcq", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wcq", 6, 8, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wcq", 11, 13, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "wcq", 11, 13, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 6, 8, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 11, 13, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 11, 13, 2, "磺脲类").size() !=0);
 
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",6,8,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",11,13,3,"格列奈类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"wcq",11,13,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 4, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 6, 8, 3, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"wcq",11,13,3,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "wcq", 11, 13, 2, "格列奈类").size() !=0);
 
-                    suggestions.add("需要注意，出现晚餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    sub_suggestions.add("需要注意，出现晚餐前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("wcq",1L);
                 }
 
                 if ( degrees.getDouble("sq") >= 1.0 && levels.getDouble("sq") <= -1.0 ) {
-                    suggestions.add("出现了睡前低血糖。");
+                    sub_suggestions.add("出现了睡前低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "sq", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "sq", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "sq", 11,13, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "sq", 17,19, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "sq", 17,19, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 11,13, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 17,19, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 17,19, 2, "磺脲类").size() !=0);
 
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",11,13,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",17,19,3,"格列奈类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",17,19,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",4,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",11,13,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",17,19,3,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "sq", 17, 19, 2, "格列奈类").size() !=0);
 
-                    suggestions.add("需要注意，出现睡前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
-                    moniter_intervals.put("sq",1L);
+                    sub_suggestions.add("需要注意，出现睡前低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    moniter_intervals.put("sq", 1L);
                 }
 
                 if ( degrees.getDouble("yj") >= 1.0 && levels.getDouble("yj") <= -1.0 ) {
-                    suggestions.add("出现了夜间低血糖。");
+                    sub_suggestions.add("出现了夜间低血糖。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "yj", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "yj", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"yj",4,"磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "yj", 17,19, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "yj", 22,22, 3, "磺脲类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "yj", 22,22, 2, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"yj",4,"磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "yj", 17,19, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "yj", 22,22, 3, "磺脲类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "yj", 22,22, 2, "磺脲类").size() !=0);
 
-                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",4,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",17,19,3,"格列奈类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",22,22,3,"格列奈类").size() !=0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,suggestions,patientName,"sq",22,22,2,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckProcessType(LONG_HYL,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",4,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",17,19,3,"格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",22,22,3,"格列奈类").size() !=0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckTimeProcessType(null,drugInfoMap,compRelateMap,drugCompMap,patientUseDrugMap,sub_suggestions,patientName,"sq",22,22,2,"格列奈类").size() !=0);
 
-                    suggestions.add("需要注意，出现夜间低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
-                    moniter_intervals.put("yj",1L);
+                    sub_suggestions.add("需要注意，出现夜间低血糖还可能与其他降糖药的使用（尤其当成分不明时）、不吃午餐或午餐过早、晚餐过晚、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    moniter_intervals.put("yj", 1L);
                 }
 
                 if ( degrees.getDouble("ydh") >= 1.0 && levels.getDouble("ydh") <= -1.0 ) {
-                    suggestions.add("出现了运动后低血糖，糖尿病患者很容易发生。可通过缩短运动时间，降低运动量，或调整药物治疗方案来解决。运动时随身携带含糖小食品和糖尿病救助卡。");
+                    sub_suggestions.add("出现了运动后低血糖，糖尿病患者很容易发生。可通过缩短运动时间，降低运动量，或调整药物治疗方案来解决。运动时随身携带含糖小食品和糖尿病救助卡。");
 
                     if (AIM_JT.size() != 0)
-                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, suggestions, patientName, "ydh", null, "α-糖苷酶抑制剂");
+                        DrugServiceUtils.CheckType(TYPE_TGMYZS, drugInfoMap, compRelateMap, drugCompMap,patientUseDrugMap, sub_suggestions, patientName, "ydh", null, "α-糖苷酶抑制剂");
                     boolean special_drug = false;
-                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "ydh", null, "磺脲类").size() != 0);
-                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, suggestions, patientName, "ydh", null, "格列奈类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "ydh", null, "磺脲类").size() != 0);
+                    special_drug = (special_drug || DrugServiceUtils.CheckType(null, drugInfoMap, compRelateMap, drugCompMap, patientUseDrugMap, sub_suggestions, patientName, "ydh", null, "格列奈类").size() != 0);
 
-                    suggestions.add("需要注意，出现运动后低血糖还可能与其他降糖药的使用（尤其当成分不明时）、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
+                    sub_suggestions.add("需要注意，出现运动后低血糖还可能与其他降糖药的使用（尤其当成分不明时）、饮茶或咖啡及心理变化等因素有关，须尽量避免上述诱因。");
                     moniter_intervals.put("ydh",1L);
                 }
 
+                if ( !sub_suggestions.isEmpty() ) {
+                    title_suggestions.put("title","低血糖建议");
+                    title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                    sub_suggestions.clear();
+                }
+
                 if ( degrees.getDouble("kf") >= 1.0 && levels.getDouble("kf") > -1.0 && levels.getDouble("kf") < 1.0 ) {
-                    suggestions.add("早晨空腹血糖控制达标。");
+                    sub_suggestions.add("早晨空腹血糖控制达标。");
                     moniter_intervals.put("kf",Math.min(moniter_intervals.getLong("kf")*2,365L));
                 }
                 if ( degrees.getDouble("wfq") >= 1.0 && levels.getDouble("wfq") == 0.0 ) {
-                    suggestions.add("午餐前血糖控制不错。");
+                    sub_suggestions.add("午餐前血糖控制不错。");
                     moniter_intervals.put("wfq",Math.min(moniter_intervals.getLong("wfq")*2,365L));
                 }
                 if ( degrees.getDouble("wcq") >= 1.0 && levels.getDouble("wcq") == 0.0 ) {
-                    suggestions.add("晚餐前血糖控制不错。");
+                    sub_suggestions.add("晚餐前血糖控制不错。");
                     moniter_intervals.put("wcq",Math.min(moniter_intervals.getLong("wcq")*2,365L));
                 }
                 if ( degrees.getDouble("sq") >= 1.0 && levels.getDouble("sq") == 0.0 ) {
-                    suggestions.add("睡前血糖控制不错。");
+                    sub_suggestions.add("睡前血糖控制不错。");
                     moniter_intervals.put("sq",Math.min(moniter_intervals.getLong("sq")*2,365L));
                 }
                 if ( degrees.getDouble("yj") >= 1.0 && levels.getDouble("yj") == 0.0 ) {
-                    suggestions.add("夜间血糖不低。");
-                    moniter_intervals.put("yj",Math.min(moniter_intervals.getLong("yj")*2,365L));
+                    sub_suggestions.add("夜间血糖不低。");
+                    moniter_intervals.put("yj", Math.min(moniter_intervals.getLong("yj") * 2, 365L));
                 }
                 if ( degrees.getDouble("ydh") >= 1.0 && levels.getDouble("ydh") >= 0.0 ) {
-                    suggestions.add("运动后血糖不低，患者可根据运动后血糖水平调整运动前饮食及运动时间和强度，户外运动时必须随身携带含糖小食品和糖尿病救助卡。");
-                    moniter_intervals.put("ydh",Math.min(moniter_intervals.getLong("ydh")*2,365L));
+                    sub_suggestions.add("运动后血糖不低，患者可根据运动后血糖水平调整运动前饮食及运动时间和强度，户外运动时必须随身携带含糖小食品和糖尿病救助卡。");
+                    moniter_intervals.put("ydh", Math.min(moniter_intervals.getLong("ydh") * 2, 365L));
+                }
+
+                if ( !sub_suggestions.isEmpty() ) {
+                    title_suggestions.put("title","正常血糖建议");
+                    title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                    sub_suggestions.clear();
                 }
 
 
                 String moment = "kf";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0 ) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 3L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -753,19 +811,19 @@ public class SBdSugarServiceUtils {
                 moment = "wfq";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 3L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -773,19 +831,19 @@ public class SBdSugarServiceUtils {
                 moment = "wcq";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 3L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -793,19 +851,19 @@ public class SBdSugarServiceUtils {
                 moment = "sq";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制未达标！血糖长期得不到控制会导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度，努力使血糖恢复正常！低能量摄入（少吃同时结合低能量食物的摄入）和高能量消耗（主要通过有氧运动）的降糖作用均不亚于降糖药物。对超重肥胖者建议利用“体重管理”工具帮助少吃多动，双管齐下；对体重正常或偏瘦者可利用“身体活动管理”维持正常的糖代谢水平。",
                                     patientName));
-                        else suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
+                        else sub_suggestions.add(String.format("目前 %s 正保持较好的体重及身体活动，通过强化饮食控制与运动恐怕很难使血糖控制达标，建议咨询医生调整药物治疗方案。",
                                 patientName));
                         moniter_intervals.put(moment, 3L);
                     } else if (levels.getDouble(moment) > 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差！血糖长期得不到控制很易导致心脑眼肾等脏器并发症。",GetMomentContext(moment)));
                         if (BMI_PA_NO)
-                            suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 在减重、控制饮食或增加身体活动等方面仍存在较大的降糖空间，强烈建议加大非药物干预力度。", patientName));
                         else
-                            suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
+                            sub_suggestions.add(String.format("目前 %s 通过饮食控制及加强身体活动已没有太大的降糖空间，建议尽快咨询医生调整药物治疗方案，并按提示监测各时点血糖变化。", patientName));
                         moniter_intervals.put(moment, 1L);
                     }
                 }
@@ -813,17 +871,17 @@ public class SBdSugarServiceUtils {
                 moment = "zch";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
                         moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
                     } else if (levels.getDouble(moment) == 0.8) {
-                        suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
+                        sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
                         moniter_intervals.put(moment,7L);
                     } else if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖，如早餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖，如早餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
                         moniter_intervals.put(moment,3L);
                     }
                 }
@@ -831,17 +889,17 @@ public class SBdSugarServiceUtils {
                 moment = "wfh";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
                         moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
                     } else if (levels.getDouble(moment) == 0.8) {
-                        suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
+                        sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
                         moniter_intervals.put(moment,7L);
                     } else if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
                         moniter_intervals.put(moment,3L);
                     }
                 }
@@ -849,19 +907,28 @@ public class SBdSugarServiceUtils {
                 moment = "wch";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
                     if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
                         moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
                     } else if (levels.getDouble(moment) == 0.8) {
-                        suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
+                        sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
                         moniter_intervals.put(moment,7L);
                     } else if (levels.getDouble(moment) == 1.0) {
-                        suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
-                        if ( BMI_PA_NO ) suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
-                        else suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
+                        sub_suggestions.add(String.format("%s血糖控制很差。",GetMomentContext(moment)));
+                        if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖，如午餐后2小时血糖持续升高或强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
+                        else sub_suggestions.add(String.format("单纯非药物干预似乎很难使%s的血糖达标。",GetMomentContext(moment)));
                         moniter_intervals.put(moment,3L);
                     }
+                }
+
+
+                if ( !sub_suggestions.isEmpty() ) {
+                    title_suggestions.put("title","高血糖建议");
+                    title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                    sub_suggestions.clear();
                 }
 
                 if ( degrees.getDouble("kf") < 1.0 ) low_degrees.add(GetMomentContext("kf"));
@@ -873,13 +940,22 @@ public class SBdSugarServiceUtils {
                 if ( degrees.getDouble("sq") < 1.0 ) low_degrees.add(GetMomentContext("sq"));
                 if ( degrees.getDouble("yj") < 1.0 ) low_degrees.add(GetMomentContext("yj"));
                 if ( degrees.getDouble("ydh") < 1.0 ) low_degrees.add(GetMomentContext("ydh"));
-                if (degrees.size() != 0 )
-                    suggestions.add(String.format("注意：以上未对可参考度较低的时点血糖%s进行评价。",low_degrees));
+                if (degrees.size() != 0 ) {
+                    title_suggestions.put("title","参考度低");
+                    title_suggestions.put("suggestion",String.format("注意：以上未对可参考度较低的时点血糖%s进行评价。", low_degrees));
+                    suggestions.add(title_suggestions);
+                    title_suggestions = new HashMap<String, String>();
+                }
+            }
 
+            JSONObject algorithm = SBdSugarAlgorithmUtils.SugarDrugsAlgorithm(patientUseDrugMap, drugInfoMap, compRelateMap, drugCompMap, levels);
+            SBdSugarAlgorithmUtils.GetSuggestion(patientName,algorithm,patientUseDrugMap,drugInfoMap,sub_suggestions);
 
-                JSONObject algorithm = SBdSugarAlgorithmUtils.SugarDrugsAlgorithm(patientUseDrugMap, drugInfoMap, compRelateMap, drugCompMap, levels);
-                SBdSugarAlgorithmUtils.GetSuggestion(patientName,algorithm,patientUseDrugMap,drugInfoMap,suggestions);
-
+            if ( !sub_suggestions.isEmpty() ) {
+                title_suggestions.put("title","调药建议");
+                title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
+                suggestions.add(title_suggestions);
+                sub_suggestions.clear();
             }
 
         }
@@ -916,19 +992,20 @@ public class SBdSugarServiceUtils {
                                               Long monitor_interval,
                                               JSONObject values_lastest,
                                               JSONObject values_in_ref_duration,
-                                              List<String> suggestions,
+                                              Map<String,String> suggestions,
                                               JSONObject references) {
         String moment = "kf";
         String moment_context = GetMomentContext(moment);
         String suggestion = null;
         Double ref_value;
         Double ref_degree;
+
         if ( !values_in_ref_duration.containsKey(moment) ) { // ref_duration 内无记录
             if ( values_lastest.containsKey(moment) ) {
                 Quota quota = values_lastest.getObject(moment,Quota.class);
                 if ( TimeUtils.dateDiffToNow(quota.getMeasure_date()) > monitor_interval ) {
                     suggestion = String.format("患者%s天内一直没有记录%s血糖变化，系统无法进行评估！",monitor_interval,moment_context);
-                    if (suggestions!=null)  suggestions.add(suggestion);
+                    if (suggestions!=null)  suggestions.put(moment, suggestion);
                     return false;
                 } else {
                     ref_value = JSONObject.parseObject(quota.getRecord()).getDouble("sugarvalue");
@@ -945,7 +1022,7 @@ public class SBdSugarServiceUtils {
                 }
             } else {
                 if ( suggestions != null )
-                 suggestions.add(String.format("患者%d天内一直没有记录%s血糖变化，系统无法进行评估！", monitor_interval, moment_context));
+                 suggestions.put(moment, String.format("患者%d天内一直没有记录%s血糖变化，系统无法进行评估！", monitor_interval, moment_context));
                 return false;
             }
         } else if ( values_in_ref_duration.getJSONArray(moment).size() == 1 ) { // ref_duration 1 条记录
@@ -982,10 +1059,11 @@ public class SBdSugarServiceUtils {
         }
 
         if ( suggestions != null )
-            suggestions.add(suggestion);
+            suggestions.put(moment, suggestion);
 
         references.getJSONObject("values").put(moment,ref_value);
         references.getJSONObject("degrees").put(moment,ref_degree);
+
         return true;
     }
 
@@ -994,7 +1072,7 @@ public class SBdSugarServiceUtils {
                                              String key,
                                              JSONObject lastest_quotas,
                                              JSONObject lastest_in_duration,
-                                             List<String> suggestions,
+                                             Map<String,String> suggestions,
                                              JSONObject references)
     {
         String moment_context = GetMomentContext(key);
@@ -1053,7 +1131,7 @@ public class SBdSugarServiceUtils {
         references.getJSONObject("degrees").put(key,ref_degree);
 
         if ( suggestion != null )
-            suggestions.add(suggestion);
+            suggestions.put(key, suggestion);
 
         return true;
     }
@@ -1063,7 +1141,7 @@ public class SBdSugarServiceUtils {
                                              String key,
                                              JSONObject lastest_quotas,
                                              JSONObject lastest_in_duration,
-                                             List<String> suggestions,
+                                             Map<String,String> suggestions,
                                              JSONObject references)
     {
 
@@ -1141,7 +1219,7 @@ public class SBdSugarServiceUtils {
         references.getJSONObject("values").put(key,ref_value);
         references.getJSONObject("degrees").put(key,ref_degree);
         if ( suggestion != null )
-            suggestions.add(suggestion);
+            suggestions.put(key, suggestion);
         return true;
     }
 
@@ -1153,7 +1231,7 @@ public class SBdSugarServiceUtils {
         else return "很低";
     }
 
-    public static void GetReferenceValueAndDegreeA1C(List<Quota> a1cQuotaList, Long change_days, List<String> suggestions, JSONObject reference) {
+    public static void GetReferenceValueAndDegreeA1C(List<Quota> a1cQuotaList, Long change_days, Map<String,String> suggestions, JSONObject reference) {
 
         Double ref_a1c_degree = null;
         Double ref_a1c = null;
@@ -1191,7 +1269,7 @@ public class SBdSugarServiceUtils {
         reference.getJSONObject("values").put("a1c",ref_a1c);
         reference.getJSONObject("degrees").put("a1c",ref_a1c_degree);
 
-        if (suggestion != null)  suggestions.add(suggestion);
+        if (suggestion != null)  suggestions.put("a1c", suggestion);
     }
 
 
@@ -1203,7 +1281,7 @@ public class SBdSugarServiceUtils {
                                                         Long last_change_days,
                                                         JSONObject monitor_interval,
                                                         JSONObject monitor_date,
-                                                        List<String> suggestions) {
+                                                        Map<String,String> suggestions) {
 
         JSONObject values_in_ref_duration = new JSONObject();
         QuotaServiceUtils.listQuotas(driver,Math.min(7L,last_change_days),account_id,patient_id,QuotaConst.QUOTA_BS,null,values_in_ref_duration);
@@ -1240,7 +1318,7 @@ public class SBdSugarServiceUtils {
             //ALC
             GetReferenceValueAndDegreeA1C(a1cQuotaList, last_change_days, suggestions, reference_value_degree);
 
-            suggestions.add("其他时点的血糖，在没有有效的结果之前暂按正常或参考空腹血糖水平处理。");
+            suggestions.put("last", "其他时点的血糖，在没有有效的结果之前暂按正常或参考空腹血糖水平处理。");
         }
 
         return  reference_value_degree;
@@ -1264,14 +1342,14 @@ public class SBdSugarServiceUtils {
 
         Long lastChanges = GetQuotaChangeDays(driver,account_id,patient_id);
 
-        List<String> reference_suggestion = new ArrayList<String>();
+        Map<String,String> reference_suggestion = new HashMap<String, String>();
         JSONObject monitor_date = new JSONObject();
         JSONObject reference_value_degree = GetReferenceValueAndDegree(driver,account_id,patient_id,patient_name,lastChanges,monitor_interval,monitor_date,reference_suggestion);
 
 
         Double BMI = SWeightSerivceUtils.GetBMI(driver,account_id,patient_id);
         Double PA =  SWeightSerivceUtils.GetActEnergy(driver, account_id, patient_id);
-        List<String> level_suggestion = null;
+        List<Map<String,String>> level_suggestion = null;
         if ( reference_value_degree.getJSONObject("values").size()>0 ) {
             level_suggestion = GetRefLevelSuggestion(patient_name, reference_value_degree, (BMI >= 24 || PA < 50), patientUseDrugMap, drugInfoMap, drugCompRelationMap, drugCompMap, monitor_interval);
             UpdateMoniterInterval(driver, patient_id, monitor_interval);

@@ -45,6 +45,8 @@ public class QuotaConst {
         put(QUOTA_A1C, QUOTA_A1C_ID);
     }};
 
+    static public String[] SUB_QUOTA_ORDER = {"kf","zch","wfq","wfh","wcq","wch","sq","yj","ydq","ydh"};
+
     static public Map<String, Long> SUB_QUOTA_IDS = new HashMap<String, Long>() {{
         put("kf",  1L);
         put("zch", 2L);
