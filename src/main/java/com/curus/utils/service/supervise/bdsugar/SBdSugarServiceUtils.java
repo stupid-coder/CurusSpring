@@ -1286,10 +1286,11 @@ public class SBdSugarServiceUtils {
         JSONObject values_in_ref_duration = new JSONObject();
         QuotaServiceUtils.listQuotas(driver,Math.min(7L,last_change_days),account_id,patient_id,QuotaConst.QUOTA_BS,null,values_in_ref_duration);
         JSONObject values_lastest = driver.quotaDao.selectLastestBSQuota(account_id,patient_id);
-
-        for ( String sub_cate : values_lastest.keySet()) {
-            java.sql.Date measure_date = values_lastest.getJSONObject(sub_cate).getSqlDate("measure_date");
-            monitor_date.put(sub_cate,TimeUtils.date2Long(TimeUtils.getDate(measure_date, monitor_interval.getInteger(sub_cate))));
+        if ( monitor_date != null ) {
+            for (String sub_cate : values_lastest.keySet()) {
+                java.sql.Date measure_date = values_lastest.getJSONObject(sub_cate).getSqlDate("measure_date");
+                monitor_date.put(sub_cate, TimeUtils.date2Long(TimeUtils.getDate(measure_date, monitor_interval.getInteger(sub_cate))));
+            }
         }
 
         JSONObject reference_value_degree = new JSONObject();
