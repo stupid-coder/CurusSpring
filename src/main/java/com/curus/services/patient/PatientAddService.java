@@ -78,7 +78,7 @@ public class PatientAddService {
             logger.warn(LogUtils.Msg(errorData,request));
         } else {
             patient = PatientServiceUtils.select(driver,request.getId_number());
-            if ( (errorData = CodeValidate.validateAddPatientCode(request.getToken(),
+            if ( false && (errorData = CodeValidate.validateAddPatientCode(request.getToken(),
                     patient == null ? request.getPhone() : patient.getPhone(),
                     request.getCode())) != null ) {
                 logger.warn(LogUtils.Msg(errorData, request, patient));
@@ -90,7 +90,7 @@ public class PatientAddService {
                 } else {
                     accountPatient = driver.accountPatientDao.select(TypeUtils.getWhereHashMap("account_id", account.getId(),
                             "patient_id", patient.getId()));
-                    if (accountPatient.getIs_super_validate().compareTo(CommonConst.TRUE) == 0 ) {
+                    if (accountPatient!=null && accountPatient.getIs_super_validate().compareTo(CommonConst.TRUE) == 0 ) {
                         patient.setName(request.getName());
                         patient.setGender(Integer.parseInt(request.getGender()));
                         patient.setBirth(new Date(Long.parseLong(request.getBirth())));
