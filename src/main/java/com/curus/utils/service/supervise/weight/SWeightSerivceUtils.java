@@ -159,7 +159,7 @@ public class SWeightSerivceUtils {
         old_energy = CalculateActivityEnergy(JSONObject.parseObject(quota.getRecord()));
         request_energy = CalculateActivityEnergy(JSONObject.parseObject(request.getActivity()));
 
-        if ( request_energy.compareTo(20.0) <= 0 ) responseData.setEvaluation("注意:减重过多地依赖饮食控制,对健康不利, 建议适当增加运动量。但减重计划可行!可以发布计划,系统会给予必要提醒和评估，也会得到其他管理者的帮助和督促。");
+        if ( request_energy.compareTo(20.0) <= 0 ) responseData.setEvaluation("注意:减重过多地依赖饮食控制,对健康不利, 建议适当增加运动量。但减重计划可行!可以发布计划,系统会给予进一步的提醒和评估，也会得到其他管理者的帮助和督促。");
         return (request_energy - old_energy) * 0.525 / 7 * currentWeight / 6.5 / 1000 / 0.35 * 2;
     }
     public static Double Pretest(CurusDriver driver, Long account_id,  SWeightPretestRequest request, SWeightPretestResponseData responseData) {
