@@ -88,7 +88,7 @@ public class SBdSugarAlgorithmUtils {
                     Integer pointId = point.getInteger("pointId");
                     Integer value = point.getInteger("value");
                     if (value == null) continue;
-                    if ( hour == null || Math.abs(pointId - hour) < 2) {
+                    if ( hour == null || pointId == hour) {
                         if (point.getInteger("value") > 1) {
                             ok = false;
                             suggestions.add(String.format("%s使用的%s从现在的%d%s减少1%s至%d%s。",
@@ -111,7 +111,7 @@ public class SBdSugarAlgorithmUtils {
                                 QuotaUtils.getSubQuotaTimeName(hour),unit,drugInfo.getProduct_name()));
                         continue;
                     }
-                    if ( hour == null || Math.abs(pointId-hour) < 2 ) {
+                    if ( hour == null || pointId==hour ) {
                         if ( value+1 <= drugInfo.getMax_once() ) {
                             ok = false;
                             suggestions.add(String.format("%s使用的%s从现在的%d %s增加1%s至%d %s。",
@@ -643,7 +643,7 @@ public class SBdSugarAlgorithmUtils {
         for ( String drug_id : drugsInfo.keySet() ) {
             JSONObject drug_info = drugsInfo.getJSONObject(drug_id);
             String[] processes = drug_info.getString("process").split("#");
-            String[] dosis = drug_info.getString("dosis").split("#");
+            String[] dosis = drug_info.getString("dosis")==null?null:drug_info.getString("dosis").split("#");
             if ( processes.length == 1 ) {
                 // 单药
                 if (processes[0].compareTo("1") == 0) { // rapid

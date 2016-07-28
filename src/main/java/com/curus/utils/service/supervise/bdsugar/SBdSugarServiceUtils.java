@@ -295,7 +295,7 @@ public class SBdSugarServiceUtils {
             }
             if ( !low_degrees.isEmpty() ) {
                 Map<String, String> low_suggestion = new HashMap<String, String>();
-                low_suggestion.put("title","参考度低");
+                low_suggestion.put("title","参考度低的血糖");
                 low_suggestion.put("suggestion", String.format("以上未对可参考度较低的时点血糖%s进行评价。", low_degrees));
                 suggestions.add(low_suggestion);
             }
@@ -475,8 +475,23 @@ public class SBdSugarServiceUtils {
                     moniter_intervals.put("ydh",Math.min(moniter_intervals.getLong("ydh")*4,365L));
                 }
 
+                if ( degrees.getDouble("zch") >= 1.0 && levels.getDouble("zch") >= 0.0 && levels.getDouble("zch") <= 0.5) {
+                    sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext("zch")));
+                    moniter_intervals.put("zch", Math.min(365L, 4 * moniter_intervals.getLong("zch")));
+                }
+
+                if ( degrees.getDouble("wfh") >= 1.0 && levels.getDouble("wfh") >= 0.0 && levels.getDouble("wfh") <= 0.5) {
+                    sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext("wfh")));
+                    moniter_intervals.put("wfh", Math.min(365L, 4 * moniter_intervals.getLong("wfh")));
+                }
+
+                if ( degrees.getDouble("wch") >= 1.0 && levels.getDouble("wch") >= 0.0 && levels.getDouble("wch") <= 0.5) {
+                    sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext("wch")));
+                    moniter_intervals.put("wch", Math.min(365L, 4 * moniter_intervals.getLong("wch")));
+                }
+
                 if ( !sub_suggestions.isEmpty() ) {
-                    title_suggestions.put("title","正常血糖建议");
+                    title_suggestions.put("title","达标血糖建议");
                     title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
                     suggestions.add(title_suggestions);
                     title_suggestions = new HashMap<String, String>();
@@ -565,10 +580,7 @@ public class SBdSugarServiceUtils {
 
                 moment = "zch";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
-                    if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
-                        moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
-                    } else if (levels.getDouble(moment) == 0.8) {
+                    if (levels.getDouble(moment) == 0.8) {
                         sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
                         if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少早餐的能量摄入，增加早餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
                         else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
@@ -583,10 +595,7 @@ public class SBdSugarServiceUtils {
 
                 moment = "wfh";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
-                    if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
-                        moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
-                    } else if (levels.getDouble(moment) == 0.8) {
+                    if (levels.getDouble(moment) == 0.8) {
                         sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
                         if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少午餐的能量摄入，增加午餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
                         else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
@@ -601,10 +610,7 @@ public class SBdSugarServiceUtils {
 
                 moment = "wch";
                 if ( degrees.getDouble(moment) >= 1.0 ) {
-                    if (levels.getDouble(moment) >= 0.0 && levels.getDouble(moment) <= 0.5) {
-                        sub_suggestions.add(String.format("%s血糖控制达标。", GetMomentContext(moment)));
-                        moniter_intervals.put(moment, Math.min(365L, 4 * moniter_intervals.getLong(moment)));
-                    } else if (levels.getDouble(moment) == 0.8) {
+                    if (levels.getDouble(moment) == 0.8) {
                         sub_suggestions.add(String.format("%s血糖控制不佳。",GetMomentContext(moment)));
                         if ( BMI_PA_NO ) sub_suggestions.add("减重、控制饮食或增加身体活动仍有较大的降糖空间，建议借助本系统提供的“体重管理”和“身体活动管理”功能模块进行非药物干预。尤其注意适当减少晚餐的能量摄入，增加晚餐后的运动量，并按提示监测各时点血糖。如果强化饮食控制和运动管理有困难，建议在医生指导下调整药物治疗方案。");
                         else sub_suggestions.add("已有较大非药物干预力度，单纯强化饮食运动管理恐怕很难使血糖控制达标。");
@@ -618,7 +624,7 @@ public class SBdSugarServiceUtils {
                 }
 
                 if ( !sub_suggestions.isEmpty() ) {
-                    title_suggestions.put("title","高血糖建议");
+                    title_suggestions.put("title","不达标血糖建议");
                     title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
                     suggestions.add(title_suggestions);
                     title_suggestions = new HashMap<String, String>();
@@ -635,7 +641,7 @@ public class SBdSugarServiceUtils {
                 if ( degrees.getDouble("yj") < 1.0 ) low_degrees.add(GetMomentContext("yj"));
                 if ( degrees.getDouble("ydh") < 1.0 ) low_degrees.add(GetMomentContext("ydh"));
                 if (degrees.size() != 0 ) {
-                    title_suggestions.put("title","参考度低");
+                    title_suggestions.put("title","参考度低的血糖");
                     title_suggestions.put("suggestion",String.format("注意：以上未对可参考度较低的时点血糖%s进行评价。", low_degrees));
                     suggestions.add(title_suggestions);
                     title_suggestions = new HashMap<String, String>();
@@ -924,7 +930,7 @@ public class SBdSugarServiceUtils {
 
 
                 if ( !sub_suggestions.isEmpty() ) {
-                    title_suggestions.put("title","高血糖建议");
+                    title_suggestions.put("title","不达标血糖建议");
                     title_suggestions.put("suggestion",StringUtils.join(sub_suggestions,""));
                     suggestions.add(title_suggestions);
                     title_suggestions = new HashMap<String, String>();
@@ -941,7 +947,7 @@ public class SBdSugarServiceUtils {
                 if ( degrees.getDouble("yj") < 1.0 ) low_degrees.add(GetMomentContext("yj"));
                 if ( degrees.getDouble("ydh") < 1.0 ) low_degrees.add(GetMomentContext("ydh"));
                 if (degrees.size() != 0 ) {
-                    title_suggestions.put("title","参考度低");
+                    title_suggestions.put("title","参考度低的血糖");
                     title_suggestions.put("suggestion",String.format("注意：以上未对可参考度较低的时点血糖%s进行评价。", low_degrees));
                     suggestions.add(title_suggestions);
                     title_suggestions = new HashMap<String, String>();
@@ -949,7 +955,7 @@ public class SBdSugarServiceUtils {
             }
 
             JSONObject algorithm = SBdSugarAlgorithmUtils.SugarDrugsAlgorithm(patientUseDrugMap, drugInfoMap, compRelateMap, drugCompMap, levels);
-            SBdSugarAlgorithmUtils.GetSuggestion(patientName,algorithm,patientUseDrugMap,drugInfoMap,sub_suggestions);
+            SBdSugarAlgorithmUtils.GetSuggestion(patientName, algorithm, patientUseDrugMap, drugInfoMap, sub_suggestions);
 
             if ( !sub_suggestions.isEmpty() ) {
                 title_suggestions.put("title","调药建议");
@@ -1406,10 +1412,15 @@ public class SBdSugarServiceUtils {
             activity_decrease = Math.max(0.0,60.0-(now_activity==null?40.0:now_activity));
         }
         JSONArray losses = new JSONArray();
+        Double total_loss = 0.0;
         // diet
         {
             JSONObject item = new JSONObject();
-            Double diet_sugar_loss = Math.min(diet_decrease * 10, Math.max(ref_sugar - 6.1, 0.0));
+            Double diet_energy = SWeightSerivceUtils.GetDietEnergy(driver,account_id,patient_id);
+            Double diet_decrease_prop = 0.0;
+            if ( diet_energy != 0.0 ) diet_decrease_prop = diet_decrease / diet_energy;
+            Double diet_sugar_loss = Math.min(diet_decrease_prop * 10, Math.max(ref_sugar - 6.1, 0.0));
+            total_loss += diet_sugar_loss;
             item.put("diet_sugar_loss", diet_sugar_loss);
             item.put("diet_loss", diet_decrease);
             losses.add(item);
@@ -1418,9 +1429,16 @@ public class SBdSugarServiceUtils {
         {
             JSONObject item = new JSONObject();
             Double act_sugar_loss = Math.min(activity_decrease / 20, Math.max(ref_sugar - 6.1, 0.0));
+            total_loss += act_sugar_loss;
             item.put("act_sugar_loss", act_sugar_loss);
             item.put("act_loss", activity_decrease);
             losses.add(item);
+        }
+        // total
+        {
+            JSONObject total = new JSONObject();
+            total.put("total_loss",Math.min(total_loss,Math.max(ref_sugar-6.1,0)));
+            losses.add(total);
         }
         responseData.put("sugar_losses",losses);
         responseData.put("monitor_duration", BdSugarConst.SugarMonitorConfig);

@@ -96,7 +96,7 @@ public class SBdPressureServiseUtils {
         desc = Math.min(desc,20);
         nonm.put("itemlist",itemlist);
         nonm.put("suggestion",String.format("通过强化非药物干预，估计%s收缩压还可降低%dmmHg。非药物干预即可辅助药治疗效果，减少降压药物使用及其副作用，同时还对血糖、血脂、心肺功能、形体和精神面貌大有益处！身体活动必须循序渐进，在耐受和适应的基础上可逐渐达到每周≥40千步当量的目标。#%s如果生活方式已经很健康或因特殊原因很难改变生活方式，血压控制又不达标，则必须辅以或调整药物治疗。对经常大量饮酒者，控制饮酒频度和饮酒量，也有助于血压控制。上述健康生活方式的降压作用因人而异，仅供参考。"
-                ,patient.getName(),desc.intValue(), sbp/dbp >= 1.6 ? String.format("适度增加身体活动强度也是控制血压的有效手段，但%s目前血压较高，建议在加大活动强度前先把血压控制到160/100以下。#",patient.getName()):""));
+                ,patient.getName(),Math.min(desc.intValue(),sbp-120), sbp/dbp >= 1.6 ? String.format("适度增加身体活动强度也是控制血压的有效手段，但%s目前血压较高，建议在加大活动强度前先把血压控制到160/100以下。#",patient.getName()):""));
         return nonm.toJSONString();
     }
 

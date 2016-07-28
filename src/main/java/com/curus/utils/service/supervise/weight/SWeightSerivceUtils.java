@@ -229,6 +229,13 @@ public class SWeightSerivceUtils {
         return SWeightSerivceUtils.BMI(QuotaServiceUtils.getLastHeight(driver,account_id,patient_id)/100.0,
                 QuotaServiceUtils.getLastWeight(driver,account_id,patient_id));
     }
+
+    public static Double GetDietEnergy(CurusDriver driver, Long account_id, Long patient_id) {
+        List<Quota> diet_quota = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_DIET_ID,1L);
+        if ( diet_quota != null && diet_quota.size() != 0 )
+            return CalculateDietEnergy(JSONObject.parseObject(diet_quota.get(0).getRecord()));
+        else return 0.0;
+    }
     public static Double GetActEnergy(CurusDriver driver, Long account_id, Long patient_id) {
         List<Quota> activity_quota = driver.quotaDao.selectLastestQuota(account_id,patient_id,QuotaConst.QUOTA_ACT_ID,1L);
         if ( activity_quota != null && activity_quota.size() == 1 ) {
