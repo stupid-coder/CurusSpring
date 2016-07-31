@@ -237,8 +237,8 @@ public class SBdSugarServiceUtils {
                 suggestion.put("title", "空腹血糖建议");
                 suggestion.put("suggestion", GetRefLevelSuggestionWithLevelithoutDrugFK(patientName, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("zch") == 0 ) {
-                suggestion.put("title","早餐前血糖建议");
-                suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
+                suggestion.put("title","早餐后血糖建议");
+                suggestion.put("suggestion", GetRefLevelSuggestionWithValueWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("wfq") == 0 ) {
                 suggestion.put("title","午餐前血糖建议");
                 suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
@@ -252,7 +252,7 @@ public class SBdSugarServiceUtils {
                 suggestion.put("title","晚餐后血糖建议");
                 suggestion.put("suggestion", GetRefLevelSuggestionWithValueWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("sq")  == 0 ) {
-                suggestion.put("title","晚餐后血糖建议");
+                suggestion.put("title","睡前血糖建议");
                 suggestion.put("suggestion", GetRefLevelSuggestionWithLevelWithoutDrug(patientName, moment, value, level, BMI_PA_NO, moniter_interval));
             } else if ( moment.compareTo("yj") == 0 ) {
                 suggestion.put("title","夜间血糖建议");
@@ -290,7 +290,7 @@ public class SBdSugarServiceUtils {
                     Double level = BdSugarLevel(key, value);
                     Double degree = degrees.getDouble(key);
                     Map<String,String> suggestion = GetRefLevelSuggestionContextWihtoutDrug(patientName, key, value, level, degree, BMI_PA_NO, low_degrees, moniter_intervals);
-                    if (suggestion != null) suggestions.add(suggestion);
+                    if (suggestion != null && suggestion.size() != 0 ) suggestions.add(suggestion);
                 }
             }
             if ( !low_degrees.isEmpty() ) {

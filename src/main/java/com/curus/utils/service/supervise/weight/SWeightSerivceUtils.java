@@ -260,15 +260,14 @@ public class SWeightSerivceUtils {
 
         JSONObject policy = JSONObject.parseObject(patientSupervise.getPolicy());
 
-        plan_diet = CalculateDietEnergy(policy.getJSONObject("diet"));
-        plan_act = CalculateActivityEnergy(policy.getJSONObject("activity"));
         Double real_diet = CalculateAvgDietEnergyByDays(driver,account_id,patient_id,days);
         Double real_act = CalculateAvgActivityEnergyByDays(driver,account_id,patient_id,days);
 
-        if ( real_diet == null ) real_diet = plan_diet;
-        if ( real_act == null ) real_act = plan_act;
+        plan_diet = policy.containsKey("diet")?CalculateDietEnergy(policy.getJSONObject("diet")):real_diet;
+        plan_act = policy.containsKey("activity")?CalculateActivityEnergy(policy.getJSONObject("activity")):real_act;
 
-        Double diet_act_percent = 0.5 * plan_act / real_act + 0.5 * plan_diet / real_diet;
+        Double diet_act_percent = real_act==null||plan_act==null||real_act==0.0?1.0:( 0.5 * plan_act / real_act) +
+                (real_diet==null||plan_diet==null||plan_diet==0.0?1.0:0.5 * plan_diet / real_diet);
         if ( real_act == 0.0 && real_diet == 0.0 ) diet_act_percent = 1.0;
 
         if ( losspercent >= 0.0 && losspercent < 0.7 )
