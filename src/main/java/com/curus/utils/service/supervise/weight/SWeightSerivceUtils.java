@@ -326,7 +326,7 @@ public class SWeightSerivceUtils {
         PatientSupervise patientSupervise = weightLossInfo.getObject("supervise",PatientSupervise.class);
         responseData.setSupervise_begin(patientSupervise == null ? TimeUtils.m2t(TimeUtils.getTimestamp().getTime()) : patientSupervise.getLast().compareTo(CommonConst.FALSE) == 0 ? TimeUtils.m2t(TimeUtils.getTimestamp().getTime()) : TimeUtils.m2t(patientSupervise.getCreate_time().getTime()));
         responseData.setDay_wermanagerment(weightLossInfo.getLong("days"));
-        responseData.setTarget(JSONObject.parseObject(patientSupervise.getTarget()).getDouble("weight_loss"));
+        responseData.setTarget(patientSupervise == null ? 0.0 : JSONObject.parseObject(patientSupervise.getTarget()).getDouble("weight_loss"));
         responseData.setWeight_loss(weightLossInfo.getDouble("curwtloss"));
         responseData.setWeight_change(WeightLossIndex(responseData.getWeight_loss()));
         responseData.setWeight_lossposition(WeightLossList(driver, weightLossInfo.getDouble("oldwtloss"), weightLossInfo.getDouble("curwtloss")));
