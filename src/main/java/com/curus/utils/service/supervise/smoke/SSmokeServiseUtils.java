@@ -50,7 +50,7 @@ public class SSmokeServiseUtils {
 
     public static Double dayMoney(String record) {
         JSONObject jo = JSONObject.parseObject(record);
-        return jo.getDouble("price") * jo.getLong("smoke") / 20.0;
+        return jo.getDouble("price") * jo.getDouble("smoke") / 20.0;
     }
 
     public static Double calculateMoney(String init, List<Quota> quotaList, Date begin, Date end) {
@@ -152,7 +152,7 @@ public class SSmokeServiseUtils {
         if ( quotaList.size() != 0 ) {
             Quota quota = quotaList.get(0);
             JSONObject record = JSONObject.parseObject(quota.getRecord());
-            if ( record.getLong("smoke") == 0 ) {
+            if ( record.getDouble("smoke") == 0 ) {
                 no_smoke_hours = TimeUtils.timestampDiffHour(record.getTimestamp("timestamp"));
             }
         }
