@@ -95,7 +95,7 @@ public class BaseDao<T> extends JdbcDaoSupport {
 
     public T select(Map<String,Object> where) {
         List<T> rs = selectAll(where);
-        if (rs == null) return null;
+        if ( rs.isEmpty() ) return null;
         else return rs.get(0);
     }
 
@@ -103,9 +103,10 @@ public class BaseDao<T> extends JdbcDaoSupport {
         List<Object> args = new ArrayList<Object>();
         String whereSql = buildWhereSql(where,args);
         RowMapper<T> rowMapper = BeanPropertyRowMapper.newInstance(entityClass);
-        List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s", tableName, whereSql), rowMapper, args.toArray());
-        if (rs.isEmpty()) return null;
-        else return rs;
+        return getJdbcTemplate().query(String.format("SELECT * FROM %s %s", tableName, whereSql), rowMapper, args.toArray());
+        //List<T> rs = getJdbcTemplate().query(String.format("SELECT * FROM %s %s", tableName, whereSql), rowMapper, args.toArray());
+        //if (rs.isEmpty()) return null;
+        //else return rs;
     }
 
     public List<T> selectRlike(Map<String,Object> where, Long limit) {

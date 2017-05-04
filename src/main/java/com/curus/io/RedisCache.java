@@ -13,7 +13,7 @@ public class RedisCache {
 
     static private Log logger = LogFactory.getLog(RedisCache.class);
 
-    static private String ADDR = "123.57.227.101";
+    static private String ADDR = "localhost";
     static private int PORT = 6379;
     static private String PASSWD = "curus";
     static private String PREFIX = "CURUS";

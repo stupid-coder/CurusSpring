@@ -40,20 +40,22 @@ public class CacheUtils {
         String ckey = getCodeCacheKey(cate, token, phone);
         if (ckey != null) {
             System.out.println(String.format("Put Code 2 Cache: %s-%s",ckey,code));
-            RedisCache.Add(ckey, code);
+            //RedisCache.Add(ckey, code);
+            Cache.Add(ckey, code);
         }
     }
 
     public static String getCode4Cache(String cate, String token, String phone) {
         String ckey = getCodeCacheKey(cate, token, phone);
-        if (ckey != null) return RedisCache.Get(ckey);
+        if (ckey != null) return Cache.Get(ckey); //RedisCache.Get(ckey);
         else return null;
     }
 
     public static void deleteCode4Cache(String cate, String token,String phone) {
         String ckey = getCodeCacheKey(cate, token, phone);
         if ( ckey != null)
-            RedisCache.Delete(ckey);
+            //RedisCache.Delete(ckey);
+            Cache.Delete(ckey);
     }
 
     public static String getToken() {
@@ -61,19 +63,23 @@ public class CacheUtils {
     }
 
     public static void putObject2Cache(String key, Object o) {
-        RedisCache.Add(key, SerializeUtils.serialize2string(o));
+        //RedisCache.Add(key, SerializeUtils.serialize2string(o));
+        Cache.Add(key, SerializeUtils.serialize2string(o));
     }
     public static String putObject2Cache(Object o) { String token = getToken(); putObject2Cache(token,o); return token;}
 
     public static Object getObject4Cache(String key) {
-        return SerializeUtils.unserialize(RedisCache.Get(key));
+        return SerializeUtils.unserialize(Cache.Get(key));
+        //return SerializeUtils.unserialize(RedisCache.Get(key));
     }
 
     public static void deleteObject4Cache(String key) {
-        RedisCache.Delete(key);
+        Cache.Delete(key);
+        //RedisCache.Delete(key);
     }
 
     public static Object deleteObjectAndGet4Cache(String key) {
-        return SerializeUtils.unserialize(RedisCache.DeleteAndGet(key));
+        return SerializeUtils.unserialize(Cache.DeleteAndGet(key));
+        //return SerializeUtils.unserialize(RedisCache.DeleteAndGet(key));
     }
 }

@@ -93,7 +93,7 @@ public class SWeightSerivceUtils {
         Double energy = 0.0;
         for ( String key : activity.keySet() ) {
             if ( ActivityConst.ACTIVITY_ENERGY.containsKey(key) )
-                energy += activity.getLong(key) / ActivityConst.ACTIVITY_ENERGY.get(key);
+                energy += activity.getDoubleValue(key) / ActivityConst.ACTIVITY_ENERGY.get(key);
         }
         return energy;
     }

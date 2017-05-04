@@ -39,10 +39,13 @@ public class CodeValidate {
     }
 
     public static ErrorData validateAddPatientCode(String token, String phone, String code) {
+        return null;
+        /*
         ErrorData errorData;
         if ( ( errorData = validation(code,CacheUtils.getCode4Cache(CateConst.ADD_PATIENT,token,phone))) != null) {}
         else { CacheUtils.deleteCode4Cache(CateConst.ADD_PATIENT,token,phone);}
         return errorData;
+        */
     }
 
 }

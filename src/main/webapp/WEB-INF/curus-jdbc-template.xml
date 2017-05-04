@@ -11,13 +11,10 @@
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <!--<property name="url" value="jdbc:mysql://localhost:3306/curus?useUnicode=true&amp;characterEncoding=utf-8&amp;autoReconnect=true"/>
+        <property name="url" value="jdbc:mysql://*.*.*.*:3306/curus?useUnicode=true&amp;characterEncoding=utf-8&amp;autoReconnect=true"/>
         <property name="username" value="curus"/>
-        <property name="password" value="curus"/>-->
+        <property name="password" value="curus"/>
 
-        <property name="url" value="jdbc:mysql://123.57.227.101:3306/curus?useUnicode=true&amp;characterEncoding=utf-8&amp;autoReconnect=true"/>
-        <property name="username" value="root"/>
-        <property name="password" value="buaa"/>
         <property name="maxActive" value="200"/>
         <property name="maxIdle" value="150"/>
         <property name="minIdle" value="10"/>

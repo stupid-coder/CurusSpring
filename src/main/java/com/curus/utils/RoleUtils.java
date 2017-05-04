@@ -17,6 +17,8 @@ public class RoleUtils {
     }
 
     static public Long getRoleId(String name) {
-        return RoleConst.ROLE_IDS.getOrDefault(name,null);
+        if ( RoleConst.ROLE_IDS.containsKey(name) )
+            return RoleConst.ROLE_IDS.get(name);
+        else return null;
     }
 }
